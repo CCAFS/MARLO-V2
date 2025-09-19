@@ -9,5 +9,6 @@ WORKDIR ${LAMBDA_TASK_ROOT}
 COPY --from=builder /workspace/dependencies/ ./lib/
 COPY --from=builder /workspace/snapshot-dependencies/ ./lib/
 COPY --from=builder /workspace/spring-boot-loader/ ./lib/
-COPY --from=builder /workspace/application/ ./
+COPY --from=builder /workspace/application/BOOT-INF/classes/ ./
+COPY --from=builder /workspace/application/META-INF/ ./META-INF/
 CMD ["com.example.demo.platform.lambda.StreamLambdaHandler::handleRequest"]

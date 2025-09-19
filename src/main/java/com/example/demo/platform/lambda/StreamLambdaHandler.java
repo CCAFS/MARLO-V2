@@ -1,8 +1,8 @@
 package com.example.demo.platform.lambda;
 
 import com.amazonaws.serverless.exceptions.ContainerInitializationException;
-import com.amazonaws.serverless.proxy.model.AwsHttpApiV2ProxyRequest;
-import com.amazonaws.serverless.proxy.model.AwsHttpApiV2ProxyResponse;
+import com.amazonaws.serverless.proxy.model.AwsProxyRequest;
+import com.amazonaws.serverless.proxy.model.AwsProxyResponse;
 import com.amazonaws.serverless.proxy.spring.SpringBootLambdaContainerHandler;
 import com.amazonaws.serverless.proxy.spring.SpringBootProxyHandlerBuilder;
 import com.amazonaws.services.lambda.runtime.Context;
@@ -14,12 +14,12 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 public class StreamLambdaHandler implements RequestStreamHandler {
-    private static final SpringBootLambdaContainerHandler<AwsHttpApiV2ProxyRequest, AwsHttpApiV2ProxyResponse> handler;
+    private static final SpringBootLambdaContainerHandler<AwsProxyRequest, AwsProxyResponse> handler;
 
     static {
         try {
-            handler = new SpringBootProxyHandlerBuilder<AwsHttpApiV2ProxyRequest>()
-                    .defaultHttpApiV2Proxy()
+            handler = new SpringBootProxyHandlerBuilder<AwsProxyRequest>()
+                    .defaultProxy()
                     .asyncInit()
                     .springBootApplication(DemoApplication.class)
                     .buildAndInitialize();

@@ -2,11 +2,14 @@
   port: 8080
   forward-headers-strategy: framework
 
+app:
+  base-path: ${BASE_PATH:}
+
 springdoc:
   api-docs:
     path: /v3/api-docs
   swagger-ui:
     path: /swagger-ui/index.html
-    config-url: /v3/api-docs/swagger-config
+    config-url: ${app.base-path}/v3/api-docs/swagger-config
     disable-swagger-default-url: true
-    oauth2-redirect-url: /swagger-ui/oauth2-redirect.html
+    oauth2-redirect-url: ${app.base-path}/swagger-ui/oauth2-redirect.html

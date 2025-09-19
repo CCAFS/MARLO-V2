@@ -1,0 +1,13 @@
+FROM eclipse-temurin:17-jre AS builder
+WORKDIR /workspace
+ARG JAR_FILE=target/marlo-0.0.1-SNAPSHOT.jar
+COPY ${JAR_FILE} app.jar
+RUN java -Djarmode=layertools -jar app.jar extract
+
+FROM public.ecr.aws/lambda/java:17
+WORKDIR ${LAMBDA_TASK_ROOT}
+COPY --from=builder dependencies/ ./lib/
+COPY --from=builder snapshot-dependencies/ ./lib/
+COPY --from=builder spring-boot-loader/ ./lib/
+COPY --from=builder application/ ./
+CMD ["com.example.demo.platform.lambda.StreamLambdaHandler::handleRequest"]

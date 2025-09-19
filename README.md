@@ -79,3 +79,12 @@ logger.error("This is an error log message");
 ```
 
 You can configure log levels and output in `src/main/resources/application.yml` or by providing environment variables.
+
+## AWS Lambda (Imagen de contenedor)
+
+1. Construye el artefacto: `mvn clean package` (genera `target/marlo-0.0.1-SNAPSHOT.jar`).
+2. Crea la imagen para Lambda: `docker build -f Dockerfile.lambda -t marlo-lambda .`.
+3. (Opcional) Prueba la imagen local con el Runtime Interface Emulator de AWS: `docker run -p 9000:8080 marlo-lambda` y realiza una invocación HTTP a `http://localhost:9000/2015-03-31/functions/function/invocations` con el payload de API Gateway.
+4. Publica la imagen en ECR y úsala en tu función Lambda.
+
+La aplicación sigue ejecutándose de forma tradicional con `mvn spring-boot:run` o `java -jar target/marlo-0.0.1-SNAPSHOT.jar`.

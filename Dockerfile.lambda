@@ -6,9 +6,9 @@ RUN java -Djarmode=layertools -jar app.jar extract
 
 FROM public.ecr.aws/lambda/java:17
 WORKDIR ${LAMBDA_TASK_ROOT}
-COPY --from=builder /workspace/dependencies/ ./lib/
-COPY --from=builder /workspace/snapshot-dependencies/ ./lib/
-COPY --from=builder /workspace/spring-boot-loader/ ./lib/
+COPY --from=builder /workspace/dependencies/BOOT-INF/lib/ ./lib/
+COPY --from=builder /workspace/snapshot-dependencies/BOOT-INF/lib/ ./lib/
+COPY --from=builder /workspace/spring-boot-loader/ ./
 COPY --from=builder /workspace/application/BOOT-INF/classes/ ./
 COPY --from=builder /workspace/application/META-INF/ ./META-INF/
 CMD ["com.example.demo.platform.lambda.StreamLambdaHandler::handleRequest"]

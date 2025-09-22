@@ -5,6 +5,8 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletRequestWrapper;
 import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -12,12 +14,14 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.ArrayList;
+
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 
 @Component
 public class ApiGatewayBasePathFilter extends OncePerRequestFilter {
+    private static final Logger log = LoggerFactory.getLogger(ApiGatewayBasePathFilter.class);
     private static final String X_FORWARDED_PREFIX = "X-Forwarded-Prefix";
     private final String basePath;
 
@@ -32,9 +36,17 @@ public class ApiGatewayBasePathFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
+        if (log.isDebugEnabled()) {
+            log.debug("Incoming request uri='{}', contextPath='{}', basePath='{}', forwardedPrefix='{}'", request.getRequestURI(), request.getContextPath(), basePath, request.getHeader(X_FORWARDED_PREFIX));
+        }
+
         if (basePath == null || hasForwardedPrefix(request) || matchesContextPath(request)) {
             filterChain.doFilter(request, response);
             return;
+        }
+
+        if (log.isDebugEnabled()) {
+            log.debug("Injecting {} header with basePath '{}'", X_FORWARDED_PREFIX, basePath);
         }
 
         HttpServletRequest wrapper = new HttpServletRequestWrapper(request) {
@@ -82,6 +94,10 @@ public class ApiGatewayBasePathFilter extends OncePerRequestFilter {
             return false;
         }
         String contextPath = request.getContextPath();
-        return StringUtils.hasText(contextPath) && basePath.equals(contextPath);
+        boolean matches = StringUtils.hasText(contextPath) && basePath.equals(contextPath);
+        if (log.isDebugEnabled()) {
+            log.debug("matchesContextPath? {} (contextPath='{}', basePath='{}')", matches, contextPath, basePath);
+        }
+        return matches;
     }
 }

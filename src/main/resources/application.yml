@@ -27,3 +27,7 @@ springdoc:
   cache:
     disabled: true
   show-actuator: false
+
+logging:
+  level:
+    com.example.demo.platform.config.ApiGatewayBasePathFilter: DEBUG

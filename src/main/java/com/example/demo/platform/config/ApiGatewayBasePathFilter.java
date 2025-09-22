@@ -21,7 +21,7 @@ import java.util.Enumeration;
 import java.util.List;
 
 @Component
-@Order(Ordered.HIGHEST_PRECEDENCE)
+@Order(Ordered.LOWEST_PRECEDENCE)
 public class ApiGatewayBasePathFilter extends OncePerRequestFilter {
     private static final Logger log = LoggerFactory.getLogger(ApiGatewayBasePathFilter.class);
     private static final String X_FORWARDED_PREFIX = "X-Forwarded-Prefix";
@@ -90,3 +90,4 @@ public class ApiGatewayBasePathFilter extends OncePerRequestFilter {
         return headerValues != null && headerValues.hasMoreElements() && headerValues.nextElement() != null;
     }
 }
+

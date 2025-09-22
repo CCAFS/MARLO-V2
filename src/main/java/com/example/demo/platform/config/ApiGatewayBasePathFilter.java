@@ -5,6 +5,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletRequestWrapper;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponseWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -41,20 +42,29 @@ public class ApiGatewayBasePathFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-        if (log.isDebugEnabled()) {
-            log.debug("Incoming request uri='{}', contextPath='{}', basePath='{}', forwardedPrefix='{}'", request.getRequestURI(), request.getContextPath(), basePath, request.getHeader(X_FORWARDED_PREFIX));
-        }
-
-        if (basePath == null || hasForwardedPrefix(request)) {
+        if (!StringUtils.hasText(basePath)) {
             filterChain.doFilter(request, response);
             return;
         }
 
         if (log.isDebugEnabled()) {
-            log.debug("Injecting {} header with basePath '{}'", X_FORWARDED_PREFIX, basePath);
+            log.debug("Incoming request uri='{}', contextPath='{}', forwardedPrefix='{}'", request.getRequestURI(), request.getContextPath(), request.getHeader(X_FORWARDED_PREFIX));
         }
 
-        HttpServletRequest wrapper = new HttpServletRequestWrapper(request) {
+        HttpServletRequest requestToUse = request;
+        if (!hasForwardedPrefix(request)) {
+            if (log.isDebugEnabled()) {
+                log.debug("Injecting {} header with basePath '{}'", X_FORWARDED_PREFIX, basePath);
+            }
+            requestToUse = wrapRequest(request);
+        }
+
+        HttpServletResponse responseToUse = wrapResponse(response);
+        filterChain.doFilter(requestToUse, responseToUse);
+    }
+
+    private HttpServletRequest wrapRequest(HttpServletRequest request) {
+        return new HttpServletRequestWrapper(request) {
             @Override
             public String getHeader(String name) {
                 if (X_FORWARDED_PREFIX.equalsIgnoreCase(name)) {
@@ -84,13 +94,45 @@ public class ApiGatewayBasePathFilter extends OncePerRequestFilter {
                 return Collections.enumeration(headerNames);
             }
         };
+    }
 
-        filterChain.doFilter(wrapper, response);
+    private HttpServletResponse wrapResponse(HttpServletResponse response) {
+        return new HttpServletResponseWrapper(response) {
+            @Override
+            public void sendRedirect(String location) throws IOException {
+                String adjustedLocation = adjustLocation(location);
+                if (log.isDebugEnabled()) {
+                    log.debug("sendRedirect called with location='{}', adjusted='{}'", location, adjustedLocation);
+                }
+                super.sendRedirect(adjustedLocation);
+            }
+        };
+    }
+
+    private String adjustLocation(String location) {
+        if (!StringUtils.hasText(location) || location.startsWith("http://") || location.startsWith("https://")) {
+            return location;
+        }
+
+        String normalizedBasePath = basePath;
+        if ("/".equals(normalizedBasePath)) {
+            normalizedBasePath = "";
+        }
+
+        String normalizedLocation = location;
+        if (!location.startsWith("/")) {
+            normalizedLocation = "/" + location;
+        }
+
+        if (normalizedLocation.startsWith(normalizedBasePath + "/") || normalizedLocation.equals(normalizedBasePath)) {
+            return normalizedLocation;
+        }
+
+        return normalizedBasePath + normalizedLocation;
     }
 
     private boolean hasForwardedPrefix(HttpServletRequest request) {
         Enumeration<String> headerValues = request.getHeaders(X_FORWARDED_PREFIX);
-        return headerValues != null && headerValues.hasMoreElements() &&
-                headerValues.nextElement() != null;
+        return headerValues != null && headerValues.hasMoreElements() && headerValues.nextElement() != null;
     }
 }

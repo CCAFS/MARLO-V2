@@ -1,15 +1,33 @@
 ﻿server:
   port: 8080
   forward-headers-strategy: framework
+  # Configurar context-path para Lambda con API Gateway
+  servlet:
+    context-path: ${BASE_PATH:/dev}
 
 app:
-  base-path: ${BASE_PATH:}
+  base-path: ${BASE_PATH:/dev}
 
 springdoc:
   api-docs:
     path: /v3/api-docs
+    enabled: true
   swagger-ui:
-    path: /swagger-ui/index.html
+    path: /swagger-ui.html
+    # URLs corregidas para Lambda + API Gateway
     config-url: ${app.base-path}/v3/api-docs/swagger-config
+    url: ${app.base-path}/v3/api-docs
     disable-swagger-default-url: true
-    oauth2-redirect-url: ${app.base-path}/swagger-ui/oauth2-redirect.html
+    oauth2-redirect-url: https://0lftavvygh.execute-api.us-east-1.amazonaws.com${app.base-path}/swagger-ui/oauth2-redirect.html
+    # Configuraciones adicionales para Lambda
+    enabled: true
+    display-request-duration: true
+    operations-sorter: method
+    tags-sorter: alpha
+    show-extensions: true
+    show-common-extensions: true
+  # Configuraciones adicionales para mejorar compatibilidad con Lambda
+  override-with-generic-response: false
+  cache:
+    disabled: true
+  show-actuator: false

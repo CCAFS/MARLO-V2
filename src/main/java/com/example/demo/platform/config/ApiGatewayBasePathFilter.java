@@ -32,7 +32,7 @@ public class ApiGatewayBasePathFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-        if (basePath == null || hasForwardedPrefix(request)) {
+        if (basePath == null || hasForwardedPrefix(request) || matchesContextPath(request)) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -75,5 +75,13 @@ public class ApiGatewayBasePathFilter extends OncePerRequestFilter {
         Enumeration<String> headerValues = request.getHeaders(X_FORWARDED_PREFIX);
         return headerValues != null && headerValues.hasMoreElements() &&
                 headerValues.nextElement() != null;
+    }
+
+    private boolean matchesContextPath(HttpServletRequest request) {
+        if (basePath == null) {
+            return false;
+        }
+        String contextPath = request.getContextPath();
+        return StringUtils.hasText(contextPath) && basePath.equals(contextPath);
     }
 }

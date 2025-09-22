@@ -14,7 +14,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.ArrayList;
-
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
@@ -26,11 +25,14 @@ public class ApiGatewayBasePathFilter extends OncePerRequestFilter {
     private final String basePath;
 
     public ApiGatewayBasePathFilter(@Value("${app.base-path:}") String basePath) {
+        String rawBasePath = System.getenv("BASE_PATH");
+        String activeProfile = System.getenv("SPRING_PROFILES_ACTIVE");
         if (StringUtils.hasText(basePath)) {
             this.basePath = basePath.startsWith("/") ? basePath : "/" + basePath;
         } else {
             this.basePath = null;
         }
+        log.info("ApiGatewayBasePathFilter initialized: property basePath='{}', env BASE_PATH='{}', SPRING_PROFILES_ACTIVE='{}'", this.basePath, rawBasePath, activeProfile);
     }
 
     @Override
@@ -40,7 +42,7 @@ public class ApiGatewayBasePathFilter extends OncePerRequestFilter {
             log.debug("Incoming request uri='{}', contextPath='{}', basePath='{}', forwardedPrefix='{}'", request.getRequestURI(), request.getContextPath(), basePath, request.getHeader(X_FORWARDED_PREFIX));
         }
 
-        if (basePath == null || hasForwardedPrefix(request) || matchesContextPath(request)) {
+        if (basePath == null || hasForwardedPrefix(request)) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -87,17 +89,5 @@ public class ApiGatewayBasePathFilter extends OncePerRequestFilter {
         Enumeration<String> headerValues = request.getHeaders(X_FORWARDED_PREFIX);
         return headerValues != null && headerValues.hasMoreElements() &&
                 headerValues.nextElement() != null;
-    }
-
-    private boolean matchesContextPath(HttpServletRequest request) {
-        if (basePath == null) {
-            return false;
-        }
-        String contextPath = request.getContextPath();
-        boolean matches = StringUtils.hasText(contextPath) && basePath.equals(contextPath);
-        if (log.isDebugEnabled()) {
-            log.debug("matchesContextPath? {} (contextPath='{}', basePath='{}')", matches, contextPath, basePath);
-        }
-        return matches;
     }
 }

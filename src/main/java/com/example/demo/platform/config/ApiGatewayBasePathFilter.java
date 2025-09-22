@@ -101,10 +101,36 @@ public class ApiGatewayBasePathFilter extends OncePerRequestFilter {
             @Override
             public void sendRedirect(String location) throws IOException {
                 String adjustedLocation = adjustLocation(location);
-                if (log.isDebugEnabled()) {
-                    log.debug("sendRedirect called with location='{}', adjusted='{}'", location, adjustedLocation);
-                }
+                logRedirect("sendRedirect", location, adjustedLocation);
                 super.sendRedirect(adjustedLocation);
+            }
+
+            @Override
+            public void setHeader(String name, String value) {
+                if ("Location".equalsIgnoreCase(name)) {
+                    String adjusted = adjustLocation(value);
+                    logRedirect("setHeader", value, adjusted);
+                    super.setHeader(name, adjusted);
+                    return;
+                }
+                super.setHeader(name, value);
+            }
+
+            @Override
+            public void addHeader(String name, String value) {
+                if ("Location".equalsIgnoreCase(name)) {
+                    String adjusted = adjustLocation(value);
+                    logRedirect("addHeader", value, adjusted);
+                    super.addHeader(name, adjusted);
+                    return;
+                }
+                super.addHeader(name, value);
+            }
+
+            private void logRedirect(String method, String original, String adjusted) {
+                if (log.isDebugEnabled()) {
+                    log.debug("{} -> Location original='{}', adjusted='{}'", method, original, adjusted);
+                }
             }
         };
     }
@@ -114,18 +140,19 @@ public class ApiGatewayBasePathFilter extends OncePerRequestFilter {
             return location;
         }
 
-        String normalizedBasePath = basePath;
-        if ("/".equals(normalizedBasePath)) {
-            normalizedBasePath = "";
-        }
-
-        String normalizedLocation = location;
-        if (!location.startsWith("/")) {
-            normalizedLocation = "/" + location;
-        }
+        String normalizedBasePath = "/".equals(basePath) ? "" : basePath;
+        String normalizedLocation = location.startsWith("/") ? location : "/" + location;
 
         if (normalizedLocation.startsWith(normalizedBasePath + "/") || normalizedLocation.equals(normalizedBasePath)) {
             return normalizedLocation;
+        }
+
+        // Avoid duplicating /swagger-ui when location already includes it twice
+        if (normalizedLocation.startsWith("/swagger-ui/")) {
+            normalizedLocation = normalizedLocation.substring("/swagger-ui".length());
+            if (!normalizedLocation.startsWith("/")) {
+                normalizedLocation = "/" + normalizedLocation;
+            }
         }
 
         return normalizedBasePath + normalizedLocation;

@@ -6,7 +6,6 @@ on:
       - "dev"
       - "staging"
       - "main"
-      - "main-setup"
   workflow_dispatch:
 
 jobs:
@@ -19,7 +18,7 @@ jobs:
         run: |
           BRANCH_NAME=${GITHUB_REF#refs/heads/}
           BRANCH_NAME=${BRANCH_NAME#aiccra-}
-          JENKINS_URL="https://automation.prms.cgiar.org/job/marlo-dev-v2/build"
+          JENKINS_URL="https://automation.prms.cgiar.org/job/marlo-${BRANCH_NAME}-v2/build"
           echo "Jenkins job URL for the branch $BRANCH_NAME is: $JENKINS_URL"
           echo "JENKINS_URL=${JENKINS_URL}" >> $GITHUB_ENV
 

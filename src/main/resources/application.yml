@@ -28,7 +28,6 @@ springdoc:
 
 logging:
   level:
-    org.springframework.web.servlet.view.RedirectView: DEBUG
-    org.springframework.web.servlet.DispatcherServlet: DEBUG
-    com.example.demo.platform.config.ApiGatewayBasePathFilter: DEBUG
-
+    org.springframework.web.servlet.DispatcherServlet: INFO
+    org.springframework.web.servlet.view.RedirectView: INFO
+    com.example.demo.platform.config.ApiGatewayBasePathFilter: INFO

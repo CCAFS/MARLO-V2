@@ -5,7 +5,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletRequestWrapper;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpServletResponseWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,14 +28,12 @@ public class ApiGatewayBasePathFilter extends OncePerRequestFilter {
     private final String basePath;
 
     public ApiGatewayBasePathFilter(@Value("${app.base-path:}") String basePath) {
-        String rawBasePath = System.getenv("BASE_PATH");
-        String activeProfile = System.getenv("SPRING_PROFILES_ACTIVE");
         if (StringUtils.hasText(basePath)) {
             this.basePath = basePath.startsWith("/") ? basePath : "/" + basePath;
         } else {
             this.basePath = null;
         }
-        log.info("ApiGatewayBasePathFilter initialized: property basePath='{}', env BASE_PATH='{}', SPRING_PROFILES_ACTIVE='{}'", this.basePath, rawBasePath, activeProfile);
+        log.info("ApiGatewayBasePathFilter initialized with basePath: {}", this.basePath);
     }
 
     @Override
@@ -47,20 +44,12 @@ public class ApiGatewayBasePathFilter extends OncePerRequestFilter {
             return;
         }
 
-        if (log.isDebugEnabled()) {
-            log.debug("Incoming request uri='{}', contextPath='{}', forwardedPrefix='{}'", request.getRequestURI(), request.getContextPath(), request.getHeader(X_FORWARDED_PREFIX));
-        }
-
         HttpServletRequest requestToUse = request;
         if (!hasForwardedPrefix(request)) {
-            if (log.isDebugEnabled()) {
-                log.debug("Injecting {} header with basePath '{}'", X_FORWARDED_PREFIX, basePath);
-            }
             requestToUse = wrapRequest(request);
         }
 
-        HttpServletResponse responseToUse = wrapResponse(response);
-        filterChain.doFilter(requestToUse, responseToUse);
+        filterChain.doFilter(requestToUse, response);
     }
 
     private HttpServletRequest wrapRequest(HttpServletRequest request) {
@@ -94,68 +83,6 @@ public class ApiGatewayBasePathFilter extends OncePerRequestFilter {
                 return Collections.enumeration(headerNames);
             }
         };
-    }
-
-    private HttpServletResponse wrapResponse(HttpServletResponse response) {
-        return new HttpServletResponseWrapper(response) {
-            @Override
-            public void sendRedirect(String location) throws IOException {
-                String adjustedLocation = adjustLocation(location);
-                logRedirect("sendRedirect", location, adjustedLocation);
-                super.sendRedirect(adjustedLocation);
-            }
-
-            @Override
-            public void setHeader(String name, String value) {
-                if ("Location".equalsIgnoreCase(name)) {
-                    String adjusted = adjustLocation(value);
-                    logRedirect("setHeader", value, adjusted);
-                    super.setHeader(name, adjusted);
-                    return;
-                }
-                super.setHeader(name, value);
-            }
-
-            @Override
-            public void addHeader(String name, String value) {
-                if ("Location".equalsIgnoreCase(name)) {
-                    String adjusted = adjustLocation(value);
-                    logRedirect("addHeader", value, adjusted);
-                    super.addHeader(name, adjusted);
-                    return;
-                }
-                super.addHeader(name, value);
-            }
-
-            private void logRedirect(String method, String original, String adjusted) {
-                if (log.isDebugEnabled()) {
-                    log.debug("{} -> Location original='{}', adjusted='{}'", method, original, adjusted);
-                }
-            }
-        };
-    }
-
-    private String adjustLocation(String location) {
-        if (!StringUtils.hasText(location) || location.startsWith("http://") || location.startsWith("https://")) {
-            return location;
-        }
-
-        String normalizedBasePath = "/".equals(basePath) ? "" : basePath;
-        String normalizedLocation = location.startsWith("/") ? location : "/" + location;
-
-        if (normalizedLocation.startsWith(normalizedBasePath + "/") || normalizedLocation.equals(normalizedBasePath)) {
-            return normalizedLocation;
-        }
-
-        // Avoid duplicating /swagger-ui when location already includes it twice
-        if (normalizedLocation.startsWith("/swagger-ui/")) {
-            normalizedLocation = normalizedLocation.substring("/swagger-ui".length());
-            if (!normalizedLocation.startsWith("/")) {
-                normalizedLocation = "/" + normalizedLocation;
-            }
-        }
-
-        return normalizedBasePath + normalizedLocation;
     }
 
     private boolean hasForwardedPrefix(HttpServletRequest request) {

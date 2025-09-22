@@ -2,24 +2,21 @@
   port: 8080
   forward-headers-strategy: framework
   compression:
-    enabled: false # evita doble compresión en Lambda/API GW
-
-app:
-  base-path: ${BASE_PATH:} # en API GW: BASE_PATH=/dev
+    enabled: false
+  servlet:
+    context-path: ${BASE_PATH:} # <-- En Lambda pon BASE_PATH=/dev
 
 springdoc:
   api-docs:
     path: /v3/api-docs
     enabled: true
   swagger-ui:
-    # Deja el UI en /swagger-ui; springdoc redirige él mismo a /swagger-ui/index.html
+    # Mantén el UI en /swagger-ui; Spring redirige solo si hace falta
     path: /swagger-ui
-
-    # Usa SOLO 'url' (evita config-url para no romper inicialización detrás de API GW)
-    url: ${app.base-path}/v3/api-docs
-
+    # Apunta al spec incluyendo el context-path
+    url: ${server.servlet.context-path}/v3/api-docs
     disable-swagger-default-url: true
-    oauth2-redirect-url: ${app.base-path}/swagger-ui/oauth2-redirect.html
+    oauth2-redirect-url: ${server.servlet.context-path}/swagger-ui/oauth2-redirect.html
     enabled: true
     display-request-duration: true
     operations-sorter: method

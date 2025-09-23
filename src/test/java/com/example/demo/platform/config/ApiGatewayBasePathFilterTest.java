@@ -48,6 +48,7 @@ class ApiGatewayBasePathFilterTest {
 
         Enumeration<String> existingValues = wrapped.getHeaders("Existing-Header");
         assertThat(Collections.list(existingValues)).containsExactly("value");
+        assertThat(wrapped.getHeader("Existing-Header")).isEqualTo("value");
 
         Enumeration<String> headerNames = wrapped.getHeaderNames();
         assertThat(Collections.list(headerNames)).containsExactlyInAnyOrder(X_FORWARDED_PREFIX, "Existing-Header");
@@ -133,6 +134,6 @@ class ApiGatewayBasePathFilterTest {
         List<String> headerNames = Collections.list(wrapped.getHeaderNames());
         assertThat(Collections.frequency(headerNames, X_FORWARDED_PREFIX)).isEqualTo(1);
         assertThat(headerNames).contains("Another");
+        assertThat(Collections.list(wrapped.getHeaders("Another"))).containsExactly("value");
     }
 }
-

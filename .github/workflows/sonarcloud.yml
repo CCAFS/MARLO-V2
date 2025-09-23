@@ -5,7 +5,6 @@ on:
       - main
       - staging
       - dev
-      - main-setup
   pull_request:
     types: [opened, synchronize, reopened]
 jobs:
@@ -41,6 +40,3 @@ jobs:
             -Dsonar.projectKey=CCAFS_MARLO-V2 \
             -Dsonar.organization=ccafs \
             -Dsonar.exclusions="**/.github/workflows/**"
-
-
-

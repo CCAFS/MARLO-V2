@@ -3,6 +3,7 @@ package com.example.demo.platform.config;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequestWrapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockFilterChain;
@@ -93,9 +94,34 @@ class ApiGatewayBasePathFilterTest {
     @Test
     void doesNotDuplicateForwardedPrefixHeaderWhenPresentWithNullValue() throws ServletException, IOException {
         ApiGatewayBasePathFilter filter = new ApiGatewayBasePathFilter("api");
-        MockHttpServletRequest request = new MockHttpServletRequest();
-        request.addHeader(X_FORWARDED_PREFIX, null);
-        request.addHeader("Another", "value");
+        MockHttpServletRequest baseRequest = new MockHttpServletRequest();
+        baseRequest.addHeader("Another", "value");
+        HttpServletRequest request = new HttpServletRequestWrapper(baseRequest) {
+            @Override
+            public Enumeration<String> getHeaders(String name) {
+                if (X_FORWARDED_PREFIX.equalsIgnoreCase(name)) {
+                    return Collections.enumeration(Collections.singletonList((String) null));
+                }
+                return super.getHeaders(name);
+            }
+
+            @Override
+            public String getHeader(String name) {
+                if (X_FORWARDED_PREFIX.equalsIgnoreCase(name)) {
+                    return null;
+                }
+                return super.getHeader(name);
+            }
+
+            @Override
+            public Enumeration<String> getHeaderNames() {
+                List<String> names = Collections.list(super.getHeaderNames());
+                if (names.stream().noneMatch(X_FORWARDED_PREFIX::equalsIgnoreCase)) {
+                    names.add(X_FORWARDED_PREFIX);
+                }
+                return Collections.enumeration(names);
+            }
+        };
         AtomicReference<HttpServletRequest> requestSeenByChain = new AtomicReference<>();
         FilterChain chain = (servletRequest, servletResponse) -> requestSeenByChain.set((HttpServletRequest) servletRequest);
 
@@ -109,3 +135,4 @@ class ApiGatewayBasePathFilterTest {
         assertThat(headerNames).contains("Another");
     }
 }
+

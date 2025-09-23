@@ -39,6 +39,12 @@ class ApiGatewayBasePathFilterTest {
         assertThat(wrapped).isNotNull();
         assertThat(wrapped.getHeader(X_FORWARDED_PREFIX)).isEqualTo("/api");
 
+        Enumeration<String> headerValues = wrapped.getHeaders(X_FORWARDED_PREFIX);
+        assertThat(java.util.Collections.list(headerValues)).containsExactly("/api");
+
+        Enumeration<String> otherValues = wrapped.getHeaders("Another-Header");
+        assertThat(java.util.Collections.list(otherValues)).isEmpty();
+
         Enumeration<String> headerNames = wrapped.getHeaderNames();
         assertThat(java.util.Collections.list(headerNames)).contains(X_FORWARDED_PREFIX);
     }

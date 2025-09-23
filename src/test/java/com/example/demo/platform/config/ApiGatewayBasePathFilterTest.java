@@ -30,6 +30,7 @@ class ApiGatewayBasePathFilterTest {
     void addsForwardedPrefixHeaderWhenMissing() throws ServletException, IOException {
         ApiGatewayBasePathFilter filter = new ApiGatewayBasePathFilter("api");
         MockHttpServletRequest request = new MockHttpServletRequest();
+        request.addHeader("Existing-Header", "value");
         AtomicReference<HttpServletRequest> requestSeenByChain = new AtomicReference<>();
         FilterChain chain = (servletRequest, servletResponse) -> requestSeenByChain.set((HttpServletRequest) servletRequest);
 
@@ -42,11 +43,11 @@ class ApiGatewayBasePathFilterTest {
         Enumeration<String> headerValues = wrapped.getHeaders(X_FORWARDED_PREFIX);
         assertThat(java.util.Collections.list(headerValues)).containsExactly("/api");
 
-        Enumeration<String> otherValues = wrapped.getHeaders("Another-Header");
-        assertThat(java.util.Collections.list(otherValues)).isEmpty();
+        Enumeration<String> existingValues = wrapped.getHeaders("Existing-Header");
+        assertThat(java.util.Collections.list(existingValues)).containsExactly("value");
 
         Enumeration<String> headerNames = wrapped.getHeaderNames();
-        assertThat(java.util.Collections.list(headerNames)).contains(X_FORWARDED_PREFIX);
+        assertThat(java.util.Collections.list(headerNames)).containsExactlyInAnyOrder(X_FORWARDED_PREFIX, "Existing-Header");
     }
 
     @Test
@@ -59,6 +60,7 @@ class ApiGatewayBasePathFilterTest {
         filter.doFilter(request, response, chain);
 
         HttpServletRequest processed = (HttpServletRequest) chain.getRequest();
+        assertThat(processed).isSameAs(request);
         assertThat(processed.getHeader(X_FORWARDED_PREFIX)).isEqualTo("/already-set");
     }
 
@@ -71,6 +73,19 @@ class ApiGatewayBasePathFilterTest {
         filter.doFilter(request, response, chain);
 
         assertThat(chain.getRequest()).isSameAs(request);
+    }
+
+    @Test
+    void normalizesBasePathThatAlreadyStartsWithDelimiter() throws ServletException, IOException {
+        ApiGatewayBasePathFilter filter = new ApiGatewayBasePathFilter("/api");
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        AtomicReference<HttpServletRequest> requestSeenByChain = new AtomicReference<>();
+        FilterChain chain = (servletRequest, servletResponse) -> requestSeenByChain.set((HttpServletRequest) servletRequest);
+
+        filter.doFilter(request, response, chain);
+
+        HttpServletRequest wrapped = requestSeenByChain.get();
+        assertThat(wrapped.getHeader(X_FORWARDED_PREFIX)).isEqualTo("/api");
     }
 }
 

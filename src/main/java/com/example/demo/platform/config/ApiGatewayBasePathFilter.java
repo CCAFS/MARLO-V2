@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -25,11 +26,12 @@ import java.util.List;
 public class ApiGatewayBasePathFilter extends OncePerRequestFilter {
     private static final Logger log = LoggerFactory.getLogger(ApiGatewayBasePathFilter.class);
     private static final String X_FORWARDED_PREFIX = "X-Forwarded-Prefix";
+    private static final String PATH_DELIMITER = AntPathMatcher.DEFAULT_PATH_SEPARATOR;
     private final String basePath;
 
     public ApiGatewayBasePathFilter(@Value("${app.base-path:}") String basePath) {
         if (StringUtils.hasText(basePath)) {
-            this.basePath = basePath.startsWith("/") ? basePath : "/" + basePath;
+            this.basePath = basePath.startsWith(PATH_DELIMITER) ? basePath : PATH_DELIMITER + basePath;
         } else {
             this.basePath = null;
         }
@@ -77,7 +79,7 @@ public class ApiGatewayBasePathFilter extends OncePerRequestFilter {
                 while (existing.hasMoreElements()) {
                     headerNames.add(existing.nextElement());
                 }
-                if (headerNames.stream().noneMatch(h -> X_FORWARDED_PREFIX.equalsIgnoreCase(h))) {
+                if (headerNames.stream().noneMatch(X_FORWARDED_PREFIX::equalsIgnoreCase)) {
                     headerNames.add(X_FORWARDED_PREFIX);
                 }
                 return Collections.enumeration(headerNames);

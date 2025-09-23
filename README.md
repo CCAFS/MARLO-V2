@@ -79,3 +79,35 @@ logger.error("This is an error log message");
 ```
 
 You can configure log levels and output in `src/main/resources/application.yml` or by providing environment variables.
+
+## AWS Lambda (Imagen de contenedor)
+
+1. Construye el artefacto: `mvn clean package` (genera `target/marlo-0.0.1-SNAPSHOT.jar`).
+2. Crea la imagen para Lambda: `docker build -f Dockerfile.lambda -t marlo-lambda .`.
+3. (Opcional) Prueba la imagen local con el Runtime Interface Emulator de AWS: `docker run -p 9000:8080 marlo-lambda` y realiza una invocación HTTP a `http://localhost:9000/2015-03-31/functions/function/invocations` con el payload de API Gateway.
+4. Publica la imagen en ECR y úsala en tu función Lambda.
+
+La aplicación sigue ejecutándose de forma tradicional con `mvn spring-boot:run` o `java -jar target/marlo-0.0.1-SNAPSHOT.jar`.
+## AWS Lambda (Imagen de contenedor)
+
+1. Construye el artefacto: mvn clean package (genera 	arget/marlo-0.0.1-SNAPSHOT.jar).
+2. Crea la imagen para Lambda: docker build -f Dockerfile.lambda -t marlo-lambda ..
+3. (Opcional) Prueba la imagen local con el Runtime Interface Emulator de AWS: docker run -p 9000:8080 marlo-lambda y realiza una invocación HTTP a http://localhost:9000/2015-03-31/functions/function/invocations con el payload de API Gateway.
+4. Publica la imagen en ECR y úsala en tu función Lambda.
+
+La aplicación sigue ejecutándose de forma tradicional con mvn spring-boot:run o java -jar target/marlo-0.0.1-SNAPSHOT.jar.
+
+## Configuración de Swagger detrás de API Gateway
+
+- La aplicación espera el prefijo del stage (/dev, /prod, etc.) en la variable de entorno BASE_PATH. Localmente puedes omitirla (queda vacía).
+- En Lambda: BASE_PATH=/dev (o el stage correspondiente) junto con el resto de variables que utilices (SPRING_PROFILES_ACTIVE, MYSQL_URL, etc.).
+- El swagger queda accesible en ${BASE_PATH}/swagger-ui/index.html, y los docs en ${BASE_PATH}/v3/api-docs.
+- Cualquier despliegue nuevo: reconstruye el JAR, crea la imagen, súbela a ECR, actualiza la función y despliega el API Gateway.
+## Configuración de Swagger detrás de API Gateway
+
+- Define la variable de entorno BASE_PATH con el prefijo de tu stage (/dev, /prod, etc.). En local puedes dejarla vacía.
+- Mantén el resto de variables (por ejemplo SPRING_PROFILES_ACTIVE, MYSQL_URL, MYSQL_USER, MYSQL_PASSWORD).
+- Swagger queda disponible en ${BASE_PATH}/swagger-ui/index.html y los docs en ${BASE_PATH}/v3/api-docs.
+- Para despliegues: mvn clean package, docker build -f Dockerfile.lambda ..., push a ECR, ws lambda update-function-code ... con la nueva imagen y ws lambda update-function-configuration ... --environment "Variables={BASE_PATH=/dev,...}. Luego Deploy API en API Gateway.
+
+Localmente, sin BASE_PATH, la UI sigue en http://localhost:8080/swagger-ui/index.html.

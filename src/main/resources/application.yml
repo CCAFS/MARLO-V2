@@ -1,2 +1,33 @@
 server:
   port: 8080
+  forward-headers-strategy: framework
+
+app:
+  base-path: ${BASE_PATH:}
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+    enabled: true
+  swagger-ui:
+    path: /swagger-ui
+    config-url: ${app.base-path}/v3/api-docs/swagger-config
+    url: ${app.base-path}/v3/api-docs
+    disable-swagger-default-url: true
+    oauth2-redirect-url: ${app.base-path}/swagger-ui/oauth2-redirect.html
+    enabled: true
+    display-request-duration: true
+    operations-sorter: method
+    tags-sorter: alpha
+    show-extensions: true
+    show-common-extensions: true
+  override-with-generic-response: false
+  cache:
+    disabled: true
+  show-actuator: false
+
+logging:
+  level:
+    org.springframework.web.servlet.DispatcherServlet: INFO
+    org.springframework.web.servlet.view.RedirectView: INFO
+    com.example.demo.platform.config.ApiGatewayBasePathFilter: INFO

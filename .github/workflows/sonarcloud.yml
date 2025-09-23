@@ -39,4 +39,8 @@ jobs:
         run: |
           mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
             -Dsonar.projectKey=CCAFS_MARLO-V2 \
-            -Dsonar.organization=ccafs
+            -Dsonar.organization=ccafs \
+            -Dsonar.exclusions="**/.github/workflows/**"
+
+
+

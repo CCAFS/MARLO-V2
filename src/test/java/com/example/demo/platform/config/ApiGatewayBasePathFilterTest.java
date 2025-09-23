@@ -10,7 +10,9 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -41,13 +43,13 @@ class ApiGatewayBasePathFilterTest {
         assertThat(wrapped.getHeader(X_FORWARDED_PREFIX)).isEqualTo("/api");
 
         Enumeration<String> headerValues = wrapped.getHeaders(X_FORWARDED_PREFIX);
-        assertThat(java.util.Collections.list(headerValues)).containsExactly("/api");
+        assertThat(Collections.list(headerValues)).containsExactly("/api");
 
         Enumeration<String> existingValues = wrapped.getHeaders("Existing-Header");
-        assertThat(java.util.Collections.list(existingValues)).containsExactly("value");
+        assertThat(Collections.list(existingValues)).containsExactly("value");
 
         Enumeration<String> headerNames = wrapped.getHeaderNames();
-        assertThat(java.util.Collections.list(headerNames)).containsExactlyInAnyOrder(X_FORWARDED_PREFIX, "Existing-Header");
+        assertThat(Collections.list(headerNames)).containsExactlyInAnyOrder(X_FORWARDED_PREFIX, "Existing-Header");
     }
 
     @Test
@@ -87,5 +89,23 @@ class ApiGatewayBasePathFilterTest {
         HttpServletRequest wrapped = requestSeenByChain.get();
         assertThat(wrapped.getHeader(X_FORWARDED_PREFIX)).isEqualTo("/api");
     }
-}
 
+    @Test
+    void doesNotDuplicateForwardedPrefixHeaderWhenPresentWithNullValue() throws ServletException, IOException {
+        ApiGatewayBasePathFilter filter = new ApiGatewayBasePathFilter("api");
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        request.addHeader(X_FORWARDED_PREFIX, null);
+        request.addHeader("Another", "value");
+        AtomicReference<HttpServletRequest> requestSeenByChain = new AtomicReference<>();
+        FilterChain chain = (servletRequest, servletResponse) -> requestSeenByChain.set((HttpServletRequest) servletRequest);
+
+        filter.doFilter(request, response, chain);
+
+        HttpServletRequest wrapped = requestSeenByChain.get();
+        assertThat(wrapped.getHeader(X_FORWARDED_PREFIX)).isEqualTo("/api");
+
+        List<String> headerNames = Collections.list(wrapped.getHeaderNames());
+        assertThat(Collections.frequency(headerNames, X_FORWARDED_PREFIX)).isEqualTo(1);
+        assertThat(headerNames).contains("Another");
+    }
+}

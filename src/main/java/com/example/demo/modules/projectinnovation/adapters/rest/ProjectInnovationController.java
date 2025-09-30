@@ -14,8 +14,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/project-innovations")
-@Tag(name = "Project Innovation API", description = "API for managing project innovations")
+@RequestMapping("/api/innovations")
+@Tag(name = "Innovation API", description = "API for managing innovations")
 public class ProjectInnovationController {
     
     private final ProjectInnovationUseCase projectInnovationUseCase;

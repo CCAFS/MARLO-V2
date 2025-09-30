@@ -100,6 +100,12 @@ public class ProjectInnovationService implements ProjectInnovationUseCase {
     
     @Override
     public Optional<ProjectInnovationInfo> findProjectInnovationInfoByInnovationIdAndPhaseId(Long innovationId, Long phaseId) {
+        // Primero verificar que la innovación principal esté activa
+        Optional<ProjectInnovation> innovation = projectInnovationRepositoryPort.findById(innovationId);
+        if (innovation.isEmpty()) {
+            return Optional.empty(); // La innovación no existe o está inactiva
+        }
+        
         return projectInnovationRepositoryPort.findProjectInnovationInfoByInnovationIdAndPhaseId(innovationId, phaseId);
     }
     

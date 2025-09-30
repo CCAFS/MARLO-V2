@@ -25,6 +25,7 @@ public interface ProjectInnovationUseCase {
     List<ProjectInnovationInfo> findProjectInnovationInfoByProjectInnovationId(Long projectInnovationId);
     Optional<ProjectInnovationInfo> findProjectInnovationInfoById(Long id);
     Optional<ProjectInnovationInfo> findProjectInnovationInfoByInnovationIdAndPhaseId(Long innovationId, Long phaseId);
+    List<ProjectInnovationInfo> findProjectInnovationInfoByPhase(Long phaseId);
     ProjectInnovationInfo createProjectInnovationInfo(ProjectInnovationInfo projectInnovationInfo);
     ProjectInnovationInfo updateProjectInnovationInfo(Long id, ProjectInnovationInfo projectInnovationInfo);
     void deleteProjectInnovationInfo(Long id);

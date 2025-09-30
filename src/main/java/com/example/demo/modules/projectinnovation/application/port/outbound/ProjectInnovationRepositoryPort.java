@@ -23,6 +23,7 @@ public interface ProjectInnovationRepositoryPort {
     List<ProjectInnovationInfo> findProjectInnovationInfoByProjectInnovationId(Long projectInnovationId);
     Optional<ProjectInnovationInfo> findProjectInnovationInfoById(Long id);
     Optional<ProjectInnovationInfo> findProjectInnovationInfoByInnovationIdAndPhaseId(Long innovationId, Long phaseId);
+    List<ProjectInnovationInfo> findProjectInnovationInfoByPhase(Long phaseId);
     ProjectInnovationInfo saveProjectInnovationInfo(ProjectInnovationInfo projectInnovationInfo);
     void deleteProjectInnovationInfoById(Long id);
 }

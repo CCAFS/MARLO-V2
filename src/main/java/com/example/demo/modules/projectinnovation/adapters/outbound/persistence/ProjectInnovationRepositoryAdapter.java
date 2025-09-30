@@ -30,7 +30,7 @@ public class ProjectInnovationRepositoryAdapter implements ProjectInnovationRepo
     @Override
     public Optional<ProjectInnovation> findById(Long id) {
         // Solo buscar registros activos por defecto
-        return projectInnovationJpaRepository.findByIdAndActive(id);
+        return projectInnovationJpaRepository.findByIdAndIsActive(id, true);
     }
     
     @Override
@@ -82,6 +82,12 @@ public class ProjectInnovationRepositoryAdapter implements ProjectInnovationRepo
     @Override
     public Optional<ProjectInnovationInfo> findProjectInnovationInfoByInnovationIdAndPhaseId(Long innovationId, Long phaseId) {
         return Optional.ofNullable(projectInnovationInfoJpaRepository.findByProjectInnovationIdAndIdPhase(innovationId, phaseId));
+    }
+    
+    @Override
+    public List<ProjectInnovationInfo> findProjectInnovationInfoByPhase(Long phaseId) {
+        // Solo devolver innovaciones que estén activas
+        return projectInnovationInfoJpaRepository.findByPhaseAndActiveInnovation(phaseId);
     }
     
     @Override

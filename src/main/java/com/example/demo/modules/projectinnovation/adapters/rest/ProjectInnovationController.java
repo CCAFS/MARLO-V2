@@ -5,6 +5,7 @@ import com.example.demo.modules.projectinnovation.application.port.inbound.Proje
 import com.example.demo.modules.projectinnovation.domain.model.ProjectInnovation;
 import com.example.demo.modules.projectinnovation.domain.model.ProjectInnovationInfo;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -166,6 +167,19 @@ public class ProjectInnovationController {
         return projectInnovationUseCase.findProjectInnovationInfoByInnovationIdAndPhaseId(innovationId, phaseId)
                 .map(info -> ResponseEntity.ok(toCompleteInfoResponse(info)))
                 .orElse(ResponseEntity.notFound().build());
+    }
+    
+    @Operation(summary = "Get all innovations by phase", 
+               description = "Returns all project innovation info for a specific phase, including only active innovations")
+    @GetMapping("/phase/{phaseId}")
+    public ResponseEntity<List<ProjectInnovationInfoResponse>> getInnovationsByPhase(
+            @Parameter(description = "Phase ID to filter innovations", example = "1")
+            @PathVariable Long phaseId) {
+        List<ProjectInnovationInfo> innovations = projectInnovationUseCase.findProjectInnovationInfoByPhase(phaseId);
+        List<ProjectInnovationInfoResponse> response = innovations.stream()
+                .map(this::toInfoResponse)
+                .toList();
+        return ResponseEntity.ok(response);
     }
     
     private ProjectInnovationResponse toResponse(ProjectInnovation projectInnovation) {

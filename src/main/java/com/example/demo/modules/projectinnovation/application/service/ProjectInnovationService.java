@@ -130,4 +130,9 @@ public class ProjectInnovationService implements ProjectInnovationUseCase {
         }
         projectInnovationRepositoryPort.deleteProjectInnovationInfoById(id);
     }
+    
+    @Override
+    public List<ProjectInnovationInfo> findProjectInnovationInfoByPhase(Long phaseId) {
+        return projectInnovationRepositoryPort.findProjectInnovationInfoByPhase(phaseId);
+    }
 }

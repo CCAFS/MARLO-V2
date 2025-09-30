@@ -26,18 +26,11 @@ public interface ProjectInnovationJpaRepository extends JpaRepository<ProjectInn
     // Buscar por project ID solo registros activos
     List<ProjectInnovation> findByProjectIdAndIsActive(Long projectId, Boolean isActive);
     
-    @Query("SELECT p FROM ProjectInnovation p WHERE p.projectId = :projectId AND p.isActive = true")
-    List<ProjectInnovation> findActiveByProjectId(@Param("projectId") Long projectId);
-    
     @Query("SELECT COUNT(p) FROM ProjectInnovation p WHERE p.projectId = :projectId AND p.isActive = true")
     Long countActiveByProjectId(@Param("projectId") Long projectId);
     
     // Métodos personalizados para búsquedas específicas
     Optional<ProjectInnovation> findByIdAndIsActive(Long id, Boolean isActive);
-    
-    // Consultas específicas para buscar por ID activo
-    @Query("SELECT p FROM ProjectInnovation p WHERE p.id = :id AND p.isActive = true")
-    Optional<ProjectInnovation> findByIdAndActive(@Param("id") Long id);
     
     // Búsqueda con información adicional (cuando se reactiven las relaciones)
     // @Query("SELECT p FROM ProjectInnovation p LEFT JOIN FETCH p.innovationInfo WHERE p.id = :id AND p.isActive = true")

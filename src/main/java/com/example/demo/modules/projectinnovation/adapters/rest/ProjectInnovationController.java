@@ -240,6 +240,7 @@ public class ProjectInnovationController {
                 info.getTitle(),
                 info.getNarrative(),
                 info.getPhaseResearchId(),
+                getPhaseResearchInfo(info.getPhaseResearchId()),
                 info.getStageInnovationId(),
                 getInnovationStageInfo(info.getStageInnovationId()),
                 info.getGeographicScopeId(),
@@ -247,14 +248,19 @@ public class ProjectInnovationController {
                 info.getInnovationTypeId(),
                 getInnovationTypeInfo(info.getInnovationTypeId()),
                 info.getRepIndRegionId(),
+                getRegionInfo(info.getRepIndRegionId()),
                 info.getRepIndContributionCrpId(),
+                getContributionCrpInfo(info.getRepIndContributionCrpId()),
                 info.getRepIndDegreeInnovationId(),
+                getDegreeInnovationInfo(info.getRepIndDegreeInnovationId()),
                 info.getProjectExpectedStudiesId(),
                 info.getDescriptionStage(),
                 info.getEvidenceLink(),
                 info.getGenderFocusLevelId(),
+                getFocusLevelInfo(info.getGenderFocusLevelId()),
                 info.getGenderExplanation(),
                 info.getYouthFocusLevelId(),
+                getFocusLevelInfo(info.getYouthFocusLevelId()),
                 info.getYouthExplanation(),
                 info.getLeadOrganizationId(),
                 getInstitutionInfo(info.getLeadOrganizationId()),
@@ -266,6 +272,7 @@ public class ProjectInnovationController {
                 info.getHasMilestones(),
                 info.getShortTitle(),
                 info.getInnovationNatureId(),
+                getInnovationNatureInfo(info.getInnovationNatureId()),
                 info.getHasCgiarContribution(),
                 info.getReasonNotCgiarContribution(),
                 info.getBeneficiariesNarrative(),
@@ -279,10 +286,15 @@ public class ProjectInnovationController {
                 info.getReadinessScale(),
                 info.getReadinessReason(),
                 info.getGenderScoreId(),
+                getImpactAreaScoreInfo(info.getGenderScoreId()),
                 info.getClimateChangeScoreId(),
+                getImpactAreaScoreInfo(info.getClimateChangeScoreId()),
                 info.getFoodSecurityScoreId(),
+                getImpactAreaScoreInfo(info.getFoodSecurityScoreId()),
                 info.getEnvironmentalScoreId(),
-                info.getPovertyJobsScoreId()
+                getImpactAreaScoreInfo(info.getEnvironmentalScoreId()),
+                info.getPovertyJobsScoreId(),
+                getImpactAreaScoreInfo(info.getPovertyJobsScoreId())
         );
     }
     
@@ -330,5 +342,76 @@ public class ProjectInnovationController {
         if (institutionId == null) return null;
         // Por ahora retornamos datos de prueba, se pueden implementar consultas reales más adelante
         return new InstitutionDto(institutionId, "Institution " + institutionId, "INST" + institutionId);
+    }
+    
+    private PhaseResearchDto getPhaseResearchInfo(Long phaseResearchId) {
+        if (phaseResearchId == null) return null;
+        String phaseName = switch (phaseResearchId.intValue()) {
+            case 1 -> "Phase 1: Research (Discovery/Proof of Concept)";
+            case 2 -> "Phase 2: Piloting";
+            case 3 -> "Phase 3/4: Scaling up and scaling out";
+            default -> "Phase Research " + phaseResearchId;
+        };
+        return new PhaseResearchDto(phaseResearchId, phaseName);
+    }
+    
+    private RegionDto getRegionInfo(Long regionId) {
+        if (regionId == null) return null;
+        String regionName = switch (regionId.intValue()) {
+            case 1 -> "Northern Africa";
+            case 2 -> "Sub-Saharan Africa";
+            case 3 -> "Latin America and the Caribbean";
+            default -> "Region " + regionId;
+        };
+        return new RegionDto(regionId, regionName);
+    }
+    
+    private ContributionCrpDto getContributionCrpInfo(Long contributionId) {
+        if (contributionId == null) return null;
+        String contributionName = switch (contributionId.intValue()) {
+            case 1 -> "Sole Contribution";
+            case 2 -> "Lead Contribution";
+            case 3 -> "Partial Contribution";
+            default -> "Contribution " + contributionId;
+        };
+        return new ContributionCrpDto(contributionId, contributionName);
+    }
+    
+    private DegreeInnovationDto getDegreeInnovationInfo(Long degreeId) {
+        if (degreeId == null) return null;
+        String degreeName = switch (degreeId.intValue()) {
+            case 1 -> "Novel";
+            case 2 -> "Adaptive";
+            default -> "Degree " + degreeId;
+        };
+        return new DegreeInnovationDto(degreeId, degreeName);
+    }
+    
+    private FocusLevelDto getFocusLevelInfo(Long focusLevelId) {
+        if (focusLevelId == null) return null;
+        String focusName = switch (focusLevelId.intValue()) {
+            case 1 -> "0 - Not Targeted";
+            case 2 -> "1 - Significant";
+            case 3 -> "2 - Principal";
+            default -> "Focus Level " + focusLevelId;
+        };
+        return new FocusLevelDto(focusLevelId, focusName);
+    }
+    
+    private InnovationNatureDto getInnovationNatureInfo(Long natureId) {
+        if (natureId == null) return null;
+        String natureName = switch (natureId.intValue()) {
+            case 1 -> "Disruptive Innovation";
+            case 2 -> "Incremental Innovation";
+            case 3 -> "Radical Innovation";
+            default -> "Innovation Nature " + natureId;
+        };
+        return new InnovationNatureDto(natureId, natureName);
+    }
+    
+    private ImpactAreaScoreDto getImpactAreaScoreInfo(Long scoreId) {
+        if (scoreId == null) return null;
+        // Por ahora retornamos datos de prueba, se pueden implementar consultas reales más adelante
+        return new ImpactAreaScoreDto(scoreId, "Impact Score " + scoreId, "Description for score " + scoreId);
     }
 }

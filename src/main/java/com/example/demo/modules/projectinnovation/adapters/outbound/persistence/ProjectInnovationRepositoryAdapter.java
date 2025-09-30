@@ -1,0 +1,96 @@
+package com.example.demo.modules.projectinnovation.adapters.outbound.persistence;
+
+import com.example.demo.modules.projectinnovation.application.port.outbound.ProjectInnovationRepositoryPort;
+import com.example.demo.modules.projectinnovation.domain.model.ProjectInnovation;
+import com.example.demo.modules.projectinnovation.domain.model.ProjectInnovationInfo;
+import org.springframework.stereotype.Component;
+
+import java.util.List;
+import java.util.Optional;
+
+@Component
+public class ProjectInnovationRepositoryAdapter implements ProjectInnovationRepositoryPort {
+    
+    private final ProjectInnovationJpaRepository projectInnovationJpaRepository;
+    private final ProjectInnovationInfoJpaRepository projectInnovationInfoJpaRepository;
+    
+    public ProjectInnovationRepositoryAdapter(
+            ProjectInnovationJpaRepository projectInnovationJpaRepository,
+            ProjectInnovationInfoJpaRepository projectInnovationInfoJpaRepository) {
+        this.projectInnovationJpaRepository = projectInnovationJpaRepository;
+        this.projectInnovationInfoJpaRepository = projectInnovationInfoJpaRepository;
+    }
+    
+    @Override
+    public List<ProjectInnovation> findAll() {
+        // Por defecto solo devolver registros activos
+        return projectInnovationJpaRepository.findAllActive();
+    }
+    
+    @Override
+    public Optional<ProjectInnovation> findById(Long id) {
+        // Solo buscar registros activos por defecto
+        return projectInnovationJpaRepository.findByIdAndActive(id);
+    }
+    
+    @Override
+    public ProjectInnovation save(ProjectInnovation projectInnovation) {
+        return projectInnovationJpaRepository.save(projectInnovation);
+    }
+    
+    @Override
+    public void deleteById(Long id) {
+        // Para "eliminar", marcar como inactivo en lugar de borrar físicamente
+        Optional<ProjectInnovation> projectInnovation = projectInnovationJpaRepository.findById(id);
+        if (projectInnovation.isPresent()) {
+            ProjectInnovation pi = projectInnovation.get();
+            pi.setIsActive(false);
+            projectInnovationJpaRepository.save(pi);
+        }
+    }
+    
+    @Override
+    public List<ProjectInnovation> findAllIncludingInactive() {
+        return projectInnovationJpaRepository.findAll();
+    }
+    
+    @Override
+    public Optional<ProjectInnovation> findByIdIncludingInactive(Long id) {
+        return projectInnovationJpaRepository.findById(id);
+    }
+    
+    @Override
+    public List<ProjectInnovation> findByProjectId(Long projectId) {
+        return projectInnovationJpaRepository.findByProjectIdAndIsActive(projectId, true);
+    }
+    
+    @Override
+    public List<ProjectInnovation> findByProjectIdAndActive(Long projectId, Boolean isActive) {
+        return projectInnovationJpaRepository.findByProjectIdAndIsActive(projectId, isActive);
+    }
+    
+    @Override
+    public List<ProjectInnovationInfo> findProjectInnovationInfoByProjectInnovationId(Long projectInnovationId) {
+        return projectInnovationInfoJpaRepository.findByProjectInnovationId(projectInnovationId);
+    }
+    
+    @Override
+    public Optional<ProjectInnovationInfo> findProjectInnovationInfoById(Long id) {
+        return projectInnovationInfoJpaRepository.findById(id);
+    }
+    
+    @Override
+    public Optional<ProjectInnovationInfo> findProjectInnovationInfoByInnovationIdAndPhaseId(Long innovationId, Long phaseId) {
+        return Optional.ofNullable(projectInnovationInfoJpaRepository.findByProjectInnovationIdAndIdPhase(innovationId, phaseId));
+    }
+    
+    @Override
+    public ProjectInnovationInfo saveProjectInnovationInfo(ProjectInnovationInfo projectInnovationInfo) {
+        return projectInnovationInfoJpaRepository.save(projectInnovationInfo);
+    }
+    
+    @Override
+    public void deleteProjectInnovationInfoById(Long id) {
+        projectInnovationInfoJpaRepository.deleteById(id);
+    }
+}

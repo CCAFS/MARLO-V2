@@ -47,7 +47,7 @@ public class ProjectInnovationService implements ProjectInnovationUseCase {
         if (!projectInnovationRepositoryPort.findById(id).isPresent()) {
             throw new RuntimeException("ProjectInnovation not found with id: " + id);
         }
-        // Eliminar marcará como inactivo en lugar de borrar físicamente
+        // Delete will mark as inactive instead of physical deletion
         projectInnovationRepositoryPort.deleteById(id);
     }
     
@@ -100,10 +100,10 @@ public class ProjectInnovationService implements ProjectInnovationUseCase {
     
     @Override
     public Optional<ProjectInnovationInfo> findProjectInnovationInfoByInnovationIdAndPhaseId(Long innovationId, Long phaseId) {
-        // Primero verificar que la innovación principal esté activa
+        // First verify that the main innovation is active
         Optional<ProjectInnovation> innovation = projectInnovationRepositoryPort.findById(innovationId);
         if (innovation.isEmpty()) {
-            return Optional.empty(); // La innovación no existe o está inactiva
+            return Optional.empty(); // Innovation doesn't exist or is inactive
         }
         
         return projectInnovationRepositoryPort.findProjectInnovationInfoByInnovationIdAndPhaseId(innovationId, phaseId);
@@ -134,5 +134,10 @@ public class ProjectInnovationService implements ProjectInnovationUseCase {
     @Override
     public List<ProjectInnovationInfo> findProjectInnovationInfoByPhase(Long phaseId) {
         return projectInnovationRepositoryPort.findProjectInnovationInfoByPhase(phaseId);
+    }
+    
+    @Override
+    public List<ProjectInnovation> findActiveInnovationsByPhase(Integer phaseId) {
+        return projectInnovationRepositoryPort.findActiveInnovationsByPhase(phaseId);
     }
 }

@@ -10,29 +10,35 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Repositorio JPA para la entidad ProjectInnovation
+ * JPA Repository for ProjectInnovation entity
  */
 @Repository
 public interface ProjectInnovationJpaRepository extends JpaRepository<ProjectInnovation, Long> {
     
     List<ProjectInnovation> findByIsActive(Boolean isActive);
     
-    // Consulta por defecto que solo devuelve registros activos
+    // Default query that only returns active records
     @Query("SELECT p FROM ProjectInnovation p WHERE p.isActive = true")
     List<ProjectInnovation> findAllActive();
     
     List<ProjectInnovation> findByProjectId(Long projectId);
     
-    // Buscar por project ID solo registros activos
+    // Search by project ID only active records
     List<ProjectInnovation> findByProjectIdAndIsActive(Long projectId, Boolean isActive);
     
     @Query("SELECT COUNT(p) FROM ProjectInnovation p WHERE p.projectId = :projectId AND p.isActive = true")
     Long countActiveByProjectId(@Param("projectId") Long projectId);
     
-    // Métodos personalizados para búsquedas específicas
+    // Custom methods for specific searches
     Optional<ProjectInnovation> findByIdAndIsActive(Long id, Boolean isActive);
     
-    // Búsqueda con información adicional (cuando se reactiven las relaciones)
+    // Find innovations by phase
+    @Query("SELECT DISTINCT p FROM ProjectInnovation p " +
+           "WHERE p.isActive = true " +
+           "AND EXISTS (SELECT 1 FROM ProjectInnovationActors pia WHERE pia.innovationId = p.id AND pia.idPhase = :phaseId AND pia.isActive = true)")
+    List<ProjectInnovation> findActiveInnovationsByPhase(@Param("phaseId") Integer phaseId);
+    
+    // Search with additional information (when relationships are reactivated)
     // @Query("SELECT p FROM ProjectInnovation p LEFT JOIN FETCH p.innovationInfo WHERE p.id = :id AND p.isActive = true")
     // Optional<ProjectInnovation> findByIdWithInfo(@Param("id") Long id);
     

@@ -1,8 +1,11 @@
 package com.example.demo.modules.projectinnovation.adapters.rest;
 
 import com.example.demo.modules.projectinnovation.adapters.rest.dto.*;
+import com.example.demo.modules.projectinnovation.adapters.rest.mapper.ProjectInnovationActorsMapper;
 import com.example.demo.modules.projectinnovation.application.port.inbound.ProjectInnovationUseCase;
+import com.example.demo.modules.projectinnovation.application.service.ProjectInnovationActorsService;
 import com.example.demo.modules.projectinnovation.domain.model.ProjectInnovation;
+import com.example.demo.modules.projectinnovation.domain.model.ProjectInnovationActors;
 import com.example.demo.modules.projectinnovation.domain.model.ProjectInnovationInfo;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -20,9 +23,16 @@ import java.util.List;
 public class ProjectInnovationController {
     
     private final ProjectInnovationUseCase projectInnovationUseCase;
+    private final ProjectInnovationActorsService actorsService;
+    private final ProjectInnovationActorsMapper actorsMapper;
     
-    public ProjectInnovationController(ProjectInnovationUseCase projectInnovationUseCase) {
+    public ProjectInnovationController(
+            ProjectInnovationUseCase projectInnovationUseCase,
+            ProjectInnovationActorsService actorsService,
+            ProjectInnovationActorsMapper actorsMapper) {
         this.projectInnovationUseCase = projectInnovationUseCase;
+        this.actorsService = actorsService;
+        this.actorsMapper = actorsMapper;
     }
     
     @Operation(summary = "Get all project innovations")
@@ -182,7 +192,24 @@ public class ProjectInnovationController {
         return ResponseEntity.ok(response);
     }
     
+    @Operation(summary = "Get all innovations with actors by phase", 
+               description = "Returns all project innovations with actor information for a specific phase")
+    @GetMapping("/phase/{phaseId}/with-actors")
+    public ResponseEntity<List<ProjectInnovationResponse>> getInnovationsWithActorsByPhase(
+            @Parameter(description = "Phase ID to filter innovations", example = "1")
+            @PathVariable Integer phaseId) {
+        List<ProjectInnovation> innovations = projectInnovationUseCase.findActiveInnovationsByPhase(phaseId);
+        List<ProjectInnovationResponse> response = innovations.stream()
+                .map(this::toResponse)
+                .toList();
+        return ResponseEntity.ok(response);
+    }
+    
     private ProjectInnovationResponse toResponse(ProjectInnovation projectInnovation) {
+        // Get actors associated with this innovation
+        List<ProjectInnovationActors> actors = actorsService.findActiveActorsByInnovationId(projectInnovation.getId());
+        List<ProjectInnovationActorsResponse> actorsResponse = actorsMapper.toResponseList(actors);
+        
         return new ProjectInnovationResponse(
                 projectInnovation.getId(),
                 projectInnovation.getProjectId(),
@@ -190,7 +217,8 @@ public class ProjectInnovationController {
                 projectInnovation.getActiveSince(),
                 projectInnovation.getCreatedBy(),
                 projectInnovation.getModifiedBy(),
-                projectInnovation.getModificationJustification()
+                projectInnovation.getModificationJustification(),
+                actorsResponse
         );
     }
     

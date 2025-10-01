@@ -7,14 +7,14 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ProjectInnovationUseCase {
-    // Métodos por defecto que solo devuelven registros activos (is_active = true)
+    // Default methods that only return active records (is_active = true)
     List<ProjectInnovation> findAllProjectInnovations();
     Optional<ProjectInnovation> findProjectInnovationById(Long id);
     ProjectInnovation createProjectInnovation(ProjectInnovation projectInnovation);
     ProjectInnovation updateProjectInnovation(Long id, ProjectInnovation projectInnovation);
-    void deleteProjectInnovation(Long id); // Marcará como inactivo en lugar de eliminar
+    void deleteProjectInnovation(Long id); // Will mark as inactive instead of deleting
     
-    // Métodos adicionales con filtros específicos
+    // Additional methods with specific filters
     List<ProjectInnovation> findAllProjectInnovationsIncludingInactive();
     List<ProjectInnovation> findProjectInnovationsByProjectId(Long projectId);
     List<ProjectInnovation> findProjectInnovationsByProjectIdAndActive(Long projectId, Boolean isActive);
@@ -29,4 +29,7 @@ public interface ProjectInnovationUseCase {
     ProjectInnovationInfo createProjectInnovationInfo(ProjectInnovationInfo projectInnovationInfo);
     ProjectInnovationInfo updateProjectInnovationInfo(Long id, ProjectInnovationInfo projectInnovationInfo);
     void deleteProjectInnovationInfo(Long id);
+    
+    // New method for finding innovations by phase using actors table
+    List<ProjectInnovation> findActiveInnovationsByPhase(Integer phaseId);
 }

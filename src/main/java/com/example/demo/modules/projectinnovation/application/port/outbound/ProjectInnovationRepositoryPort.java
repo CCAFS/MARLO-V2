@@ -26,4 +26,7 @@ public interface ProjectInnovationRepositoryPort {
     List<ProjectInnovationInfo> findProjectInnovationInfoByPhase(Long phaseId);
     ProjectInnovationInfo saveProjectInnovationInfo(ProjectInnovationInfo projectInnovationInfo);
     void deleteProjectInnovationInfoById(Long id);
+    
+    // New method for finding innovations by phase using actors table
+    List<ProjectInnovation> findActiveInnovationsByPhase(Integer phaseId);
 }

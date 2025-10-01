@@ -23,13 +23,13 @@ public class ProjectInnovationRepositoryAdapter implements ProjectInnovationRepo
     
     @Override
     public List<ProjectInnovation> findAll() {
-        // Por defecto solo devolver registros activos
+        // By default only return active records
         return projectInnovationJpaRepository.findAllActive();
     }
     
     @Override
     public Optional<ProjectInnovation> findById(Long id) {
-        // Solo buscar registros activos por defecto
+        // Only search active records by default
         return projectInnovationJpaRepository.findByIdAndIsActive(id, true);
     }
     
@@ -40,7 +40,7 @@ public class ProjectInnovationRepositoryAdapter implements ProjectInnovationRepo
     
     @Override
     public void deleteById(Long id) {
-        // Para "eliminar", marcar como inactivo en lugar de borrar físicamente
+        // To "delete", mark as inactive instead of physical deletion
         Optional<ProjectInnovation> projectInnovation = projectInnovationJpaRepository.findById(id);
         if (projectInnovation.isPresent()) {
             ProjectInnovation pi = projectInnovation.get();
@@ -86,7 +86,7 @@ public class ProjectInnovationRepositoryAdapter implements ProjectInnovationRepo
     
     @Override
     public List<ProjectInnovationInfo> findProjectInnovationInfoByPhase(Long phaseId) {
-        // Solo devolver innovaciones que estén activas
+        // Only return innovations that are active
         return projectInnovationInfoJpaRepository.findByPhaseAndActiveInnovation(phaseId);
     }
     
@@ -98,5 +98,10 @@ public class ProjectInnovationRepositoryAdapter implements ProjectInnovationRepo
     @Override
     public void deleteProjectInnovationInfoById(Long id) {
         projectInnovationInfoJpaRepository.deleteById(id);
+    }
+    
+    @Override
+    public List<ProjectInnovation> findActiveInnovationsByPhase(Integer phaseId) {
+        return projectInnovationJpaRepository.findActiveInnovationsByPhase(phaseId);
     }
 }

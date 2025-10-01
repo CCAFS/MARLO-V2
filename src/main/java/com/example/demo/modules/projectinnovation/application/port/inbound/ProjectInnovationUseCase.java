@@ -8,7 +8,6 @@ import java.util.Optional;
 
 public interface ProjectInnovationUseCase {
     // Default methods that only return active records (is_active = true)
-    List<ProjectInnovation> findAllProjectInnovations();
     Optional<ProjectInnovation> findProjectInnovationById(Long id);
     ProjectInnovation createProjectInnovation(ProjectInnovation projectInnovation);
     ProjectInnovation updateProjectInnovation(Long id, ProjectInnovation projectInnovation);

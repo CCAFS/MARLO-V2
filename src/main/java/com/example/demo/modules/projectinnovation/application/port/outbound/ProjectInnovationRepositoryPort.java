@@ -7,13 +7,13 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ProjectInnovationRepositoryPort {
-    // Métodos por defecto que filtran por is_active = true
+    // Default methods that filter by is_active = true
     List<ProjectInnovation> findAll();
     Optional<ProjectInnovation> findById(Long id);
     ProjectInnovation save(ProjectInnovation projectInnovation);
     void deleteById(Long id);
     
-    // Métodos adicionales con filtros específicos
+    // Additional methods with specific filters
     List<ProjectInnovation> findAllIncludingInactive();
     Optional<ProjectInnovation> findByIdIncludingInactive(Long id);
     List<ProjectInnovation> findByProjectId(Long projectId);

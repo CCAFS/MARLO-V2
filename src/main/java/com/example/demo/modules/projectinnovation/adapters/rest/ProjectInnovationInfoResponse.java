@@ -1,5 +1,9 @@
 package com.example.demo.modules.projectinnovation.adapters.rest;
 
+import com.example.demo.modules.projectinnovation.adapters.rest.dto.ProjectInnovationActorsResponse;
+import java.time.LocalDateTime;
+import java.util.List;
+
 public record ProjectInnovationInfoResponse(
     Long id,
     Long projectInnovationId,
@@ -45,5 +49,13 @@ public record ProjectInnovationInfoResponse(
     Long climateChangeScoreId,
     Long foodSecurityScoreId,
     Long environmentalScoreId,
-    Long povertyJobsScoreId
+    Long povertyJobsScoreId,
+    // New fields added from endpoint 2
+    Long projectId,
+    Boolean isActive,
+    LocalDateTime activeSince,
+    Long createdBy,
+    Long modifiedBy,
+    String modificationJustification,
+    List<ProjectInnovationActorsResponse> actors
 ) {}

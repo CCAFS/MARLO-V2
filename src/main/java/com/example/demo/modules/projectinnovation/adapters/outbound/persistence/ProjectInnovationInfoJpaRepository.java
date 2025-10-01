@@ -30,7 +30,7 @@ public interface ProjectInnovationInfoJpaRepository extends JpaRepository<Projec
            "WHERE pii.idPhase = :phaseId AND pi.isActive = true")
     List<ProjectInnovationInfo> findByPhaseAndActiveInnovation(@Param("phaseId") Long phaseId);
     
-    // Consultas con JOIN comentadas temporalmente para pruebas
+    // JOIN queries temporarily commented for testing
     // @Query("SELECT pii FROM ProjectInnovationInfo pii " +
     //        "LEFT JOIN FETCH pii.innovationStage " +
     //        "LEFT JOIN FETCH pii.innovationType " +

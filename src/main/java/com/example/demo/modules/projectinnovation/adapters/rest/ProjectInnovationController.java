@@ -15,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -143,19 +144,6 @@ public class ProjectInnovationController {
         return ResponseEntity.ok(response);
     }
     
-    @Operation(summary = "Get all innovations with actors by phase", 
-               description = "Returns all project innovations with actor information for a specific phase")
-    @GetMapping("/phase/{phaseId}/with-actors")
-    public ResponseEntity<List<ProjectInnovationResponse>> getInnovationsWithActorsByPhase(
-            @Parameter(description = "Phase ID to filter innovations", example = "1")
-            @PathVariable Integer phaseId) {
-        List<ProjectInnovation> innovations = projectInnovationUseCase.findActiveInnovationsByPhase(phaseId);
-        List<ProjectInnovationResponse> response = innovations.stream()
-                .map(this::toResponse)
-                .toList();
-        return ResponseEntity.ok(response);
-    }
-    
     private ProjectInnovationResponse toResponse(ProjectInnovation projectInnovation) {
         // Get actors associated with this innovation
         List<ProjectInnovationActors> actors = actorsService.findActiveActorsByInnovationId(projectInnovation.getId());
@@ -174,6 +162,18 @@ public class ProjectInnovationController {
     }
     
     private ProjectInnovationInfoResponse toInfoResponse(ProjectInnovationInfo info) {
+        // Get actors for this innovation and phase
+        List<ProjectInnovationActorsResponse> actorsResponse = List.of();
+        if (info.getProjectInnovationId() != null && info.getIdPhase() != null) {
+            List<ProjectInnovationActors> actors = actorsService.findActiveActorsByInnovationIdAndPhase(
+                info.getProjectInnovationId(), info.getIdPhase().intValue());
+            actorsResponse = actorsMapper.toResponseList(actors);
+        }
+        
+        // Get associated ProjectInnovation information
+        var projectInnovation = info.getProjectInnovationId() != null ? 
+            projectInnovationUseCase.findProjectInnovationById(info.getProjectInnovationId()).orElse(null) : null;
+        
         return new ProjectInnovationInfoResponse(
                 info.getId(),
                 info.getProjectInnovationId(),
@@ -219,7 +219,15 @@ public class ProjectInnovationController {
                 info.getClimateChangeScoreId(),
                 info.getFoodSecurityScoreId(),
                 info.getEnvironmentalScoreId(),
-                info.getPovertyJobsScoreId()
+                info.getPovertyJobsScoreId(),
+                // New fields from endpoint 2
+                projectInnovation != null ? projectInnovation.getProjectId() : null,
+                projectInnovation != null ? projectInnovation.getIsActive() : null,
+                projectInnovation != null ? projectInnovation.getActiveSince() : null,
+                projectInnovation != null ? projectInnovation.getCreatedBy() : null,
+                projectInnovation != null ? projectInnovation.getModifiedBy() : null,
+                projectInnovation != null ? projectInnovation.getModificationJustification() : null,
+                actorsResponse
         );
     }
 
@@ -299,16 +307,16 @@ public class ProjectInnovationController {
         );
     }
     
-    // Métodos auxiliares para obtener información de tablas relacionadas
+    // Helper methods to get information from related tables
     private PhaseDto getPhaseInfo(Long phaseId) {
         if (phaseId == null) return null;
-        // Por ahora retornamos datos de prueba, se pueden implementar consultas reales más adelante
+        // For now we return test data, real queries can be implemented later
         return new PhaseDto(phaseId, "Phase " + phaseId);
     }
     
     private InnovationStageDto getInnovationStageInfo(Long stageId) {
         if (stageId == null) return null;
-        // Datos basados en la consulta que hicimos anteriormente
+        // Data based on the query we made previously
         String stageName = switch (stageId.intValue()) {
             case 1 -> "Stage 1: discovery/proof of concept (PC - end of research phase)";
             case 2 -> "Stage 2: successful piloting (PIL - end of piloting phase)";
@@ -321,13 +329,13 @@ public class ProjectInnovationController {
     
     private GeographicScopeDto getGeographicScopeInfo(Long scopeId) {
         if (scopeId == null) return null;
-        // Por ahora retornamos datos de prueba, se pueden implementar consultas reales más adelante
+        // For now we return test data, real queries can be implemented later
         return new GeographicScopeDto(scopeId, "Geographic Scope " + scopeId);
     }
     
     private InnovationTypeDto getInnovationTypeInfo(Long typeId) {
         if (typeId == null) return null;
-        // Datos basados en la consulta que hicimos anteriormente
+        // Data based on the query we made previously
         String typeName = switch (typeId.intValue()) {
             case 1 -> "Genetic (varieties and breeds)";
             case 2 -> "Production systems and Management practices";
@@ -341,7 +349,7 @@ public class ProjectInnovationController {
     
     private InstitutionDto getInstitutionInfo(Long institutionId) {
         if (institutionId == null) return null;
-        // Por ahora retornamos datos de prueba, se pueden implementar consultas reales más adelante
+        // For now we return test data, real queries can be implemented later
         return new InstitutionDto(institutionId, "Institution " + institutionId, "INST" + institutionId);
     }
     
@@ -412,7 +420,7 @@ public class ProjectInnovationController {
     
     private ImpactAreaScoreDto getImpactAreaScoreInfo(Long scoreId) {
         if (scoreId == null) return null;
-        // Por ahora retornamos datos de prueba, se pueden implementar consultas reales más adelante
+        // For now we return test data, real queries can be implemented later
         return new ImpactAreaScoreDto(scoreId, "Impact Score " + scoreId, "Description for score " + scoreId);
     }
 }

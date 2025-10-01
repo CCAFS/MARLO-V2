@@ -19,11 +19,6 @@ public class ProjectInnovationService implements ProjectInnovationUseCase {
     }
     
     @Override
-    public List<ProjectInnovation> findAllProjectInnovations() {
-        return projectInnovationRepositoryPort.findAll();
-    }
-    
-    @Override
     public Optional<ProjectInnovation> findProjectInnovationById(Long id) {
         return projectInnovationRepositoryPort.findById(id);
     }

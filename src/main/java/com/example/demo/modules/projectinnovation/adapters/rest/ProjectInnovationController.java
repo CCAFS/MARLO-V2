@@ -155,7 +155,7 @@ public class ProjectInnovationController {
             @PathVariable Long innovationId, 
             @PathVariable Long phaseId) {
         return projectInnovationUseCase.findProjectInnovationInfoByInnovationIdAndPhaseId(innovationId, phaseId)
-                .map(info -> ResponseEntity.ok(toCompleteInfoResponse(info)))
+                .map(info -> ResponseEntity.ok(toCompleteInfoResponse(info, innovationId, phaseId)))
                 .orElse(ResponseEntity.notFound().build());
     }
     
@@ -175,7 +175,7 @@ public class ProjectInnovationController {
             @PathVariable Long innovationId, 
             @PathVariable Long phaseId) {
         return projectInnovationUseCase.findProjectInnovationInfoByInnovationIdAndPhaseId(innovationId, phaseId)
-                .map(info -> ResponseEntity.ok(toCompleteInfoResponse(info)))
+                .map(info -> ResponseEntity.ok(toCompleteInfoResponse(info, innovationId, phaseId)))
                 .orElse(ResponseEntity.notFound().build());
     }
     
@@ -273,6 +273,17 @@ public class ProjectInnovationController {
     }
 
     private ProjectInnovationInfoCompleteResponse toCompleteInfoResponse(ProjectInnovationInfo info) {
+        return toCompleteInfoResponse(info, null, null);
+    }
+    
+    private ProjectInnovationInfoCompleteResponse toCompleteInfoResponse(ProjectInnovationInfo info, Long innovationId, Long phaseId) {
+        // Load actors for specific innovation and phase
+        List<ProjectInnovationActorsResponse> actorsResponse = List.of();
+        if (innovationId != null && phaseId != null) {
+            List<ProjectInnovationActors> actors = actorsService.findActiveActorsByInnovationIdAndPhase(innovationId, phaseId.intValue());
+            actorsResponse = actorsMapper.toResponseList(actors);
+        }
+        
         return new ProjectInnovationInfoCompleteResponse(
                 info.getId(),
                 info.getProjectInnovationId(),
@@ -336,7 +347,8 @@ public class ProjectInnovationController {
                 info.getEnvironmentalScoreId(),
                 getImpactAreaScoreInfo(info.getEnvironmentalScoreId()),
                 info.getPovertyJobsScoreId(),
-                getImpactAreaScoreInfo(info.getPovertyJobsScoreId())
+                getImpactAreaScoreInfo(info.getPovertyJobsScoreId()),
+                actorsResponse
         );
     }
     

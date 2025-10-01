@@ -65,5 +65,6 @@ public record ProjectInnovationInfoCompleteResponse(
     Long environmentalScoreId,
     ImpactAreaScoreDto environmentalScore,
     Long povertyJobsScoreId,
-    ImpactAreaScoreDto povertyJobsScore
+    ImpactAreaScoreDto povertyJobsScore,
+    java.util.List<com.example.demo.modules.projectinnovation.adapters.rest.dto.ProjectInnovationActorsResponse> actors
 ) {}

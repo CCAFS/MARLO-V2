@@ -27,29 +27,27 @@ public class InnovationTypeController {
     }
     
     @Operation(
-        summary = "Get all innovation types", 
-        description = "Returns all innovation types from the catalog, ordered by name"
+        summary = "Get innovation types", 
+        description = "Returns innovation types from the catalog. If ID is provided, returns specific type; otherwise returns all types ordered by name"
     )
     @GetMapping
-    public ResponseEntity<List<InnovationTypeResponse>> getAllInnovationTypes() {
-        List<InnovationType> innovationTypes = innovationTypeUseCase.findAllInnovationTypes();
-        List<InnovationTypeResponse> response = innovationTypes.stream()
-                .map(this::toResponse)
-                .toList();
-        return ResponseEntity.ok(response);
-    }
-    
-    @Operation(
-        summary = "Get innovation type by ID", 
-        description = "Returns a specific innovation type by its ID"
-    )
-    @GetMapping("/{id}")
-    public ResponseEntity<InnovationTypeResponse> getInnovationTypeById(
-            @Parameter(description = "Innovation type ID", example = "1")
-            @PathVariable Long id) {
-        return innovationTypeUseCase.findInnovationTypeById(id)
-                .map(innovationType -> ResponseEntity.ok(toResponse(innovationType)))
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<?> getInnovationTypes(
+            @Parameter(description = "Innovation type ID (optional)", example = "1")
+            @RequestParam(required = false) Long id) {
+        
+        if (id != null) {
+            // Return specific innovation type
+            return innovationTypeUseCase.findInnovationTypeById(id)
+                    .map(innovationType -> ResponseEntity.ok(toResponse(innovationType)))
+                    .orElse(ResponseEntity.notFound().build());
+        } else {
+            // Return all innovation types
+            List<InnovationType> innovationTypes = innovationTypeUseCase.findAllInnovationTypes();
+            List<InnovationTypeResponse> response = innovationTypes.stream()
+                    .map(this::toResponse)
+                    .toList();
+            return ResponseEntity.ok(response);
+        }
     }
     
 

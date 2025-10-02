@@ -37,8 +37,10 @@ public class ProjectInnovationController {
     }
     
     @Operation(summary = "Get project innovation by ID")
-    @GetMapping("/{id}")
-    public ResponseEntity<ProjectInnovationResponse> getProjectInnovationById(@PathVariable Long id) {
+    @GetMapping("/by-id")
+    public ResponseEntity<ProjectInnovationResponse> getProjectInnovationById(
+            @Parameter(description = "Innovation ID", example = "1")
+            @RequestParam Long id) {
         return projectInnovationUseCase.findProjectInnovationById(id)
                 .map(projectInnovation -> ResponseEntity.ok(toResponse(projectInnovation)))
                 .orElse(ResponseEntity.notFound().build());
@@ -58,9 +60,10 @@ public class ProjectInnovationController {
     }
     
     @Operation(summary = "Update project innovation")
-    @PutMapping("/{id}")
+    @PutMapping("/update")
     public ResponseEntity<ProjectInnovationResponse> updateProjectInnovation(
-            @PathVariable Long id,
+            @Parameter(description = "Innovation ID", example = "1")
+            @RequestParam Long id,
             @Valid @RequestBody UpdateProjectInnovationRequest request) {
         try {
             ProjectInnovation projectInnovation = new ProjectInnovation();
@@ -86,8 +89,10 @@ public class ProjectInnovationController {
     }
     
     @Operation(summary = "Get project innovations by project ID", description = "Returns only active project innovations for the specified project")
-    @GetMapping("/project/{projectId}")
-    public ResponseEntity<List<ProjectInnovationResponse>> getProjectInnovationsByProjectId(@PathVariable Long projectId) {
+    @GetMapping("/by-project")
+    public ResponseEntity<List<ProjectInnovationResponse>> getProjectInnovationsByProjectId(
+            @Parameter(description = "Project ID", example = "1")
+            @RequestParam Long projectId) {
         List<ProjectInnovation> projectInnovations = projectInnovationUseCase.findProjectInnovationsByProjectId(projectId);
         List<ProjectInnovationResponse> response = projectInnovations.stream()
                 .map(this::toResponse)
@@ -96,8 +101,10 @@ public class ProjectInnovationController {
     }
     
     @Operation(summary = "Activate project innovation")
-    @PatchMapping("/{id}/activate")
-    public ResponseEntity<ProjectInnovationResponse> activateProjectInnovation(@PathVariable Long id) {
+    @PatchMapping("/activate")
+    public ResponseEntity<ProjectInnovationResponse> activateProjectInnovation(
+            @Parameter(description = "Innovation ID", example = "1")
+            @RequestParam Long id) {
         try {
             ProjectInnovation activated = projectInnovationUseCase.activateProjectInnovation(id);
             return ResponseEntity.ok(toResponse(activated));
@@ -107,9 +114,10 @@ public class ProjectInnovationController {
     }
     
     @Operation(summary = "Get project innovation info by project innovation ID")
-    @GetMapping("/{projectInnovationId}/info")
+    @GetMapping("/info")
     public ResponseEntity<List<ProjectInnovationInfoResponse>> getProjectInnovationInfo(
-            @PathVariable Long projectInnovationId) {
+            @Parameter(description = "Project Innovation ID", example = "1")
+            @RequestParam Long projectInnovationId) {
         List<ProjectInnovationInfo> infoList = projectInnovationUseCase
                 .findProjectInnovationInfoByProjectInnovationId(projectInnovationId);
         List<ProjectInnovationInfoResponse> response = infoList.stream()
@@ -120,12 +128,12 @@ public class ProjectInnovationController {
     
     @Operation(summary = "Get complete project innovation info by innovation ID and phase ID", 
                description = "Returns complete innovation information including actors data for the specific innovation and phase")
-    @GetMapping("/info/{innovationId}/phase/{phaseId}")
+    @GetMapping("/info/complete")
     public ResponseEntity<ProjectInnovationInfoCompleteResponse> getProjectInnovationInfoByInnovationIdAndPhaseId(
             @Parameter(description = "Innovation ID", example = "1566")
-            @PathVariable Long innovationId, 
+            @RequestParam Long innovationId, 
             @Parameter(description = "Phase ID", example = "425")
-            @PathVariable Long phaseId) {
+            @RequestParam Long phaseId) {
         return projectInnovationUseCase.findProjectInnovationInfoByInnovationIdAndPhaseId(innovationId, phaseId)
                 .map(info -> ResponseEntity.ok(toCompleteInfoResponse(info, innovationId, phaseId)))
                 .orElse(ResponseEntity.notFound().build());
@@ -133,10 +141,10 @@ public class ProjectInnovationController {
     
     @Operation(summary = "Get all innovations by phase", 
                description = "Returns all project innovation info for a specific phase, including only active innovations")
-    @GetMapping("/phase/{phaseId}")
+    @GetMapping("/by-phase")
     public ResponseEntity<List<ProjectInnovationInfoResponse>> getInnovationsByPhase(
             @Parameter(description = "Phase ID to filter innovations", example = "1")
-            @PathVariable Long phaseId) {
+            @RequestParam Long phaseId) {
         List<ProjectInnovationInfo> innovations = projectInnovationUseCase.findProjectInnovationInfoByPhase(phaseId);
         List<ProjectInnovationInfoResponse> response = innovations.stream()
                 .map(this::toInfoResponse)

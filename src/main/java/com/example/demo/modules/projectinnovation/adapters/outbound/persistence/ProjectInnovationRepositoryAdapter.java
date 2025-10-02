@@ -40,7 +40,7 @@ public class ProjectInnovationRepositoryAdapter implements ProjectInnovationRepo
     
     @Override
     public void deleteById(Long id) {
-        // To "delete", mark as inactive instead of physical deletion
+        // Soft delete: mark as inactive instead of physical deletion
         Optional<ProjectInnovation> projectInnovation = projectInnovationJpaRepository.findById(id);
         if (projectInnovation.isPresent()) {
             ProjectInnovation pi = projectInnovation.get();
@@ -86,7 +86,7 @@ public class ProjectInnovationRepositoryAdapter implements ProjectInnovationRepo
     
     @Override
     public List<ProjectInnovationInfo> findProjectInnovationInfoByPhase(Long phaseId) {
-        // Only return innovations that are active
+        // Only return information for active innovations
         return projectInnovationInfoJpaRepository.findByPhaseAndActiveInnovation(phaseId);
     }
     

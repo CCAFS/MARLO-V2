@@ -22,7 +22,7 @@ public interface ProjectInnovationInfoJpaRepository extends JpaRepository<Projec
            "WHERE pii.projectInnovationId = :projectInnovationId AND pii.idPhase = :idPhase")
     ProjectInnovationInfo findByProjectInnovationIdAndIdPhaseWithDetails(@Param("projectInnovationId") Long projectInnovationId, @Param("idPhase") Long idPhase);
     
-    // Buscar todas las innovaciones por fase
+    // Find all innovations by phase
     List<ProjectInnovationInfo> findByIdPhase(Long idPhase);
     
     @Query("SELECT pii FROM ProjectInnovationInfo pii " +

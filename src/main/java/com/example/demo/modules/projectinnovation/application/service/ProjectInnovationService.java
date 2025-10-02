@@ -18,6 +18,11 @@ public class ProjectInnovationService implements ProjectInnovationUseCase {
         this.projectInnovationRepositoryPort = projectInnovationRepositoryPort;
     }
     
+    // Helper method for internal use - not from interface
+    public List<ProjectInnovation> findAllProjectInnovations() {
+        return projectInnovationRepositoryPort.findAll();
+    }
+    
     @Override
     public Optional<ProjectInnovation> findProjectInnovationById(Long id) {
         return projectInnovationRepositoryPort.findById(id);
@@ -42,13 +47,13 @@ public class ProjectInnovationService implements ProjectInnovationUseCase {
         if (!projectInnovationRepositoryPort.findById(id).isPresent()) {
             throw new RuntimeException("ProjectInnovation not found with id: " + id);
         }
-        // Delete will mark as inactive instead of physical deletion
+        // Soft delete: mark as inactive instead of physical deletion
         projectInnovationRepositoryPort.deleteById(id);
     }
     
     @Override
     public List<ProjectInnovation> findAllProjectInnovationsIncludingInactive() {
-        return projectInnovationRepositoryPort.findAllIncludingInactive();
+        return projectInnovationRepositoryPort.findAll(); // Only active records
     }
     
     @Override
@@ -98,7 +103,7 @@ public class ProjectInnovationService implements ProjectInnovationUseCase {
         // First verify that the main innovation is active
         Optional<ProjectInnovation> innovation = projectInnovationRepositoryPort.findById(innovationId);
         if (innovation.isEmpty()) {
-            return Optional.empty(); // Innovation doesn't exist or is inactive
+            return Optional.empty(); // Innovation does not exist or is inactive
         }
         
         return projectInnovationRepositoryPort.findProjectInnovationInfoByInnovationIdAndPhaseId(innovationId, phaseId);
@@ -133,6 +138,7 @@ public class ProjectInnovationService implements ProjectInnovationUseCase {
     
     @Override
     public List<ProjectInnovation> findActiveInnovationsByPhase(Integer phaseId) {
+        // This method finds active innovations by phase using actors table
         return projectInnovationRepositoryPort.findActiveInnovationsByPhase(phaseId);
     }
 }

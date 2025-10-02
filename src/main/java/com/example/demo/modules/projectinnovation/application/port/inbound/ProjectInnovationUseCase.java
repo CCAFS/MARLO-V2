@@ -31,4 +31,14 @@ public interface ProjectInnovationUseCase {
     
     // New method for finding innovations by phase using actors table
     List<ProjectInnovation> findActiveInnovationsByPhase(Integer phaseId);
+    
+    // Advanced filtering methods for complete innovation search (only active records)
+    List<ProjectInnovation> findActiveInnovationsWithFilters(Long phase, Integer readinessScale, Long innovationTypeId);
+    List<ProjectInnovation> findActiveInnovationsBySdgFilters(Long innovationId, Long phase, Long sdgId);
+    List<ProjectInnovation> findAllActiveInnovationsComplete();
+    
+    // Advanced filtering methods that return complete ProjectInnovationInfo (only active records)
+    List<ProjectInnovationInfo> findActiveInnovationsInfoWithFilters(Long phase, Integer readinessScale, Long innovationTypeId);
+    List<ProjectInnovationInfo> findActiveInnovationsInfoBySdgFilters(Long innovationId, Long phase, Long sdgId);
+    List<ProjectInnovationInfo> findAllActiveInnovationsInfo();
 }

@@ -38,15 +38,40 @@ public interface ProjectInnovationJpaRepository extends JpaRepository<ProjectInn
            "AND EXISTS (SELECT 1 FROM ProjectInnovationActors pia WHERE pia.innovationId = p.id AND pia.idPhase = :phaseId AND pia.isActive = true)")
     List<ProjectInnovation> findActiveInnovationsByPhase(@Param("phaseId") Integer phaseId);
     
-    // Search with additional information (when relationships are reactivated)
-    // @Query("SELECT p FROM ProjectInnovation p LEFT JOIN FETCH p.innovationInfo WHERE p.id = :id AND p.isActive = true")
-    // Optional<ProjectInnovation> findByIdWithInfo(@Param("id") Long id);
+    // Advanced filtering methods for complete innovation search
     
-    // @Query("SELECT p FROM ProjectInnovation p LEFT JOIN FETCH p.innovationInfo WHERE p.isActive = true")
-    // List<ProjectInnovation> findAllActiveWithInfo();
+    // Find all active innovations with complex filters
+    @Query(value = "SELECT DISTINCT p.* FROM project_innovations p " +
+           "JOIN project_innovation_info pii ON p.id = pii.project_innovation_id " +
+           "WHERE p.is_active = true " +
+           "AND (:phase IS NULL OR pii.id_phase = :phase) " +
+           "AND (:readinessScale IS NULL OR pii.readiness_scale = :readinessScale) " +
+           "AND (:innovationTypeId IS NULL OR pii.innovation_type_id = :innovationTypeId) " +
+           "ORDER BY p.id DESC", nativeQuery = true)
+    List<ProjectInnovation> findActiveInnovationsWithFilters(
+            @Param("phase") Long phase,
+            @Param("readinessScale") Integer readinessScale,
+            @Param("innovationTypeId") Long innovationTypeId);
     
-    // @Query("SELECT p FROM ProjectInnovation p " +
-    //        "LEFT JOIN FETCH p.innovationInfo " +
-    //        "WHERE p.projectId = :projectId AND p.isActive = true")
+    // Find innovations by SDG relationship
+    @Query(value = "SELECT DISTINCT p.* FROM project_innovations p " +
+           "JOIN project_innovation_sdgs pis ON p.id = pis.innovation_id " +
+           "WHERE p.is_active = true " +
+           "AND pis.is_active = true " +
+           "AND (:innovationId IS NULL OR pis.innovation_id = :innovationId) " +
+           "AND (:phase IS NULL OR pis.id_phase = :phase) " +
+           "AND (:sdgId IS NULL OR pis.sdg_id = :sdgId) " +
+           "ORDER BY p.id DESC", nativeQuery = true)
+    List<ProjectInnovation> findActiveInnovationsBySdgFilters(
+            @Param("innovationId") Long innovationId,
+            @Param("phase") Long phase,
+            @Param("sdgId") Long sdgId);
+    
+    // Find all active innovations with complete information
+    @Query("SELECT DISTINCT p FROM ProjectInnovation p " +
+           "LEFT JOIN ProjectInnovationInfo pii ON p.id = pii.projectInnovationId " +
+           "WHERE p.isActive = true " +
+           "ORDER BY p.id DESC")
+    List<ProjectInnovation> findAllActiveInnovationsComplete();
     // List<ProjectInnovation> findActiveByProjectIdWithInfo(@Param("projectId") Long projectId);
 }

@@ -42,4 +42,39 @@ public interface ProjectInnovationInfoJpaRepository extends JpaRepository<Projec
     //        "LEFT JOIN FETCH pii.innovationType " +
     //        "WHERE pii.id = :id")
     // ProjectInnovationInfo findByIdWithReferences(@Param("id") Long id);
+    
+    // Advanced filtering methods that return complete ProjectInnovationInfo (only active records)
+    @Query(value = "SELECT DISTINCT pii.* FROM project_innovation_info pii " +
+           "JOIN project_innovations p ON pii.project_innovation_id = p.id " +
+           "WHERE p.is_active = true " +
+           "AND (:phase IS NULL OR pii.id_phase = :phase) " +
+           "AND (:readinessScale IS NULL OR pii.readiness_scale = :readinessScale) " +
+           "AND (:innovationTypeId IS NULL OR pii.innovation_type_id = :innovationTypeId) " +
+           "ORDER BY pii.id DESC", nativeQuery = true)
+    List<ProjectInnovationInfo> findActiveInnovationsInfoWithFilters(
+            @Param("phase") Long phase,
+            @Param("readinessScale") Integer readinessScale,
+            @Param("innovationTypeId") Long innovationTypeId);
+    
+    // Find innovation info by SDG relationship
+    @Query(value = "SELECT DISTINCT pii.* FROM project_innovation_info pii " +
+           "JOIN project_innovations p ON pii.project_innovation_id = p.id " +
+           "JOIN project_innovation_sdgs pis ON p.id = pis.innovation_id AND pii.id_phase = pis.id_phase " +
+           "WHERE p.is_active = true " +
+           "AND pis.is_active = true " +
+           "AND (:innovationId IS NULL OR pis.innovation_id = :innovationId) " +
+           "AND (:phase IS NULL OR pis.id_phase = :phase) " +
+           "AND (:sdgId IS NULL OR pis.sdg_id = :sdgId) " +
+           "ORDER BY pii.id DESC", nativeQuery = true)
+    List<ProjectInnovationInfo> findActiveInnovationsInfoBySdgFilters(
+            @Param("innovationId") Long innovationId,
+            @Param("phase") Long phase,
+            @Param("sdgId") Long sdgId);
+    
+    // Find all active innovations info
+    @Query(value = "SELECT DISTINCT pii.* FROM project_innovation_info pii " +
+           "JOIN project_innovations p ON pii.project_innovation_id = p.id " +
+           "WHERE p.is_active = true " +
+           "ORDER BY pii.id DESC", nativeQuery = true)
+    List<ProjectInnovationInfo> findAllActiveInnovationsInfo();
 }

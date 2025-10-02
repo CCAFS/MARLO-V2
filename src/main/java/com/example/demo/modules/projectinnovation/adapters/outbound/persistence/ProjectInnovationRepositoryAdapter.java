@@ -104,4 +104,35 @@ public class ProjectInnovationRepositoryAdapter implements ProjectInnovationRepo
     public List<ProjectInnovation> findActiveInnovationsByPhase(Integer phaseId) {
         return projectInnovationJpaRepository.findActiveInnovationsByPhase(phaseId);
     }
+    
+    @Override
+    public List<ProjectInnovation> findActiveInnovationsWithFilters(Long phase, Integer readinessScale, Long innovationTypeId) {
+        return projectInnovationJpaRepository.findActiveInnovationsWithFilters(phase, readinessScale, innovationTypeId);
+    }
+    
+    @Override
+    public List<ProjectInnovation> findActiveInnovationsBySdgFilters(Long innovationId, Long phase, Long sdgId) {
+        return projectInnovationJpaRepository.findActiveInnovationsBySdgFilters(innovationId, phase, sdgId);
+    }
+    
+    @Override
+    public List<ProjectInnovation> findAllActiveInnovationsComplete() {
+        return projectInnovationJpaRepository.findAllActiveInnovationsComplete();
+    }
+    
+    // New methods that return ProjectInnovationInfo instead of ProjectInnovation
+    @Override
+    public List<ProjectInnovationInfo> findActiveInnovationsInfoWithFilters(Long phase, Integer readinessScale, Long innovationTypeId) {
+        return projectInnovationInfoJpaRepository.findActiveInnovationsInfoWithFilters(phase, readinessScale, innovationTypeId);
+    }
+    
+    @Override
+    public List<ProjectInnovationInfo> findActiveInnovationsInfoBySdgFilters(Long innovationId, Long phase, Long sdgId) {
+        return projectInnovationInfoJpaRepository.findActiveInnovationsInfoBySdgFilters(innovationId, phase, sdgId);
+    }
+    
+    @Override
+    public List<ProjectInnovationInfo> findAllActiveInnovationsInfo() {
+        return projectInnovationInfoJpaRepository.findAllActiveInnovationsInfo();
+    }
 }

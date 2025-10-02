@@ -78,7 +78,9 @@ public class ProjectInnovationController {
         }
     }
     
-    @Operation(summary = "Get all project innovations including inactive ones", description = "Returns both active and inactive project innovations")
+    @Deprecated(since = "1.0", forRemoval = true)
+    @Operation(summary = "Get all project innovations including inactive ones", 
+               description = "⚠️ DEPRECATED: Use /search instead (only returns active records). This endpoint returns both active and inactive project innovations")
     @GetMapping("/all")
     public ResponseEntity<List<ProjectInnovationResponse>> getAllProjectInnovationsIncludingInactive() {
         List<ProjectInnovation> projectInnovations = projectInnovationUseCase.findAllProjectInnovationsIncludingInactive();
@@ -146,6 +148,43 @@ public class ProjectInnovationController {
             @Parameter(description = "Phase ID to filter innovations", example = "1")
             @RequestParam Long phaseId) {
         List<ProjectInnovationInfo> innovations = projectInnovationUseCase.findProjectInnovationInfoByPhase(phaseId);
+        List<ProjectInnovationInfoResponse> response = innovations.stream()
+                .map(this::toInfoResponse)
+                .toList();
+        return ResponseEntity.ok(response);
+    }
+    
+    @Operation(summary = "Search innovations with advanced filters", 
+               description = "Returns active innovations with complete information including actors, with optional filters by phase, readiness scale, innovation type, and SDG. Only returns active records.")
+    @GetMapping("/search")
+    public ResponseEntity<List<ProjectInnovationInfoResponse>> searchInnovations(
+            @Parameter(description = "Phase ID to filter by", example = "425")
+            @RequestParam(required = false) Long phase,
+            @Parameter(description = "Readiness scale to filter by", example = "7")
+            @RequestParam(required = false) Integer readinessScale,
+            @Parameter(description = "Innovation type ID to filter by", example = "1")
+            @RequestParam(required = false) Long innovationTypeId,
+            @Parameter(description = "Innovation ID to filter by (for SDG search)", example = "1566")
+            @RequestParam(required = false) Long innovationId,
+            @Parameter(description = "SDG ID to filter by", example = "2")
+            @RequestParam(required = false) Long sdgId) {
+        
+        // Get innovation info with filters instead of just innovation entities
+        List<ProjectInnovationInfo> innovations;
+        
+        // If any SDG-related filter is provided, use SDG search
+        if (sdgId != null || (innovationId != null && phase != null)) {
+            innovations = projectInnovationUseCase.findActiveInnovationsInfoBySdgFilters(innovationId, phase, sdgId);
+        }
+        // If any general filter is provided, use general search
+        else if (phase != null || readinessScale != null || innovationTypeId != null) {
+            innovations = projectInnovationUseCase.findActiveInnovationsInfoWithFilters(phase, readinessScale, innovationTypeId);
+        }
+        // If no filters provided, return all active innovations with info
+        else {
+            innovations = projectInnovationUseCase.findAllActiveInnovationsInfo();
+        }
+        
         List<ProjectInnovationInfoResponse> response = innovations.stream()
                 .map(this::toInfoResponse)
                 .toList();

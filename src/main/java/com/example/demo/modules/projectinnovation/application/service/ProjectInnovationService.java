@@ -141,4 +141,35 @@ public class ProjectInnovationService implements ProjectInnovationUseCase {
         // This method finds active innovations by phase using actors table
         return projectInnovationRepositoryPort.findActiveInnovationsByPhase(phaseId);
     }
+    
+    @Override
+    public List<ProjectInnovation> findActiveInnovationsWithFilters(Long phase, Integer readinessScale, Long innovationTypeId) {
+        return projectInnovationRepositoryPort.findActiveInnovationsWithFilters(phase, readinessScale, innovationTypeId);
+    }
+    
+    @Override
+    public List<ProjectInnovation> findActiveInnovationsBySdgFilters(Long innovationId, Long phase, Long sdgId) {
+        return projectInnovationRepositoryPort.findActiveInnovationsBySdgFilters(innovationId, phase, sdgId);
+    }
+    
+    @Override
+    public List<ProjectInnovation> findAllActiveInnovationsComplete() {
+        return projectInnovationRepositoryPort.findAllActiveInnovationsComplete();
+    }
+    
+    // New methods that return ProjectInnovationInfo instead of ProjectInnovation
+    @Override
+    public List<ProjectInnovationInfo> findActiveInnovationsInfoWithFilters(Long phase, Integer readinessScale, Long innovationTypeId) {
+        return projectInnovationRepositoryPort.findActiveInnovationsInfoWithFilters(phase, readinessScale, innovationTypeId);
+    }
+    
+    @Override
+    public List<ProjectInnovationInfo> findActiveInnovationsInfoBySdgFilters(Long innovationId, Long phase, Long sdgId) {
+        return projectInnovationRepositoryPort.findActiveInnovationsInfoBySdgFilters(innovationId, phase, sdgId);
+    }
+    
+    @Override
+    public List<ProjectInnovationInfo> findAllActiveInnovationsInfo() {
+        return projectInnovationRepositoryPort.findAllActiveInnovationsInfo();
+    }
 }

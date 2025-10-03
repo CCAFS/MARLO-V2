@@ -8,8 +8,8 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 /**
- * Entidad principal para project_innovations
- * Tabla principal que contiene los metadatos básicos de las innovaciones
+ * Project Innovation entity
+ * Main table containing basic metadata of innovations
  */
 @Entity
 @Table(name = "project_innovations")

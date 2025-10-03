@@ -1,5 +1,7 @@
 package com.example.demo.modules.projectinnovation.application.service;
 
+import com.example.demo.modules.projectinnovation.adapters.outbound.persistence.PhaseJpaRepository;
+import com.example.demo.modules.projectinnovation.domain.model.Phase;
 import com.example.demo.platform.config.InnovationPdfGeneratorProperties;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -13,10 +15,13 @@ import org.springframework.http.ResponseEntity;
 public class InnovationPdfReportService {
     
     private final InnovationPdfGeneratorProperties pdfGeneratorProperties;
+    private final PhaseJpaRepository phaseRepository;
     private final RestTemplate restTemplate;
     
-    public InnovationPdfReportService(InnovationPdfGeneratorProperties pdfGeneratorProperties) {
+    public InnovationPdfReportService(InnovationPdfGeneratorProperties pdfGeneratorProperties, 
+                                     PhaseJpaRepository phaseRepository) {
         this.pdfGeneratorProperties = pdfGeneratorProperties;
+        this.phaseRepository = phaseRepository;
         this.restTemplate = new RestTemplate();
     }
     
@@ -61,6 +66,32 @@ public class InnovationPdfReportService {
         } catch (Exception e) {
             throw new RuntimeException("Error downloading PDF report for innovation " + innovationId, e);
         }
+    }
+    
+    /**
+     * Generate PDF report URL using phase information
+     * @param innovationId The ID of the innovation
+     * @param phaseId The ID of the phase (to get cycle and year from phases table)
+     * @return Complete URL for PDF generation
+     */
+    public String generateInnovationPdfUrlByPhase(Long innovationId, Long phaseId) {
+        Phase phase = phaseRepository.findById(phaseId)
+            .orElseThrow(() -> new RuntimeException("Phase not found: " + phaseId));
+        
+        String cycle = phase.getCycle();
+        Integer year = phase.getYear();
+        
+        return pdfGeneratorProperties.buildUrlWithParameters(innovationId, cycle, year);
+    }
+    
+    /**
+     * Get phase information by ID
+     * @param phaseId The phase ID
+     * @return Phase object with cycle and year information
+     */
+    public Phase getPhaseById(Long phaseId) {
+        return phaseRepository.findById(phaseId)
+            .orElseThrow(() -> new RuntimeException("Phase not found: " + phaseId));
     }
     
     /**

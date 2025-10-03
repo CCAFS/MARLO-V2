@@ -6,8 +6,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * Entidad para project_innovation_info
- * Contiene la información detallada de cada innovación
+ * Project Innovation Info entity
+ * Contains detailed information for each innovation
  */
 @Entity
 @Table(name = "project_innovation_info")
@@ -137,7 +137,7 @@ public class ProjectInnovationInfo {
     @Column(name = "readiness_reason", columnDefinition = "TEXT")
     private String readinessReason;
     
-    // Scores de impacto
+    // Impact scores
     @Column(name = "gender_score_id")
     private Long genderScoreId;
     

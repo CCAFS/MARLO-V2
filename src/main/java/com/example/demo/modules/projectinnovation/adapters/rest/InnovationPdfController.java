@@ -21,31 +21,46 @@ public class InnovationPdfController {
         this.pdfReportService = pdfReportService;
     }
     
-    @Operation(summary = "Generate PDF report URL with default parameters")
-    @GetMapping("/url/{innovationId}")
-    public ResponseEntity<PdfUrlResponse> generatePdfUrl(
+    @Operation(summary = "Generate PDF report URL using phase information", 
+               description = "Generates PDF URL by consulting the phases table to get cycle and year from phase ID")
+    @GetMapping("/url/by-phase")
+    public ResponseEntity<PdfUrlResponse> generatePdfUrlByPhase(
             @Parameter(description = "Innovation ID", example = "1558")
-            @PathVariable Long innovationId) {
+            @RequestParam Long innovationId,
+            @Parameter(description = "Phase ID (to get cycle and year from phases table)", example = "425")
+            @RequestParam Long phaseId) {
         
-        String pdfUrl = pdfReportService.generateInnovationPdfUrl(innovationId);
-        return ResponseEntity.ok(new PdfUrlResponse(
-            innovationId,
-            pdfUrl,
-            "Reporting",
-            2025,
-            "URL generated with default parameters"
-        ));
+        try {
+            String pdfUrl = pdfReportService.generateInnovationPdfUrlByPhase(innovationId, phaseId);
+            var phase = pdfReportService.getPhaseById(phaseId);
+            
+            return ResponseEntity.ok(new PdfUrlResponse(
+                innovationId,
+                pdfUrl,
+                phase.getCycle(),
+                phase.getYear(),
+                "URL generated from phase information (ID: " + phaseId + ")"
+            ));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(new PdfUrlResponse(
+                innovationId,
+                null,
+                null,
+                null,
+                "Error: " + e.getMessage()
+            ));
+        }
     }
     
     @Operation(summary = "Generate PDF report URL with custom parameters")
-    @GetMapping("/url/{innovationId}/custom")
+    @GetMapping("/url/custom")
     public ResponseEntity<PdfUrlResponse> generateCustomPdfUrl(
             @Parameter(description = "Innovation ID", example = "1558")
-            @PathVariable Long innovationId,
+            @RequestParam Long innovationId,
             @Parameter(description = "Cycle parameter", example = "Reporting")
-            @RequestParam(defaultValue = "Reporting") String cycle,
+            @RequestParam String cycle,
             @Parameter(description = "Year parameter", example = "2025")
-            @RequestParam(defaultValue = "2025") Integer year) {
+            @RequestParam Integer year) {
         
         if (!pdfReportService.validateParameters(innovationId, cycle, year)) {
             return ResponseEntity.badRequest().build();
@@ -61,37 +76,6 @@ public class InnovationPdfController {
         ));
     }
     
-    @Operation(summary = "Get base PDF generator configuration")
-    @GetMapping("/config")
-    public ResponseEntity<PdfConfigResponse> getPdfConfig() {
-        String baseUrl = pdfReportService.getPdfGeneratorBaseUrl();
-        return ResponseEntity.ok(new PdfConfigResponse(
-            baseUrl,
-            "Base URL configured from application-local.properties",
-            new String[]{"innovationID", "cycle", "year"}
-        ));
-    }
-    
-    @Operation(summary = "Validate PDF generation parameters")
-    @GetMapping("/validate")
-    public ResponseEntity<ValidationResponse> validateParameters(
-            @Parameter(description = "Innovation ID", example = "1558")
-            @RequestParam Long innovationId,
-            @Parameter(description = "Cycle parameter", example = "Reporting")
-            @RequestParam String cycle,
-            @Parameter(description = "Year parameter", example = "2025")
-            @RequestParam Integer year) {
-        
-        boolean isValid = pdfReportService.validateParameters(innovationId, cycle, year);
-        return ResponseEntity.ok(new ValidationResponse(
-            isValid,
-            isValid ? "Parameters are valid" : "Invalid parameters provided",
-            innovationId,
-            cycle,
-            year
-        ));
-    }
-    
     // Response DTOs
     public record PdfUrlResponse(
         Long innovationId,
@@ -99,19 +83,5 @@ public class InnovationPdfController {
         String cycle,
         Integer year,
         String message
-    ) {}
-    
-    public record PdfConfigResponse(
-        String baseUrl,
-        String source,
-        String[] requiredParameters
-    ) {}
-    
-    public record ValidationResponse(
-        boolean valid,
-        String message,
-        Long innovationId,
-        String cycle,
-        Integer year
     ) {}
 }

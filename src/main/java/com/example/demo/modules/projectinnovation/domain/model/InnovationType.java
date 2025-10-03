@@ -6,8 +6,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * Entidad para rep_ind_innovation_types
- * Catálogo de tipos de innovación
+ * Innovation Type entity
+ * Catalog of innovation types
  */
 @Entity
 @Table(name = "rep_ind_innovation_types")

@@ -20,3 +20,8 @@ Thumbs.db
 # Env & logs
 .env
 *.log
+
+# Local development files
+application-local.properties
+run-marlo.sh
+.mvn/jvm.config

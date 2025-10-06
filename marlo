@@ -1,0 +1,74 @@
+#!/bin/bash
+
+# 🚀 MARLO Development Tools
+# Collection of useful shortcuts for MARLO project
+
+case "$1" in
+    "start"|"run"|"")
+        echo "🚀 Starting MARLO Project..."
+        ./run-marlo.sh
+        ;;
+    "test")
+        echo "🧪 Testing MARLO endpoints..."
+        echo "Checking if service is running..."
+        if lsof -i:8080 > /dev/null 2>&1; then
+            echo "✅ Service is running on port 8080"
+            echo ""
+            echo "🔍 Testing main endpoints:"
+            echo "1️⃣ Testing /search endpoint (all active):"
+            curl -s "http://localhost:8080/api/innovations/search" | jq 'length'
+            echo ""
+            echo "2️⃣ Testing SDG filter (sdgId=2):"
+            curl -s "http://localhost:8080/api/innovations/search?sdgId=2" | jq 'length'
+            echo ""
+            echo "3️⃣ Testing phase + SDG filter (phase=428, sdgId=17):"
+            curl -s "http://localhost:8080/api/innovations/search?phase=428&sdgId=17" | jq 'length'
+        else
+            echo "❌ Service is not running on port 8080"
+            echo "Run './marlo start' to start the service"
+        fi
+        ;;
+    "stop")
+        echo "🛑 Stopping MARLO..."
+        lsof -ti:8080 | xargs kill -9 2>/dev/null || echo "No process found on port 8080"
+        echo "✅ MARLO stopped"
+        ;;
+    "status")
+        echo "📊 MARLO Status:"
+        if lsof -i:8080 > /dev/null 2>&1; then
+            echo "✅ Service is RUNNING on port 8080"
+            echo "🌐 Swagger UI: http://localhost:8080/swagger-ui/index.html"
+            echo "🔗 API Base: http://localhost:8080/api/innovations"
+        else
+            echo "❌ Service is NOT running"
+        fi
+        ;;
+    "db")
+        echo "🗄️ Connecting to MARLO database..."
+        mysql -h localhost -u root -p00000000 aiccradb
+        ;;
+    "help"|"-h"|"--help")
+        echo "🚀 MARLO Development Tools"
+        echo "=========================="
+        echo ""
+        echo "Usage: ./marlo [command]"
+        echo ""
+        echo "Commands:"
+        echo "  start, run    Start MARLO application"
+        echo "  test          Test main endpoints"
+        echo "  stop          Stop MARLO application"
+        echo "  status        Check if MARLO is running"
+        echo "  db            Connect to MARLO database"
+        echo "  help          Show this help message"
+        echo ""
+        echo "Examples:"
+        echo "  ./marlo start    # Start the application"
+        echo "  ./marlo test     # Test endpoints"
+        echo "  ./marlo status   # Check status"
+        ;;
+    *)
+        echo "❌ Unknown command: $1"
+        echo "Run './marlo help' for usage information"
+        exit 1
+        ;;
+esac

@@ -26,11 +26,47 @@ This separation ensures maintainability, testability, and flexibility, making it
 
 ## Local Execution
 
-1. Configure your MySQL database and update `application-local.properties` or use environment variables (`.env`).
-2. Run:
+### Requirements
+- Java 17 (JDK 17)
+- Maven 3.6+
+- MySQL 8.0+ with `aiccradb` database
+
+### Quick Start
+
+1. **Use the automated script:**
+   ```bash
+   ./run-marlo.sh
    ```
-   mvn spring-boot:run
+
+2. **Test the application:**
+   ```bash
+   ./test-marlo.sh
    ```
+
+### Manual Execution
+
+1. Configure Java 17:
+   ```bash
+   export JAVA_HOME="/Library/Java/JavaVirtualMachines/jdk-17.jdk/Contents/Home"
+   export PATH="$JAVA_HOME/bin:$PATH"
+   ```
+
+2. Compile and run:
+   ```bash
+   mvn compile
+   mvn spring-boot:run -Dspring-boot.run.profiles=local
+   ```
+
+### Important URLs
+- **API Base:** http://localhost:8080/api/innovations
+- **Swagger UI:** http://localhost:8080/swagger-ui/index.html
+- **OpenAPI Docs:** http://localhost:8080/v3/api-docs
+
+### Main Endpoints
+- `GET /api/innovations` - All active innovations
+- `GET /api/innovations/{id}` - Specific innovation with actors
+- `GET /api/innovations/phase/{phaseId}/with-actors` - Innovations with actors by phase
+- `GET /api/innovations/search?projectId=X&active=true` - Search by project
 
 ## Docker
 
@@ -84,29 +120,29 @@ You can configure log levels and output in `src/main/resources/application.yml` 
 
 1. Construye el artefacto: `mvn clean package` (genera `target/marlo-0.0.1-SNAPSHOT.jar`).
 2. Crea la imagen para Lambda: `docker build -f Dockerfile.lambda -t marlo-lambda .`.
-3. (Opcional) Prueba la imagen local con el Runtime Interface Emulator de AWS: `docker run -p 9000:8080 marlo-lambda` y realiza una invocación HTTP a `http://localhost:9000/2015-03-31/functions/function/invocations` con el payload de API Gateway.
-4. Publica la imagen en ECR y úsala en tu función Lambda.
+3. (Opcional) Prueba la imagen local con el Runtime Interface Emulator de AWS: `docker run -p 9000:8080 marlo-lambda` y realiza una invocaciï¿½n HTTP a `http://localhost:9000/2015-03-31/functions/function/invocations` con el payload de API Gateway.
+4. Publica la imagen en ECR y ï¿½sala en tu funciï¿½n Lambda.
 
-La aplicación sigue ejecutándose de forma tradicional con `mvn spring-boot:run` o `java -jar target/marlo-0.0.1-SNAPSHOT.jar`.
+La aplicaciï¿½n sigue ejecutï¿½ndose de forma tradicional con `mvn spring-boot:run` o `java -jar target/marlo-0.0.1-SNAPSHOT.jar`.
 ## AWS Lambda (Imagen de contenedor)
 
 1. Construye el artefacto: mvn clean package (genera 	arget/marlo-0.0.1-SNAPSHOT.jar).
 2. Crea la imagen para Lambda: docker build -f Dockerfile.lambda -t marlo-lambda ..
-3. (Opcional) Prueba la imagen local con el Runtime Interface Emulator de AWS: docker run -p 9000:8080 marlo-lambda y realiza una invocación HTTP a http://localhost:9000/2015-03-31/functions/function/invocations con el payload de API Gateway.
-4. Publica la imagen en ECR y úsala en tu función Lambda.
+3. (Opcional) Prueba la imagen local con el Runtime Interface Emulator de AWS: docker run -p 9000:8080 marlo-lambda y realiza una invocaciï¿½n HTTP a http://localhost:9000/2015-03-31/functions/function/invocations con el payload de API Gateway.
+4. Publica la imagen en ECR y ï¿½sala en tu funciï¿½n Lambda.
 
-La aplicación sigue ejecutándose de forma tradicional con mvn spring-boot:run o java -jar target/marlo-0.0.1-SNAPSHOT.jar.
+La aplicaciï¿½n sigue ejecutï¿½ndose de forma tradicional con mvn spring-boot:run o java -jar target/marlo-0.0.1-SNAPSHOT.jar.
 
-## Configuración de Swagger detrás de API Gateway
+## Configuraciï¿½n de Swagger detrï¿½s de API Gateway
 
-- La aplicación espera el prefijo del stage (/dev, /prod, etc.) en la variable de entorno BASE_PATH. Localmente puedes omitirla (queda vacía).
+- La aplicaciï¿½n espera el prefijo del stage (/dev, /prod, etc.) en la variable de entorno BASE_PATH. Localmente puedes omitirla (queda vacï¿½a).
 - En Lambda: BASE_PATH=/dev (o el stage correspondiente) junto con el resto de variables que utilices (SPRING_PROFILES_ACTIVE, MYSQL_URL, etc.).
 - El swagger queda accesible en ${BASE_PATH}/swagger-ui/index.html, y los docs en ${BASE_PATH}/v3/api-docs.
-- Cualquier despliegue nuevo: reconstruye el JAR, crea la imagen, súbela a ECR, actualiza la función y despliega el API Gateway.
-## Configuración de Swagger detrás de API Gateway
+- Cualquier despliegue nuevo: reconstruye el JAR, crea la imagen, sï¿½bela a ECR, actualiza la funciï¿½n y despliega el API Gateway.
+## Configuraciï¿½n de Swagger detrï¿½s de API Gateway
 
-- Define la variable de entorno BASE_PATH con el prefijo de tu stage (/dev, /prod, etc.). En local puedes dejarla vacía.
-- Mantén el resto de variables (por ejemplo SPRING_PROFILES_ACTIVE, MYSQL_URL, MYSQL_USER, MYSQL_PASSWORD).
+- Define la variable de entorno BASE_PATH con el prefijo de tu stage (/dev, /prod, etc.). En local puedes dejarla vacï¿½a.
+- Mantï¿½n el resto de variables (por ejemplo SPRING_PROFILES_ACTIVE, MYSQL_URL, MYSQL_USER, MYSQL_PASSWORD).
 - Swagger queda disponible en ${BASE_PATH}/swagger-ui/index.html y los docs en ${BASE_PATH}/v3/api-docs.
 - Para despliegues: mvn clean package, docker build -f Dockerfile.lambda ..., push a ECR, ws lambda update-function-code ... con la nueva imagen y ws lambda update-function-configuration ... --environment "Variables={BASE_PATH=/dev,...}. Luego Deploy API en API Gateway.
 

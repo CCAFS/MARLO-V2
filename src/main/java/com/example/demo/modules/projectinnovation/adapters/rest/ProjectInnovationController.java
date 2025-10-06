@@ -155,9 +155,9 @@ public class ProjectInnovationController {
     }
     
     @Operation(summary = "Search innovations with advanced filters", 
-               description = "Returns active innovations with complete information including actors, with optional filters by phase, readiness scale, innovation type, and SDG. Only returns active records.")
+               description = "Returns active innovations with complete information including actors, with optional filters by phase, readiness scale, innovation type, and SDG. Only returns active records. Includes total count of innovations found.")
     @GetMapping("/search")
-    public ResponseEntity<List<ProjectInnovationInfoResponse>> searchInnovations(
+    public ResponseEntity<ProjectInnovationSearchResponse> searchInnovations(
             @Parameter(description = "Phase ID to filter by", example = "425")
             @RequestParam(required = false) Long phase,
             @Parameter(description = "Readiness scale to filter by", example = "7")
@@ -171,24 +171,38 @@ public class ProjectInnovationController {
         
         // Get innovation info with filters instead of just innovation entities
         List<ProjectInnovationInfo> innovations;
+        String searchType;
         
         // If any SDG-related filter is provided, use SDG search
         if (sdgId != null || (innovationId != null && phase != null)) {
             innovations = projectInnovationUseCase.findActiveInnovationsInfoBySdgFilters(innovationId, phase, sdgId);
+            searchType = "SDG_FILTERS";
         }
         // If any general filter is provided, use general search
         else if (phase != null || readinessScale != null || innovationTypeId != null) {
             innovations = projectInnovationUseCase.findActiveInnovationsInfoWithFilters(phase, readinessScale, innovationTypeId);
+            searchType = "GENERAL_FILTERS";
         }
         // If no filters provided, return all active innovations with info
         else {
             innovations = projectInnovationUseCase.findAllActiveInnovationsInfo();
+            searchType = "ALL_ACTIVE";
         }
         
         List<ProjectInnovationInfoResponse> response = innovations.stream()
                 .map(this::toInfoResponse)
                 .toList();
-        return ResponseEntity.ok(response);
+        
+        // Create filters metadata
+        ProjectInnovationSearchResponse.SearchFilters appliedFilters = 
+            new ProjectInnovationSearchResponse.SearchFilters(
+                phase, readinessScale, innovationTypeId, innovationId, sdgId, searchType
+            );
+        
+        ProjectInnovationSearchResponse searchResponse = 
+            ProjectInnovationSearchResponse.of(response, appliedFilters);
+            
+        return ResponseEntity.ok(searchResponse);
     }
     
     private ProjectInnovationResponse toResponse(ProjectInnovation projectInnovation) {

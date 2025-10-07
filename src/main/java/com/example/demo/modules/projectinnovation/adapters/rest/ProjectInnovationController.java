@@ -115,19 +115,6 @@ public class ProjectInnovationController {
         }
     }
     
-    @Operation(summary = "Get project innovation info by project innovation ID")
-    @GetMapping("/info")
-    public ResponseEntity<List<ProjectInnovationInfoResponse>> getProjectInnovationInfo(
-            @Parameter(description = "Project Innovation ID", example = "1")
-            @RequestParam Long projectInnovationId) {
-        List<ProjectInnovationInfo> infoList = projectInnovationUseCase
-                .findProjectInnovationInfoByProjectInnovationId(projectInnovationId);
-        List<ProjectInnovationInfoResponse> response = infoList.stream()
-                .map(this::toInfoResponse)
-                .toList();
-        return ResponseEntity.ok(response);
-    }
-    
     @Operation(summary = "Get complete project innovation info by innovation ID and phase ID", 
                description = "Returns complete innovation information including actors data for the specific innovation and phase")
     @GetMapping("/info/complete")

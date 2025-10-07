@@ -117,7 +117,7 @@ public class ProjectInnovationController {
     
     @Operation(summary = "Get complete project innovation info by innovation ID and phase ID", 
                description = "Returns complete innovation information including actors data for the specific innovation and phase")
-    @GetMapping("/info/complete")
+    @GetMapping("/info")
     public ResponseEntity<ProjectInnovationInfoCompleteResponse> getProjectInnovationInfoByInnovationIdAndPhaseId(
             @Parameter(description = "Innovation ID", example = "1566")
             @RequestParam Long innovationId, 

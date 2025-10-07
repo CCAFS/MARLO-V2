@@ -118,13 +118,26 @@ public class ProjectInnovationController {
         }
     }
     
-    @Operation(summary = "Get complete project innovation info by innovation ID and phase ID", 
-               description = "Returns complete innovation information including actors, SDGs, regions, organizations, and external partners for the specific innovation and phase")
+    @Operation(
+        summary = "Get complete project innovation information with all relationships", 
+        description = """
+            Returns comprehensive innovation details including:
+            • Basic innovation information (title, narrative, stage, etc.)
+            • Countries: Geographic countries where innovation is implemented
+            • Regions: Geographic regions covered by the innovation  
+            • SDGs: Sustainable Development Goals addressed by the innovation
+            • Organizations: Contact organizations involved in the innovation
+            • External Partners: Partner institutions with contact persons
+            
+            All relationships are filtered by the specified phase to show only relevant data for that phase.
+            """,
+        tags = {"Innovation Information"}
+    )
     @GetMapping("/info")
-    public ResponseEntity<ProjectInnovationInfoCompleteWithRelationsResponse> getProjectInnovationInfoByInnovationIdAndPhaseId(
-            @Parameter(description = "Innovation ID", example = "1566")
+    public ResponseEntity<InnovationInfo> getProjectInnovationInfoByInnovationIdAndPhaseId(
+            @Parameter(description = "Innovation ID to retrieve information for", example = "1566", required = true)
             @RequestParam Long innovationId, 
-            @Parameter(description = "Phase ID", example = "425")
+            @Parameter(description = "Phase ID to filter relationships by", example = "428", required = true)
             @RequestParam Long phaseId) {
         return projectInnovationUseCase.findProjectInnovationInfoByInnovationIdAndPhaseId(innovationId, phaseId)
                 .map(info -> ResponseEntity.ok(toCompleteInfoWithRelationsResponse(info, innovationId, phaseId)))
@@ -282,81 +295,6 @@ public class ProjectInnovationController {
         );
     }
 
-    private ProjectInnovationInfoCompleteResponse toCompleteInfoResponse(ProjectInnovationInfo info, Long innovationId, Long phaseId) {
-        // Load actors for specific innovation and phase
-        List<ProjectInnovationActorsResponse> actorsResponse = List.of();
-        if (innovationId != null && phaseId != null) {
-            List<ProjectInnovationActors> actors = actorsService.findActiveActorsByInnovationIdAndPhase(innovationId, phaseId.intValue());
-            actorsResponse = actorsMapper.toResponseList(actors);
-        }
-        
-        return new ProjectInnovationInfoCompleteResponse(
-                info.getId(),
-                info.getProjectInnovationId(),
-                info.getIdPhase(),
-                getPhaseInfo(info.getIdPhase()),
-                info.getYear(),
-                info.getTitle(),
-                info.getNarrative(),
-                info.getPhaseResearchId(),
-                getPhaseResearchInfo(info.getPhaseResearchId()),
-                info.getStageInnovationId(),
-                getInnovationStageInfo(info.getStageInnovationId()),
-                info.getGeographicScopeId(),
-                getGeographicScopeInfo(info.getGeographicScopeId()),
-                info.getInnovationTypeId(),
-                getInnovationTypeInfo(info.getInnovationTypeId()),
-                info.getRepIndRegionId(),
-                getRegionInfo(info.getRepIndRegionId()),
-                info.getRepIndContributionCrpId(),
-                getContributionCrpInfo(info.getRepIndContributionCrpId()),
-                info.getRepIndDegreeInnovationId(),
-                getDegreeInnovationInfo(info.getRepIndDegreeInnovationId()),
-                info.getProjectExpectedStudiesId(),
-                info.getDescriptionStage(),
-                info.getEvidenceLink(),
-                info.getGenderFocusLevelId(),
-                getFocusLevelInfo(info.getGenderFocusLevelId()),
-                info.getGenderExplanation(),
-                info.getYouthFocusLevelId(),
-                getFocusLevelInfo(info.getYouthFocusLevelId()),
-                info.getYouthExplanation(),
-                info.getLeadOrganizationId(),
-                getInstitutionInfo(info.getLeadOrganizationId()),
-                info.getAdaptativeResearchNarrative(),
-                info.getIsClearLead(),
-                info.getOtherInnovationType(),
-                info.getExternalLink(),
-                info.getNumberOfInnovations(),
-                info.getHasMilestones(),
-                info.getShortTitle(),
-                info.getInnovationNatureId(),
-                getInnovationNatureInfo(info.getInnovationNatureId()),
-                info.getHasCgiarContribution(),
-                info.getReasonNotCgiarContribution(),
-                info.getBeneficiariesNarrative(),
-                info.getIntellectualPropertyInstitutionId(),
-                getInstitutionInfo(info.getIntellectualPropertyInstitutionId()),
-                info.getHasLegalRestrictions(),
-                info.getHasAssetPotential(),
-                info.getHasFurtherDevelopment(),
-                info.getOtherIntellectualProperty(),
-                info.getInnovationImportance(),
-                info.getReadinessScale(),
-                info.getReadinessReason(),
-                info.getGenderScoreId(),
-                getImpactAreaScoreInfo(info.getGenderScoreId()),
-                info.getClimateChangeScoreId(),
-                getImpactAreaScoreInfo(info.getClimateChangeScoreId()),
-                info.getFoodSecurityScoreId(),
-                getImpactAreaScoreInfo(info.getFoodSecurityScoreId()),
-                info.getEnvironmentalScoreId(),
-                getImpactAreaScoreInfo(info.getEnvironmentalScoreId()),
-                info.getPovertyJobsScoreId(),
-                getImpactAreaScoreInfo(info.getPovertyJobsScoreId()),
-                actorsResponse
-        );
-    }
     
     // Helper methods to get information from related tables
     private PhaseDto getPhaseInfo(Long phaseId) {
@@ -458,22 +396,7 @@ public class ProjectInnovationController {
         return new FocusLevelDto(focusLevelId, focusName);
     }
     
-    private InnovationNatureDto getInnovationNatureInfo(Long natureId) {
-        if (natureId == null) return null;
-        String natureName = switch (natureId.intValue()) {
-            case 1 -> "Disruptive Innovation";
-            case 2 -> "Incremental Innovation";
-            case 3 -> "Radical Innovation";
-            default -> "Innovation Nature " + natureId;
-        };
-        return new InnovationNatureDto(natureId, natureName);
-    }
-    
-    private ImpactAreaScoreDto getImpactAreaScoreInfo(Long scoreId) {
-        if (scoreId == null) return null;
-        // For now we return test data, real queries can be implemented later
-        return new ImpactAreaScoreDto(scoreId, "Impact Score " + scoreId, "Description for score " + scoreId);
-    }
+
     
     private ProjectInnovationSdgResponse toSdgResponse(ProjectInnovationSdg sdg) {
         String sdgShortName = "SDG " + sdg.getSdgId();
@@ -655,7 +578,7 @@ public class ProjectInnovationController {
         };
     }
     
-    private ProjectInnovationInfoCompleteWithRelationsResponse toCompleteInfoWithRelationsResponse(ProjectInnovationInfo info, Long innovationId, Long phaseId) {
+    private InnovationInfo toCompleteInfoWithRelationsResponse(ProjectInnovationInfo info, Long innovationId, Long phaseId) {
         // Get actors data
         List<ProjectInnovationActors> actors = actorsService.findActiveActorsByInnovationIdAndPhase(innovationId, phaseId.intValue());
         List<ProjectInnovationActorsResponse> actorsResponse = actors.stream()
@@ -702,7 +625,7 @@ public class ProjectInnovationController {
                 .map(partnership -> toPartnershipResponse(partnership, institutions, contactPersons))
                 .toList();
         
-        return new ProjectInnovationInfoCompleteWithRelationsResponse(
+        return new InnovationInfo(
                 info.getId(),
                 info.getProjectInnovationId(),
                 info.getIdPhase(),

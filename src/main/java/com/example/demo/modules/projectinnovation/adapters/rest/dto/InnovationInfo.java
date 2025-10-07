@@ -1,14 +1,15 @@
-package com.example.demo.modules.projectinnovation.adapters.rest;
+package com.example.demo.modules.projectinnovation.adapters.rest.dto;
 
-import com.example.demo.modules.projectinnovation.adapters.rest.dto.*;
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * Enhanced response with all related information for Innovation Info endpoint
- * Includes Countries, Regions, SDGs, Contact Organizations, Organizations, and External Partners
+ * Complete innovation information including all relationships and details
+ * Contains basic innovation data plus related Countries, Regions, SDGs, Organizations, and External Partners
  */
-public record ProjectInnovationInfoCompleteWithRelationsResponse(
+@Schema(description = "Complete innovation information with all related data filtered by phase")
+public record InnovationInfo(
         // Basic Innovation Info (inherited from ProjectInnovationInfoCompleteResponse)
         Long id,
         Long projectInnovationId,

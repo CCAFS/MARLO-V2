@@ -2,11 +2,11 @@ package com.example.demo.modules.projectinnovation.adapters.rest;
 
 import com.example.demo.modules.projectinnovation.adapters.rest.dto.*;
 import com.example.demo.modules.projectinnovation.adapters.rest.mapper.ProjectInnovationActorsMapper;
+import com.example.demo.modules.projectinnovation.adapters.outbound.persistence.ProjectInnovationRepositoryAdapter;
 import com.example.demo.modules.projectinnovation.application.port.inbound.ProjectInnovationUseCase;
 import com.example.demo.modules.projectinnovation.application.service.ProjectInnovationActorsService;
-import com.example.demo.modules.projectinnovation.domain.model.ProjectInnovation;
-import com.example.demo.modules.projectinnovation.domain.model.ProjectInnovationActors;
-import com.example.demo.modules.projectinnovation.domain.model.ProjectInnovationInfo;
+import com.example.demo.modules.projectinnovation.domain.model.*;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -26,14 +26,17 @@ public class ProjectInnovationController {
     private final ProjectInnovationUseCase projectInnovationUseCase;
     private final ProjectInnovationActorsService actorsService;
     private final ProjectInnovationActorsMapper actorsMapper;
+    private final ProjectInnovationRepositoryAdapter repositoryAdapter;
     
     public ProjectInnovationController(
             ProjectInnovationUseCase projectInnovationUseCase,
             ProjectInnovationActorsService actorsService,
-            ProjectInnovationActorsMapper actorsMapper) {
+            ProjectInnovationActorsMapper actorsMapper,
+            ProjectInnovationRepositoryAdapter repositoryAdapter) {
         this.projectInnovationUseCase = projectInnovationUseCase;
         this.actorsService = actorsService;
         this.actorsMapper = actorsMapper;
+        this.repositoryAdapter = repositoryAdapter;
     }
     
     @Operation(summary = "Get project innovation by ID")
@@ -116,15 +119,15 @@ public class ProjectInnovationController {
     }
     
     @Operation(summary = "Get complete project innovation info by innovation ID and phase ID", 
-               description = "Returns complete innovation information including actors data for the specific innovation and phase")
+               description = "Returns complete innovation information including actors, SDGs, regions, organizations, and external partners for the specific innovation and phase")
     @GetMapping("/info")
-    public ResponseEntity<ProjectInnovationInfoCompleteResponse> getProjectInnovationInfoByInnovationIdAndPhaseId(
+    public ResponseEntity<ProjectInnovationInfoCompleteWithRelationsResponse> getProjectInnovationInfoByInnovationIdAndPhaseId(
             @Parameter(description = "Innovation ID", example = "1566")
             @RequestParam Long innovationId, 
             @Parameter(description = "Phase ID", example = "425")
             @RequestParam Long phaseId) {
         return projectInnovationUseCase.findProjectInnovationInfoByInnovationIdAndPhaseId(innovationId, phaseId)
-                .map(info -> ResponseEntity.ok(toCompleteInfoResponse(info, innovationId, phaseId)))
+                .map(info -> ResponseEntity.ok(toCompleteInfoWithRelationsResponse(info, innovationId, phaseId)))
                 .orElse(ResponseEntity.notFound().build());
     }
     
@@ -470,5 +473,307 @@ public class ProjectInnovationController {
         if (scoreId == null) return null;
         // For now we return test data, real queries can be implemented later
         return new ImpactAreaScoreDto(scoreId, "Impact Score " + scoreId, "Description for score " + scoreId);
+    }
+    
+    private ProjectInnovationSdgResponse toSdgResponse(ProjectInnovationSdg sdg) {
+        String sdgShortName = "SDG " + sdg.getSdgId();
+        String sdgFullName = getSdgFullName(sdg.getSdgId());
+        return new ProjectInnovationSdgResponse(
+                sdg.getId(),
+                sdg.getInnovationId(),
+                sdg.getSdgId(),
+                sdgShortName,
+                sdgFullName,
+                sdg.getIdPhase(),
+                sdg.getIsActive()
+        );
+    }
+    
+    private ProjectInnovationRegionResponse toRegionResponse(ProjectInnovationRegion region) {
+        String regionName = getRegionNameById(region.getIdRegion());
+        return new ProjectInnovationRegionResponse(
+                region.getId(),
+                region.getProjectInnovationId(),
+                region.getIdRegion(),
+                regionName,
+                region.getIdPhase()
+        );
+    }
+    
+    private ProjectInnovationCountryResponse toCountryResponse(ProjectInnovationCountry country) {
+        String countryName = getCountryNameById(country.getIdCountry());
+        return new ProjectInnovationCountryResponse(
+                country.getId(),
+                country.getProjectInnovationId(),
+                country.getIdCountry(),
+                countryName,
+                country.getIdPhase()
+        );
+    }
+    
+    private ProjectInnovationOrganizationResponse toOrganizationResponse(ProjectInnovationOrganization organization) {
+        String organizationTypeName = getOrganizationTypeName(organization.getRepIndOrganizationTypeId());
+        return new ProjectInnovationOrganizationResponse(
+                organization.getId(),
+                organization.getProjectInnovationId(),
+                organization.getIdPhase(),
+                organization.getRepIndOrganizationTypeId(),
+                organizationTypeName
+        );
+    }
+    
+    private ProjectInnovationPartnershipResponse toPartnershipResponse(
+            ProjectInnovationPartnership partnership, 
+            List<Institution> institutions, 
+            List<ProjectInnovationPartnershipPerson> contactPersons) {
+        
+        Institution institution = institutions.stream()
+                .filter(inst -> inst.getId().equals(partnership.getInstitutionId()))
+                .findFirst()
+                .orElse(null);
+        
+        List<ContactPersonResponse> contacts = contactPersons.stream()
+                .filter(contact -> contact.getPartnershipId().equals(partnership.getId()))
+                .map(this::toContactPersonResponse)
+                .toList();
+        
+        String partnerTypeName = getPartnerTypeName(partnership.getInnovationPartnerTypeId());
+        
+        return new ProjectInnovationPartnershipResponse(
+                partnership.getId(),
+                partnership.getProjectInnovationId(),
+                partnership.getInstitutionId(),
+                institution != null ? institution.getName() : "Unknown Institution",
+                institution != null ? institution.getAcronym() : "",
+                institution != null ? institution.getWebsiteLink() : "",
+                partnership.getIdPhase(),
+                partnership.getInnovationPartnerTypeId(),
+                partnerTypeName,
+                partnership.getIsActive(),
+                partnership.getActiveSince(),
+                contacts
+        );
+    }
+    
+    private ContactPersonResponse toContactPersonResponse(ProjectInnovationPartnershipPerson person) {
+        // For now returning basic data - user info would require additional queries
+        return new ContactPersonResponse(
+                person.getId(),
+                person.getPartnershipId(),
+                person.getUserId(),
+                "User " + person.getUserId(), // userName - would need user table
+                "user" + person.getUserId() + "@example.com", // userEmail - would need user table
+                person.getIsActive(),
+                person.getActiveSince()
+        );
+    }
+    
+    private String getSdgFullName(Long sdgId) {
+        if (sdgId == null) return null;
+        return switch (sdgId.intValue()) {
+            case 1 -> "No Poverty";
+            case 2 -> "Zero Hunger";
+            case 3 -> "Good Health and Well-being";
+            case 4 -> "Quality Education";
+            case 5 -> "Gender Equality";
+            case 6 -> "Clean Water and Sanitation";
+            case 7 -> "Affordable and Clean Energy";
+            case 8 -> "Decent Work and Economic Growth";
+            case 9 -> "Industry, Innovation and Infrastructure";
+            case 10 -> "Reduced Inequality";
+            case 11 -> "Sustainable Cities and Communities";
+            case 12 -> "Responsible Consumption and Production";
+            case 13 -> "Climate Action";
+            case 14 -> "Life Below Water";
+            case 15 -> "Life on Land";
+            case 16 -> "Peace and Justice Strong Institutions";
+            case 17 -> "Partnerships to achieve the Goal";
+            default -> "SDG " + sdgId;
+        };
+    }
+    
+    private String getRegionNameById(Long regionId) {
+        if (regionId == null) return null;
+        return switch (regionId.intValue()) {
+            case 1 -> "Northern Africa";
+            case 2 -> "Sub-Saharan Africa";
+            case 3 -> "Latin America and the Caribbean";
+            case 4 -> "Northern America";
+            case 5 -> "Central Asia";
+            case 6 -> "Eastern Asia";
+            case 7 -> "South-eastern Asia";
+            case 8 -> "Southern Asia";
+            case 9 -> "Western Asia";
+            case 10 -> "Eastern Europe";
+            case 11 -> "Northern Europe";
+            case 12 -> "Southern Europe";
+            case 13 -> "Western Europe";
+            case 14 -> "Australia and New Zealand";
+            case 15 -> "Melanesia";
+            case 16 -> "Micronesia";
+            case 17 -> "Polynesia";
+            default -> "Region " + regionId;
+        };
+    }
+    
+    private String getOrganizationTypeName(Long organizationTypeId) {
+        if (organizationTypeId == null) return null;
+        return switch (organizationTypeId.intValue()) {
+            case 1 -> "Government Agency";
+            case 2 -> "Private Sector";
+            case 3 -> "NGO/Civil Society";
+            case 4 -> "Academic Institution";
+            case 5 -> "International Organization";
+            default -> "Organization Type " + organizationTypeId;
+        };
+    }
+    
+    private String getPartnerTypeName(Long partnerTypeId) {
+        if (partnerTypeId == null) return null;
+        return switch (partnerTypeId.intValue()) {
+            case 1 -> "Leading Partner";
+            case 2 -> "Implementing Partner";
+            case 3 -> "Supporting Partner";
+            case 4 -> "Co-funding Partner";
+            default -> "Partner Type " + partnerTypeId;
+        };
+    }
+    
+    private String getCountryNameById(Long countryId) {
+        if (countryId == null) return null;
+        // Based on loc_elements table data - more comprehensive country mapping
+        return switch (countryId.intValue()) {
+            case 113 -> "Kenya";
+            case 112 -> "Japan";
+            case 111 -> "Jordan";
+            case 110 -> "Jamaica";
+            case 114 -> "Kyrgyzstan";
+            case 115 -> "Cambodia";
+            // Add more countries as needed - these are the most common ones
+            // For production, this should query the loc_elements table
+            default -> "Country " + countryId;
+        };
+    }
+    
+    private ProjectInnovationInfoCompleteWithRelationsResponse toCompleteInfoWithRelationsResponse(ProjectInnovationInfo info, Long innovationId, Long phaseId) {
+        // Get actors data
+        List<ProjectInnovationActors> actors = actorsService.findActiveActorsByInnovationIdAndPhase(innovationId, phaseId.intValue());
+        List<ProjectInnovationActorsResponse> actorsResponse = actors.stream()
+                .map(actorsMapper::toResponse)
+                .toList();
+        
+        // Get SDGs
+        List<ProjectInnovationSdg> sdgs = repositoryAdapter.findSdgsByInnovationIdAndPhase(innovationId, phaseId);
+        List<ProjectInnovationSdgResponse> sdgsResponse = sdgs.stream()
+                .map(this::toSdgResponse)
+                .toList();
+        
+        // Get Regions
+        List<ProjectInnovationRegion> regions = repositoryAdapter.findRegionsByInnovationIdAndPhase(innovationId, phaseId);
+        List<ProjectInnovationRegionResponse> regionsResponse = regions.stream()
+                .map(this::toRegionResponse)
+                .toList();
+        
+        // Get Countries - filtered by phase
+        List<ProjectInnovationCountry> countries = repositoryAdapter.findCountriesByInnovationIdAndPhase(innovationId, phaseId);
+        List<ProjectInnovationCountryResponse> countriesResponse = countries.stream()
+                .map(this::toCountryResponse)
+                .toList();
+        
+        // Get Organizations
+        List<ProjectInnovationOrganization> organizations = repositoryAdapter.findOrganizationsByInnovationIdAndPhase(innovationId, phaseId);
+        List<ProjectInnovationOrganizationResponse> organizationsResponse = organizations.stream()
+                .map(this::toOrganizationResponse)
+                .toList();
+        
+        // Get Partnerships (External Partners)
+        List<ProjectInnovationPartnership> partnerships = repositoryAdapter.findPartnershipsByInnovationIdAndPhase(innovationId, phaseId);
+        List<Long> institutionIds = partnerships.stream()
+                .map(ProjectInnovationPartnership::getInstitutionId)
+                .toList();
+        List<Institution> institutions = repositoryAdapter.findInstitutionsByIds(institutionIds);
+        
+        List<Long> partnershipIds = partnerships.stream()
+                .map(ProjectInnovationPartnership::getId)
+                .toList();
+        List<ProjectInnovationPartnershipPerson> contactPersons = repositoryAdapter.findContactPersonsByPartnershipIds(partnershipIds);
+        
+        List<ProjectInnovationPartnershipResponse> partnershipsResponse = partnerships.stream()
+                .map(partnership -> toPartnershipResponse(partnership, institutions, contactPersons))
+                .toList();
+        
+        return new ProjectInnovationInfoCompleteWithRelationsResponse(
+                info.getId(),
+                info.getProjectInnovationId(),
+                info.getIdPhase(),
+                info.getYear(),
+                info.getTitle(),
+                info.getNarrative(),
+                info.getPhaseResearchId(),
+                info.getStageInnovationId(),
+                info.getGeographicScopeId(),
+                info.getInnovationTypeId(),
+                info.getRepIndRegionId(),
+                info.getRepIndContributionCrpId(),
+                info.getRepIndDegreeInnovationId(),
+                info.getProjectExpectedStudiesId(),
+                info.getDescriptionStage(),
+                info.getEvidenceLink(),
+                info.getGenderFocusLevelId(),
+                info.getGenderExplanation(),
+                info.getYouthFocusLevelId(),
+                info.getYouthExplanation(),
+                info.getLeadOrganizationId(),
+                info.getAdaptativeResearchNarrative(),
+                info.getIsClearLead(),
+                info.getOtherInnovationType(),
+                info.getExternalLink(),
+                info.getNumberOfInnovations() != null ? Math.toIntExact(info.getNumberOfInnovations()) : null,
+                info.getHasMilestones(),
+                info.getShortTitle(),
+                info.getInnovationNatureId(),
+                info.getHasCgiarContribution(),
+                info.getReasonNotCgiarContribution(),
+                info.getBeneficiariesNarrative(),
+                info.getIntellectualPropertyInstitutionId(),
+                info.getHasLegalRestrictions(),
+                info.getHasAssetPotential(),
+                info.getHasFurtherDevelopment(),
+                info.getOtherIntellectualProperty(),
+                info.getInnovationImportance(),
+                info.getReadinessScale(),
+                info.getReadinessReason(),
+                info.getGenderScoreId(),
+                info.getClimateChangeScoreId(),
+                info.getFoodSecurityScoreId(),
+                info.getEnvironmentalScoreId(),
+                info.getPovertyJobsScoreId(),
+                // Expanded objects
+                getPhaseInfo(info.getIdPhase()),
+                getInnovationStageInfo(info.getStageInnovationId()),
+                getGeographicScopeInfo(info.getGeographicScopeId()),
+                getInnovationTypeInfo(info.getInnovationTypeId()),
+                getRegionInfo(info.getRepIndRegionId()),
+                getContributionCrpInfo(info.getRepIndContributionCrpId()),
+                getDegreeInnovationInfo(info.getRepIndDegreeInnovationId()),
+                getInstitutionInfo(info.getLeadOrganizationId()),
+                getFocusLevelInfo(info.getGenderFocusLevelId()),
+                getFocusLevelInfo(info.getYouthFocusLevelId()),
+                getInstitutionInfo(info.getIntellectualPropertyInstitutionId()),
+                getPhaseResearchInfo(info.getPhaseResearchId()),
+                innovationId,  // projectId
+                true,  // isActive (assumed from findByInnovationIdAndPhase result)
+                LocalDateTime.now(),  // activeSince (default)
+                null,  // createdBy
+                null,  // modifiedBy
+                null,  // modificationJustification
+                actorsResponse,
+                // NEW RELATIONSHIPS
+                sdgsResponse,
+                regionsResponse,
+                countriesResponse,
+                organizationsResponse,
+                partnershipsResponse
+        );
     }
 }

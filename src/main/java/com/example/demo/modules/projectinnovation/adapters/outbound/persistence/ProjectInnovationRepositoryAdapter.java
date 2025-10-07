@@ -1,8 +1,7 @@
 package com.example.demo.modules.projectinnovation.adapters.outbound.persistence;
 
 import com.example.demo.modules.projectinnovation.application.port.outbound.ProjectInnovationRepositoryPort;
-import com.example.demo.modules.projectinnovation.domain.model.ProjectInnovation;
-import com.example.demo.modules.projectinnovation.domain.model.ProjectInnovationInfo;
+import com.example.demo.modules.projectinnovation.domain.model.*;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -13,12 +12,33 @@ public class ProjectInnovationRepositoryAdapter implements ProjectInnovationRepo
     
     private final ProjectInnovationJpaRepository projectInnovationJpaRepository;
     private final ProjectInnovationInfoJpaRepository projectInnovationInfoJpaRepository;
+    private final ProjectInnovationSdgJpaRepository projectInnovationSdgJpaRepository;
+    private final ProjectInnovationRegionJpaRepository projectInnovationRegionJpaRepository;
+    private final ProjectInnovationCountryJpaRepository projectInnovationCountryJpaRepository;
+    private final ProjectInnovationOrganizationJpaRepository projectInnovationOrganizationJpaRepository;
+    private final ProjectInnovationPartnershipJpaRepository projectInnovationPartnershipJpaRepository;
+    private final ProjectInnovationPartnershipPersonJpaRepository projectInnovationPartnershipPersonJpaRepository;
+    private final InstitutionJpaRepository institutionJpaRepository;
     
     public ProjectInnovationRepositoryAdapter(
             ProjectInnovationJpaRepository projectInnovationJpaRepository,
-            ProjectInnovationInfoJpaRepository projectInnovationInfoJpaRepository) {
+            ProjectInnovationInfoJpaRepository projectInnovationInfoJpaRepository,
+            ProjectInnovationSdgJpaRepository projectInnovationSdgJpaRepository,
+            ProjectInnovationRegionJpaRepository projectInnovationRegionJpaRepository,
+            ProjectInnovationCountryJpaRepository projectInnovationCountryJpaRepository,
+            ProjectInnovationOrganizationJpaRepository projectInnovationOrganizationJpaRepository,
+            ProjectInnovationPartnershipJpaRepository projectInnovationPartnershipJpaRepository,
+            ProjectInnovationPartnershipPersonJpaRepository projectInnovationPartnershipPersonJpaRepository,
+            InstitutionJpaRepository institutionJpaRepository) {
         this.projectInnovationJpaRepository = projectInnovationJpaRepository;
         this.projectInnovationInfoJpaRepository = projectInnovationInfoJpaRepository;
+        this.projectInnovationSdgJpaRepository = projectInnovationSdgJpaRepository;
+        this.projectInnovationRegionJpaRepository = projectInnovationRegionJpaRepository;
+        this.projectInnovationCountryJpaRepository = projectInnovationCountryJpaRepository;
+        this.projectInnovationOrganizationJpaRepository = projectInnovationOrganizationJpaRepository;
+        this.projectInnovationPartnershipJpaRepository = projectInnovationPartnershipJpaRepository;
+        this.projectInnovationPartnershipPersonJpaRepository = projectInnovationPartnershipPersonJpaRepository;
+        this.institutionJpaRepository = institutionJpaRepository;
     }
     
     @Override
@@ -134,5 +154,34 @@ public class ProjectInnovationRepositoryAdapter implements ProjectInnovationRepo
     @Override
     public List<ProjectInnovationInfo> findAllActiveInnovationsInfo() {
         return projectInnovationInfoJpaRepository.findAllActiveInnovationsInfo();
+    }
+    
+    // New methods for relationships
+    public List<ProjectInnovationSdg> findSdgsByInnovationIdAndPhase(Long innovationId, Long phaseId) {
+        return projectInnovationSdgJpaRepository.findByInnovationIdAndIdPhaseAndIsActive(innovationId, phaseId, true);
+    }
+    
+    public List<ProjectInnovationRegion> findRegionsByInnovationIdAndPhase(Long innovationId, Long phaseId) {
+        return projectInnovationRegionJpaRepository.findByProjectInnovationIdAndIdPhase(innovationId, phaseId);
+    }
+    
+    public List<ProjectInnovationCountry> findCountriesByInnovationIdAndPhase(Long innovationId, Long phaseId) {
+        return projectInnovationCountryJpaRepository.findByProjectInnovationIdAndIdPhase(innovationId, phaseId);
+    }
+    
+    public List<ProjectInnovationOrganization> findOrganizationsByInnovationIdAndPhase(Long innovationId, Long phaseId) {
+        return projectInnovationOrganizationJpaRepository.findByProjectInnovationIdAndIdPhase(innovationId, phaseId);
+    }
+    
+    public List<ProjectInnovationPartnership> findPartnershipsByInnovationIdAndPhase(Long innovationId, Long phaseId) {
+        return projectInnovationPartnershipJpaRepository.findByProjectInnovationIdAndIdPhaseAndIsActive(innovationId, phaseId, true);
+    }
+    
+    public List<ProjectInnovationPartnershipPerson> findContactPersonsByPartnershipIds(List<Long> partnershipIds) {
+        return projectInnovationPartnershipPersonJpaRepository.findActivePersonsByPartnershipIds(partnershipIds);
+    }
+    
+    public List<Institution> findInstitutionsByIds(List<Long> institutionIds) {
+        return institutionJpaRepository.findActiveInstitutionsByIds(institutionIds);
     }
 }

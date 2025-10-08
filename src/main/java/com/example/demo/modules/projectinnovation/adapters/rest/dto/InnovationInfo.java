@@ -43,6 +43,8 @@ public record InnovationInfo(
         Boolean hasCgiarContribution,
         String reasonNotCgiarContribution,
         String beneficiariesNarrative,
+        @Schema(description = "Knowledge results narrative describing the knowledge outputs and outcomes")
+        String knowledgeResultsNarrative,
         Long intellectualPropertyInstitutionId,
         Boolean hasLegalRestrictions,
         Boolean hasAssetPotential,

@@ -113,6 +113,9 @@ public class ProjectInnovationInfo {
     @Column(name = "beneficiaries_narrative", columnDefinition = "TEXT")
     private String beneficiariesNarrative;
     
+    @Column(name = "knowledge_results_narrative", columnDefinition = "TEXT")
+    private String knowledgeResultsNarrative;
+    
     @Column(name = "intellectual_property_institution_id")
     private Long intellectualPropertyInstitutionId;
     

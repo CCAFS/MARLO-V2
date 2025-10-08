@@ -169,4 +169,14 @@ public class ProjectInnovationInfo {
     // @ManyToOne(fetch = FetchType.LAZY)
     // @JoinColumn(name = "innovation_type_id", insertable = false, updatable = false)
     // private InnovationType innovationType;
+    
+    // Manual getters for critical fields (Lombok backup)
+    public Long getId() { return id; }
+    public Long getProjectInnovationId() { return projectInnovationId; }
+    public Long getIdPhase() { return idPhase; }
+    public Long getYear() { return year; }
+    public String getTitle() { return title; }
+    public String getNarrative() { return narrative; }
+    public String getBeneficiariesNarrative() { return beneficiariesNarrative; }
+    public String getKnowledgeResultsNarrative() { return knowledgeResultsNarrative; }
 }

@@ -37,6 +37,7 @@ public record ProjectInnovationInfoResponse(
     Boolean hasCgiarContribution,
     String reasonNotCgiarContribution,
     String beneficiariesNarrative,
+    String knowledgeResultsNarrative,
     Long intellectualPropertyInstitutionId,
     Boolean hasLegalRestrictions,
     Boolean hasAssetPotential,

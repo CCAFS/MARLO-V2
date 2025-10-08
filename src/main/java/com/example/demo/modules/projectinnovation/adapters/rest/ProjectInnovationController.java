@@ -164,7 +164,7 @@ public class ProjectInnovationController {
     }
     
     @Operation(summary = "Search innovations with advanced filters", 
-               description = "Returns active innovations with complete information including actors, with optional filters by phase, readiness scale, innovation type, and SDG. Only returns active records. Includes total count of innovations found.")
+               description = "Returns active innovations with complete information including actors, with optional filters by phase, readiness scale, innovation type, and SDG. Only returns active records. Supports pagination with offset and limit parameters.")
     @GetMapping("/search")
     public ResponseEntity<ProjectInnovationSearchResponse> searchInnovations(
             @Parameter(description = "Phase ID to filter by", example = "425")
@@ -176,29 +176,47 @@ public class ProjectInnovationController {
             @Parameter(description = "Innovation ID to filter by (for SDG search)", example = "1566")
             @RequestParam(required = false) Long innovationId,
             @Parameter(description = "SDG ID to filter by", example = "2")
-            @RequestParam(required = false) Long sdgId) {
+            @RequestParam(required = false) Long sdgId,
+            @Parameter(description = "Number of records to skip (pagination)", example = "0")
+            @RequestParam(required = false, defaultValue = "0") Integer offset,
+            @Parameter(description = "Maximum number of records to return (pagination)", example = "20")
+            @RequestParam(required = false, defaultValue = "20") Integer limit) {
+        
+        // Validate pagination parameters
+        if (offset < 0) offset = 0;
+        if (limit <= 0) limit = 20;
+        if (limit > 100) limit = 100; // Maximum limit to prevent performance issues
         
         // Get innovation info with filters instead of just innovation entities
-        List<ProjectInnovationInfo> innovations;
+        List<ProjectInnovationInfo> allInnovations;
         String searchType;
         
         // If any SDG-related filter is provided, use SDG search
         if (sdgId != null || (innovationId != null && phase != null)) {
-            innovations = projectInnovationUseCase.findActiveInnovationsInfoBySdgFilters(innovationId, phase, sdgId);
+            allInnovations = projectInnovationUseCase.findActiveInnovationsInfoBySdgFilters(innovationId, phase, sdgId);
             searchType = "SDG_FILTERS";
         }
         // If any general filter is provided, use general search
         else if (phase != null || readinessScale != null || innovationTypeId != null) {
-            innovations = projectInnovationUseCase.findActiveInnovationsInfoWithFilters(phase, readinessScale, innovationTypeId);
+            allInnovations = projectInnovationUseCase.findActiveInnovationsInfoWithFilters(phase, readinessScale, innovationTypeId);
             searchType = "GENERAL_FILTERS";
         }
         // If no filters provided, return all active innovations with info
         else {
-            innovations = projectInnovationUseCase.findAllActiveInnovationsInfo();
+            allInnovations = projectInnovationUseCase.findAllActiveInnovationsInfo();
             searchType = "ALL_ACTIVE";
         }
         
-        List<ProjectInnovationInfoResponse> response = innovations.stream()
+        // Get total count before pagination
+        int totalCount = allInnovations.size();
+        
+        // Apply pagination
+        List<ProjectInnovationInfo> paginatedInnovations = allInnovations.stream()
+                .skip(offset)
+                .limit(limit)
+                .toList();
+        
+        List<ProjectInnovationInfoResponse> response = paginatedInnovations.stream()
                 .map(this::toInfoResponse)
                 .toList();
         
@@ -208,8 +226,12 @@ public class ProjectInnovationController {
                 phase, readinessScale, innovationTypeId, innovationId, sdgId, searchType
             );
         
+        // Create pagination metadata
+        ProjectInnovationSearchResponse.PaginationInfo pagination = 
+            ProjectInnovationSearchResponse.PaginationInfo.of(offset, limit, totalCount);
+        
         ProjectInnovationSearchResponse searchResponse = 
-            ProjectInnovationSearchResponse.of(response, appliedFilters);
+            ProjectInnovationSearchResponse.of(response, totalCount, appliedFilters, pagination);
             
         return ResponseEntity.ok(searchResponse);
     }

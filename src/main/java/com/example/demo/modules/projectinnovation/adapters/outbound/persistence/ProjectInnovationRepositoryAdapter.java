@@ -184,4 +184,13 @@ public class ProjectInnovationRepositoryAdapter implements ProjectInnovationRepo
     public List<Institution> findInstitutionsByIds(List<Long> institutionIds) {
         return institutionJpaRepository.findActiveInstitutionsByIds(institutionIds);
     }
+    
+    // New method for innovation and country statistics
+    public Long countDistinctCountries(Long innovationId, Long phaseId) {
+        return projectInnovationCountryJpaRepository.countDistinctCountriesByInnovationAndPhase(innovationId, phaseId);
+    }
+    
+    public Long countDistinctInnovations(Long innovationId, Long phaseId) {
+        return projectInnovationCountryJpaRepository.countDistinctInnovationsByInnovationAndPhase(innovationId, phaseId);
+    }
 }

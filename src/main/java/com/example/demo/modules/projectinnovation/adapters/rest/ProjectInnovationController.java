@@ -937,4 +937,36 @@ public class ProjectInnovationController {
                 partnershipsResponse
         );
     }
+    
+    @Operation(summary = "Get innovation and country statistics by phase",
+               description = "Returns count of active innovations and unique countries for a specific phase. Provides aggregate statistics for all innovations within the specified phase.")
+    @GetMapping("/stats")
+    public ResponseEntity<InnovationCountryStatsResponse> getInnovationCountryStats(
+            @Parameter(description = "Phase ID to get statistics for", example = "428", required = true)
+            @RequestParam Long phaseId) {
+        
+        try {
+            // Get count of unique countries for this phase (all innovations)
+            Long countryCount = repositoryAdapter.countDistinctCountries(null, phaseId);
+            
+            // Get count of unique innovations for this phase
+            Long innovationCount = repositoryAdapter.countDistinctInnovations(null, phaseId);
+            
+            InnovationCountryStatsResponse response = InnovationCountryStatsResponse.of(
+                    innovationCount.intValue(),
+                    countryCount.intValue(),
+                    null, // No longer filtering by specific innovation
+                    phaseId
+            );
+            
+            return ResponseEntity.ok(response);
+            
+        } catch (Exception e) {
+            // Return empty stats in case of error
+            InnovationCountryStatsResponse errorResponse = InnovationCountryStatsResponse.of(
+                    0, 0, null, phaseId
+            );
+            return ResponseEntity.ok(errorResponse);
+        }
+    }
 }

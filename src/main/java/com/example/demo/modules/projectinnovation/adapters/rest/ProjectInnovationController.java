@@ -935,8 +935,18 @@ public class ProjectInnovationController {
                 .map(this::toOrganizationResponse)
                 .toList();
         
-        // Get Contributing Organizations
-        List<ProjectInnovationContributingOrganization> contributingOrganizations = repositoryAdapter.findContributingOrganizationsByInnovationIdAndPhase(innovationId, phaseId);
+        // Get Contributing Organizations (deduplicated by ID to avoid duplicates)
+        List<ProjectInnovationContributingOrganization> allContributingOrganizations = repositoryAdapter.findContributingOrganizationsByInnovationIdAndPhase(innovationId, phaseId);
+        List<ProjectInnovationContributingOrganization> contributingOrganizations = new java.util.ArrayList<>();
+        java.util.Set<Long> seenIds = new java.util.HashSet<>();
+        
+        for (ProjectInnovationContributingOrganization org : allContributingOrganizations) {
+            if (!seenIds.contains(org.getId())) {
+                seenIds.add(org.getId());
+                contributingOrganizations.add(org);
+            }
+        }
+        
         List<Long> contributingInstitutionIds = contributingOrganizations.stream()
                 .map(ProjectInnovationContributingOrganization::getInstitutionId)
                 .toList();

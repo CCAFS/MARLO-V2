@@ -84,6 +84,7 @@ public record InnovationInfo(
         List<ProjectInnovationRegionResponse> regions,                    // Regions
         List<ProjectInnovationCountryResponse> countries,                 // Countries
         List<ProjectInnovationOrganizationResponse> organizations,        // Contact Organizations
-        List<ProjectInnovationPartnershipResponse> externalPartners      // External Partners with Contact Names
+        List<ProjectInnovationPartnershipResponse> externalPartners,     // External Partners with Contact Names
+        List<ProjectInnovationContributingOrganizationResponse> contributingOrganizations // Contributing Organizations
 ) {
 }

@@ -6,6 +6,7 @@ import com.example.demo.modules.projectinnovation.adapters.rest.dto.*;
 import com.example.demo.modules.projectinnovation.adapters.rest.mapper.ProjectInnovationActorsMapper;
 import com.example.demo.modules.projectinnovation.adapters.outbound.persistence.ProjectInnovationRepositoryAdapter;
 import com.example.demo.modules.projectinnovation.adapters.outbound.persistence.LocElementJpaRepository;
+import com.example.demo.modules.sustainabledevelopmentgoals.adapters.outbound.persistence.SustainableDevelopmentGoalJpaRepository;
 import com.example.demo.modules.projectinnovation.application.port.inbound.ProjectInnovationUseCase;
 import com.example.demo.modules.projectinnovation.application.service.ProjectInnovationActorsService;
 import com.example.demo.modules.projectinnovation.domain.model.*;
@@ -33,6 +34,7 @@ public class ProjectInnovationController {
     private final ProjectInnovationRepositoryAdapter repositoryAdapter;
     private final LocElementJpaRepository locElementRepository;
     private final InnovationTypeRepositoryAdapter innovationTypeRepository;
+    private final SustainableDevelopmentGoalJpaRepository sdgRepository;
     
     public ProjectInnovationController(
             ProjectInnovationUseCase projectInnovationUseCase,
@@ -40,13 +42,15 @@ public class ProjectInnovationController {
             ProjectInnovationActorsMapper actorsMapper,
             ProjectInnovationRepositoryAdapter repositoryAdapter,
             LocElementJpaRepository locElementRepository,
-            InnovationTypeRepositoryAdapter innovationTypeRepository) {
+            InnovationTypeRepositoryAdapter innovationTypeRepository,
+            SustainableDevelopmentGoalJpaRepository sdgRepository) {
         this.projectInnovationUseCase = projectInnovationUseCase;
         this.actorsService = actorsService;
         this.actorsMapper = actorsMapper;
         this.repositoryAdapter = repositoryAdapter;
         this.locElementRepository = locElementRepository;
         this.innovationTypeRepository = innovationTypeRepository;
+        this.sdgRepository = sdgRepository;
     }
     
     @Operation(summary = "Get project innovation by ID")
@@ -556,50 +560,68 @@ public class ProjectInnovationController {
     
     private String getSdgShortNameById(Long sdgId) {
         if (sdgId == null) return "Unknown SDG";
-        return switch (sdgId.intValue()) {
-            case 1 -> "No Poverty";
-            case 2 -> "Zero Hunger"; 
-            case 3 -> "Good Health";
-            case 4 -> "Quality Education";
-            case 5 -> "Gender Equality";
-            case 6 -> "Clean Water";
-            case 7 -> "Affordable Energy";
-            case 8 -> "Decent Work";
-            case 9 -> "Innovation";
-            case 10 -> "Reduced Inequalities";
-            case 11 -> "Sustainable Cities";
-            case 12 -> "Responsible Consumption";
-            case 13 -> "Climate Action";
-            case 14 -> "Life Below Water";
-            case 15 -> "Life on Land";
-            case 16 -> "Peace and Justice";
-            case 17 -> "Partnerships";
-            default -> "SDG " + sdgId;
-        };
+        
+        try {
+            // Get SDG from sustainable_development_goals table
+            return sdgRepository.findBySmoCode(sdgId)
+                .map(com.example.demo.modules.sustainabledevelopmentgoals.domain.model.SustainableDevelopmentGoal::getShortName)
+                .orElse("SDG " + sdgId);
+        } catch (Exception e) {
+            // Fallback to hardcoded values if database query fails
+            return switch (sdgId.intValue()) {
+                case 1 -> "No Poverty";
+                case 2 -> "Zero Hunger"; 
+                case 3 -> "Good Health";
+                case 4 -> "Quality Education";
+                case 5 -> "Gender Equality";
+                case 6 -> "Clean Water";
+                case 7 -> "Affordable Energy";
+                case 8 -> "Decent Work";
+                case 9 -> "Innovation";
+                case 10 -> "Reduced Inequalities";
+                case 11 -> "Sustainable Cities";
+                case 12 -> "Responsible Consumption";
+                case 13 -> "Climate Action";
+                case 14 -> "Life Below Water";
+                case 15 -> "Life on Land";
+                case 16 -> "Peace and Justice";
+                case 17 -> "Partnerships";
+                default -> "SDG " + sdgId;
+            };
+        }
     }
     
     private String getSdgFullNameById(Long sdgId) {
         if (sdgId == null) return "Unknown SDG";
-        return switch (sdgId.intValue()) {
-            case 1 -> "End poverty in all its forms everywhere";
-            case 2 -> "End hunger, achieve food security and improved nutrition and promote sustainable agriculture";
-            case 3 -> "Ensure healthy lives and promote well-being for all at all ages";
-            case 4 -> "Ensure inclusive and equitable quality education and promote lifelong learning opportunities for all";
-            case 5 -> "Achieve gender equality and empower all women and girls";
-            case 6 -> "Ensure availability and sustainable management of water and sanitation for all";
-            case 7 -> "Ensure access to affordable, reliable, sustainable and modern energy for all";
-            case 8 -> "Promote sustained, inclusive and sustainable economic growth, full and productive employment and decent work for all";
-            case 9 -> "Build resilient infrastructure, promote inclusive and sustainable industrialization and foster innovation";
-            case 10 -> "Reduce inequality within and among countries";
-            case 11 -> "Make cities and human settlements inclusive, safe, resilient and sustainable";
-            case 12 -> "Ensure sustainable consumption and production patterns";
-            case 13 -> "Take urgent action to combat climate change and its impacts";
-            case 14 -> "Conserve and sustainably use the oceans, seas and marine resources for sustainable development";
-            case 15 -> "Protect, restore and promote sustainable use of terrestrial ecosystems, sustainably manage forests, combat desertification, and halt and reverse land degradation and halt biodiversity loss";
-            case 16 -> "Promote peaceful and inclusive societies for sustainable development, provide access to justice for all and build effective, accountable and inclusive institutions at all levels";
-            case 17 -> "Strengthen the means of implementation and revitalize the Global Partnership for Sustainable Development";
-            default -> "SDG " + sdgId + " - Full name not available";
-        };
+        
+        try {
+            // Get SDG from sustainable_development_goals table
+            return sdgRepository.findBySmoCode(sdgId)
+                .map(com.example.demo.modules.sustainabledevelopmentgoals.domain.model.SustainableDevelopmentGoal::getFullName)
+                .orElse("SDG " + sdgId + " - Full name not available");
+        } catch (Exception e) {
+            // Fallback to hardcoded values if database query fails
+            return switch (sdgId.intValue()) {
+                case 1 -> "End poverty in all its forms everywhere";
+                case 2 -> "End hunger, achieve food security and improved nutrition and promote sustainable agriculture";
+                case 3 -> "Ensure healthy lives and promote well-being for all at all ages";
+                case 4 -> "Ensure inclusive and equitable quality education and promote lifelong learning opportunities for all";
+                case 5 -> "Achieve gender equality and empower all women and girls";
+                case 6 -> "Ensure availability and sustainable management of water and sanitation for all";
+                case 7 -> "Ensure access to affordable, reliable, sustainable and modern energy for all";
+                case 8 -> "Promote sustained, inclusive and sustainable economic growth, full and productive employment and decent work for all";
+                case 9 -> "Build resilient infrastructure, promote inclusive and sustainable industrialization and foster innovation";
+                case 10 -> "Reduce inequality within and among countries";
+                case 11 -> "Make cities and human settlements inclusive, safe, resilient and sustainable";
+                case 12 -> "Ensure sustainable consumption and production patterns";
+                case 13 -> "Take urgent action to combat climate change and its impacts";
+                case 14 -> "Conserve and sustainably use the oceans, seas and marine resources for sustainable development";
+                case 15 -> "Protect, restore and promote sustainable use of terrestrial ecosystems, sustainably manage forests, combat desertification, and halt and reverse land degradation and halt biodiversity loss";
+                case 16 -> "Promote peaceful and inclusive societies for sustainable development, provide access to justice for all and build effective, accountable and inclusive institutions at all levels";
+                case 17 -> "Strengthen the means of implementation and revitalize the Global Partnership for Sustainable Development";
+                default -> "SDG " + sdgId + " - Full name not available";
+            };
+        }
     }
     
     private InstitutionDto getInstitutionInfo(Long institutionId) {
@@ -804,26 +826,35 @@ public class ProjectInnovationController {
     
     private String getSdgFullName(Long sdgId) {
         if (sdgId == null) return null;
-        return switch (sdgId.intValue()) {
-            case 1 -> "No Poverty";
-            case 2 -> "Zero Hunger";
-            case 3 -> "Good Health and Well-being";
-            case 4 -> "Quality Education";
-            case 5 -> "Gender Equality";
-            case 6 -> "Clean Water and Sanitation";
-            case 7 -> "Affordable and Clean Energy";
-            case 8 -> "Decent Work and Economic Growth";
-            case 9 -> "Industry, Innovation and Infrastructure";
-            case 10 -> "Reduced Inequality";
-            case 11 -> "Sustainable Cities and Communities";
-            case 12 -> "Responsible Consumption and Production";
-            case 13 -> "Climate Action";
-            case 14 -> "Life Below Water";
-            case 15 -> "Life on Land";
-            case 16 -> "Peace and Justice Strong Institutions";
-            case 17 -> "Partnerships to achieve the Goal";
-            default -> "SDG " + sdgId;
-        };
+        
+        try {
+            // Get SDG from sustainable_development_goals table 
+            return sdgRepository.findBySmoCode(sdgId)
+                .map(com.example.demo.modules.sustainabledevelopmentgoals.domain.model.SustainableDevelopmentGoal::getShortName)
+                .orElse("SDG " + sdgId);
+        } catch (Exception e) {
+            // Fallback to hardcoded values if database query fails
+            return switch (sdgId.intValue()) {
+                case 1 -> "No Poverty";
+                case 2 -> "Zero Hunger";
+                case 3 -> "Good Health and Well-being";
+                case 4 -> "Quality Education";
+                case 5 -> "Gender Equality";
+                case 6 -> "Clean Water and Sanitation";
+                case 7 -> "Affordable and Clean Energy";
+                case 8 -> "Decent Work and Economic Growth";
+                case 9 -> "Industry, Innovation and Infrastructure";
+                case 10 -> "Reduced Inequality";
+                case 11 -> "Sustainable Cities and Communities";
+                case 12 -> "Responsible Consumption and Production";
+                case 13 -> "Climate Action";
+                case 14 -> "Life Below Water";
+                case 15 -> "Life on Land";
+                case 16 -> "Peace and Justice Strong Institutions";
+                case 17 -> "Partnerships to achieve the Goal";
+                default -> "SDG " + sdgId;
+            };
+        }
     }
     
     private String getRegionNameById(Long regionId) {

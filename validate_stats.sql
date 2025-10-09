@@ -1,78 +1,45 @@
--- SQL Validation for /api/innovations/stats endpoint
--- These queries should match the endpoint results exactly
+-- SQL Validation for /api/innovations/stats endpoint (Updated Version)
+-- Endpoint now only accepts phaseId as required parameter
+-- Expected endpoint call: GET /api/innovations/stats?phaseId=428
 
 USE aiccradb2;
 
-SELECT '=== VALIDATION FOR STATS ENDPOINT ===' as title;
+SELECT '=== VALIDATION FOR UPDATED STATS ENDPOINT ===' as title;
 
--- Test 1: innovationId=1566, phaseId=428 (ONLY ACTIVE INNOVATIONS)
--- Expected from endpoint: innovationCount: 1, countryCount: 2
+-- MAIN TEST: phaseId=428 (Current endpoint behavior)
+-- Expected from endpoint: {"innovationCount": 63, "countryCount": 10, "phaseId": 428}
 SELECT 
-    '1. Innovation 1566, Phase 428 (Active Only)' as test_case,
+    'ENDPOINT QUERY - Phase 428 Statistics' as test_description,
     COUNT(DISTINCT pic.project_innovation_id) as innovation_count,
-    COUNT(DISTINCT pic.id_country) as country_count
-FROM project_innovation_countries pic
-JOIN project_innovations pi ON pic.project_innovation_id = pi.id
-WHERE pi.is_active = 1 
-  AND pic.project_innovation_id = 1566 
-  AND pic.id_phase = 428;
-
--- Show details for debugging
-SELECT 
-    '1a. Details for Innovation 1566, Phase 428 (with Active Status)' as debug_info,
-    pic.project_innovation_id, 
-    pic.id_country, 
-    pic.id_phase,
-    pi.is_active,
-    pi.active_since
-FROM project_innovation_countries pic
-JOIN project_innovations pi ON pic.project_innovation_id = pi.id
-WHERE pic.project_innovation_id = 1566 AND pic.id_phase = 428;
-
--- Test 2: Only phaseId=428 (ONLY ACTIVE INNOVATIONS)
--- Expected from endpoint will now be different due to isActive filter
-SELECT 
-    '2. Only Phase 428 (Active Only)' as test_case,
-    COUNT(DISTINCT pic.project_innovation_id) as innovation_count,
-    COUNT(DISTINCT pic.id_country) as country_count
+    COUNT(DISTINCT pic.id_country) as country_count,
+    COUNT(*) as total_records_processed
 FROM project_innovation_countries pic
 JOIN project_innovations pi ON pic.project_innovation_id = pi.id
 WHERE pi.is_active = 1 
   AND pic.id_phase = 428;
 
--- Test 3: No filters (ONLY ACTIVE INNOVATIONS)
--- Expected from endpoint will now be different due to isActive filter
+-- Show the actual countries found in phase 428
 SELECT 
-    '3. All data - Active Only (no other filters)' as test_case,
-    COUNT(DISTINCT pic.project_innovation_id) as innovation_count,
-    COUNT(DISTINCT pic.id_country) as country_count
+    'Countries in Phase 428' as info,
+    GROUP_CONCAT(DISTINCT pic.id_country ORDER BY pic.id_country) as country_ids_list
 FROM project_innovation_countries pic
 JOIN project_innovations pi ON pic.project_innovation_id = pi.id
-WHERE pi.is_active = 1;
+WHERE pi.is_active = 1 
+  AND pic.id_phase = 428;
 
--- Additional validation: Check if innovation 1566 has active status
+-- Final validation: Exact queries from endpoint
 SELECT 
-    '4. Innovation 1566 status check' as validation,
-    id,
-    project_id,
-    is_active,
-    active_since
-FROM project_innovations 
-WHERE id = 1566;
+    'EXACT ENDPOINT QUERY 1 - Country Count' as endpoint_validation,
+    COUNT(DISTINCT pic.id_country) as result
+FROM project_innovation_countries pic 
+JOIN project_innovations pi ON pic.project_innovation_id = pi.id 
+WHERE pi.is_active = 1 
+  AND pic.id_phase = 428;
 
--- Validate table structure
 SELECT 
-    '5. Table structure validation' as info,
-    COUNT(*) as total_records
-FROM project_innovation_countries;
-
--- Show sample data
-SELECT 
-    '6. Sample data from project_innovation_countries' as sample,
-    id,
-    project_innovation_id,
-    id_country,
-    id_phase
-FROM project_innovation_countries 
-ORDER BY id 
-LIMIT 5;
+    'EXACT ENDPOINT QUERY 2 - Innovation Count' as endpoint_validation,
+    COUNT(DISTINCT pic.project_innovation_id) as result
+FROM project_innovation_countries pic 
+JOIN project_innovations pi ON pic.project_innovation_id = pi.id 
+WHERE pi.is_active = 1 
+  AND pic.id_phase = 428;

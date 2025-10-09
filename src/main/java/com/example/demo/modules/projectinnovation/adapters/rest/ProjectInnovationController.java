@@ -711,6 +711,28 @@ public class ProjectInnovationController {
         );
     }
     
+    private ProjectInnovationContributingOrganizationResponse toContributingOrganizationResponse(
+            ProjectInnovationContributingOrganization contributingOrg, 
+            List<Institution> institutions) {
+        
+        Institution institution = institutions.stream()
+                .filter(inst -> inst.getId().equals(contributingOrg.getInstitutionId()))
+                .findFirst()
+                .orElse(null);
+        
+        String institutionName = institution != null ? institution.getName() : "Institution " + contributingOrg.getInstitutionId();
+        String institutionAcronym = institution != null ? institution.getAcronym() : null;
+        
+        return new ProjectInnovationContributingOrganizationResponse(
+                contributingOrg.getId(),
+                contributingOrg.getProjectInnovationId(),
+                contributingOrg.getIdPhase(),
+                contributingOrg.getInstitutionId(),
+                institutionName,
+                institutionAcronym
+        );
+    }
+    
     private ProjectInnovationPartnershipResponse toPartnershipResponse(
             ProjectInnovationPartnership partnership, 
             List<Institution> institutions, 
@@ -859,6 +881,17 @@ public class ProjectInnovationController {
                 .map(this::toOrganizationResponse)
                 .toList();
         
+        // Get Contributing Organizations
+        List<ProjectInnovationContributingOrganization> contributingOrganizations = repositoryAdapter.findContributingOrganizationsByInnovationIdAndPhase(innovationId, phaseId);
+        List<Long> contributingInstitutionIds = contributingOrganizations.stream()
+                .map(ProjectInnovationContributingOrganization::getInstitutionId)
+                .toList();
+        List<Institution> contributingInstitutions = contributingInstitutionIds.isEmpty() ? 
+                Collections.emptyList() : repositoryAdapter.findInstitutionsByIds(contributingInstitutionIds);
+        List<ProjectInnovationContributingOrganizationResponse> contributingOrganizationsResponse = contributingOrganizations.stream()
+                .map(org -> toContributingOrganizationResponse(org, contributingInstitutions))
+                .toList();
+        
         // Get Partnerships (External Partners)
         List<ProjectInnovationPartnership> partnerships = repositoryAdapter.findPartnershipsByInnovationIdAndPhase(innovationId, phaseId);
         List<Long> institutionIds = partnerships.stream()
@@ -947,7 +980,8 @@ public class ProjectInnovationController {
                 regionsResponse,
                 countriesResponse,
                 organizationsResponse,
-                partnershipsResponse
+                partnershipsResponse,
+                contributingOrganizationsResponse
         );
     }
     

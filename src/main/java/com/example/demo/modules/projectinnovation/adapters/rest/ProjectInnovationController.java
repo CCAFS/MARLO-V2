@@ -1,6 +1,7 @@
 package com.example.demo.modules.projectinnovation.adapters.rest;
 
 import com.example.demo.modules.innovationtype.adapters.rest.dto.InnovationTypeResponse;
+import com.example.demo.modules.innovationtype.adapters.outbound.persistence.InnovationTypeRepositoryAdapter;
 import com.example.demo.modules.projectinnovation.adapters.rest.dto.*;
 import com.example.demo.modules.projectinnovation.adapters.rest.mapper.ProjectInnovationActorsMapper;
 import com.example.demo.modules.projectinnovation.adapters.outbound.persistence.ProjectInnovationRepositoryAdapter;
@@ -31,18 +32,21 @@ public class ProjectInnovationController {
     private final ProjectInnovationActorsMapper actorsMapper;
     private final ProjectInnovationRepositoryAdapter repositoryAdapter;
     private final LocElementJpaRepository locElementRepository;
+    private final InnovationTypeRepositoryAdapter innovationTypeRepository;
     
     public ProjectInnovationController(
             ProjectInnovationUseCase projectInnovationUseCase,
             ProjectInnovationActorsService actorsService,
             ProjectInnovationActorsMapper actorsMapper,
             ProjectInnovationRepositoryAdapter repositoryAdapter,
-            LocElementJpaRepository locElementRepository) {
+            LocElementJpaRepository locElementRepository,
+            InnovationTypeRepositoryAdapter innovationTypeRepository) {
         this.projectInnovationUseCase = projectInnovationUseCase;
         this.actorsService = actorsService;
         this.actorsMapper = actorsMapper;
         this.repositoryAdapter = repositoryAdapter;
         this.locElementRepository = locElementRepository;
+        this.innovationTypeRepository = innovationTypeRepository;
     }
     
     @Operation(summary = "Get project innovation by ID")
@@ -482,14 +486,23 @@ public class ProjectInnovationController {
     
     private String getInnovationTypeNameById(Long typeId) {
         if (typeId == null) return "Unknown";
-        return switch (typeId.intValue()) {
-            case 1 -> "Genetic (varieties and breeds)";
-            case 2 -> "Production systems and Management practices";
-            case 3 -> "Social Science";
-            case 4 -> "Biophysical Research";
-            case 5 -> "Research and Communication Methodologies and Tools";
-            default -> "Innovation Type " + typeId;
-        };
+        
+        try {
+            // Get innovation type from rep_ind_innovation_types table
+            return innovationTypeRepository.findById(typeId)
+                .map(com.example.demo.modules.innovationtype.domain.model.InnovationType::getName)
+                .orElse("Innovation Type " + typeId);
+        } catch (Exception e) {
+            // Fallback to hardcoded values if database query fails
+            return switch (typeId.intValue()) {
+                case 1 -> "Genetic (varieties and breeds)";
+                case 2 -> "Production systems and Management practices";
+                case 3 -> "Social Science";
+                case 4 -> "Biophysical Research";
+                case 5 -> "Research and Communication Methodologies and Tools";
+                default -> "Innovation Type " + typeId;
+            };
+        }
     }
     
     private List<SdgDto> getSdgsForInnovation(Long innovationId, Long phaseId) {
@@ -967,6 +980,30 @@ public class ProjectInnovationController {
                     0, 0, null, phaseId
             );
             return ResponseEntity.ok(errorResponse);
+        }
+    }
+    
+    @Operation(summary = "Get all innovation types", 
+               description = "Returns all innovation types from rep_ind_innovation_types table")
+    @GetMapping("/innovation-types")
+    public ResponseEntity<List<InnovationTypeResponse.Simple>> getAllInnovationTypes() {
+        try {
+            List<com.example.demo.modules.innovationtype.domain.model.InnovationType> types = 
+                innovationTypeRepository.findAll();
+            
+            List<InnovationTypeResponse.Simple> response = types.stream()
+                .map(type -> new InnovationTypeResponse.Simple(
+                    type.getId(),
+                    type.getName(),
+                    type.getIsOldType() != null ? type.getIsOldType() : false
+                ))
+                .toList();
+            
+            return ResponseEntity.ok(response);
+            
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Collections.emptyList());
         }
     }
 }

@@ -20,6 +20,7 @@ public class ProjectInnovationRepositoryAdapter implements ProjectInnovationRepo
     private final ProjectInnovationPartnershipPersonJpaRepository projectInnovationPartnershipPersonJpaRepository;
     private final ProjectInnovationContributingOrganizationJpaRepository projectInnovationContributingOrganizationJpaRepository;
     private final InstitutionJpaRepository institutionJpaRepository;
+    private final UserJpaRepository userJpaRepository;
     
     public ProjectInnovationRepositoryAdapter(
             ProjectInnovationJpaRepository projectInnovationJpaRepository,
@@ -31,7 +32,8 @@ public class ProjectInnovationRepositoryAdapter implements ProjectInnovationRepo
             ProjectInnovationPartnershipJpaRepository projectInnovationPartnershipJpaRepository,
             ProjectInnovationPartnershipPersonJpaRepository projectInnovationPartnershipPersonJpaRepository,
             ProjectInnovationContributingOrganizationJpaRepository projectInnovationContributingOrganizationJpaRepository,
-            InstitutionJpaRepository institutionJpaRepository) {
+            InstitutionJpaRepository institutionJpaRepository,
+            UserJpaRepository userJpaRepository) {
         this.projectInnovationJpaRepository = projectInnovationJpaRepository;
         this.projectInnovationInfoJpaRepository = projectInnovationInfoJpaRepository;
         this.projectInnovationSdgJpaRepository = projectInnovationSdgJpaRepository;
@@ -42,6 +44,7 @@ public class ProjectInnovationRepositoryAdapter implements ProjectInnovationRepo
         this.projectInnovationPartnershipPersonJpaRepository = projectInnovationPartnershipPersonJpaRepository;
         this.projectInnovationContributingOrganizationJpaRepository = projectInnovationContributingOrganizationJpaRepository;
         this.institutionJpaRepository = institutionJpaRepository;
+        this.userJpaRepository = userJpaRepository;
     }
     
     @Override
@@ -202,5 +205,12 @@ public class ProjectInnovationRepositoryAdapter implements ProjectInnovationRepo
      */
     public List<ProjectInnovationContributingOrganization> findContributingOrganizationsByInnovationIdAndPhase(Long innovationId, Long phaseId) {
         return projectInnovationContributingOrganizationJpaRepository.findByProjectInnovationIdAndPhaseId(innovationId, phaseId);
+    }
+    
+    /**
+     * Find user by ID
+     */
+    public Optional<User> findUserById(Long userId) {
+        return userJpaRepository.findById(userId);
     }
 }

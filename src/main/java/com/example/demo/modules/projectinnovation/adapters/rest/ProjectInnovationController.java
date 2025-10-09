@@ -767,13 +767,36 @@ public class ProjectInnovationController {
     }
     
     private ContactPersonResponse toContactPersonResponse(ProjectInnovationPartnershipPerson person) {
-        // For now returning basic data - user info would require additional queries
+        // Get user information from users table
+        User user = repositoryAdapter.findUserById(person.getUserId()).orElse(null);
+        
+        String userName = "Unknown User";
+        String userEmail = "unknown@example.com";
+        
+        if (user != null) {
+            // Construct full name from firstName and lastName
+            StringBuilder nameBuilder = new StringBuilder();
+            if (user.getFirstName() != null && !user.getFirstName().trim().isEmpty()) {
+                nameBuilder.append(user.getFirstName().trim());
+            }
+            if (user.getLastName() != null && !user.getLastName().trim().isEmpty()) {
+                if (nameBuilder.length() > 0) {
+                    nameBuilder.append(" ");
+                }
+                nameBuilder.append(user.getLastName().trim());
+            }
+            
+            userName = nameBuilder.length() > 0 ? nameBuilder.toString() : 
+                      (user.getUsername() != null ? user.getUsername() : "User " + person.getUserId());
+            userEmail = user.getEmail() != null ? user.getEmail() : "user" + person.getUserId() + "@example.com";
+        }
+        
         return new ContactPersonResponse(
                 person.getId(),
                 person.getPartnershipId(),
                 person.getUserId(),
-                "User " + person.getUserId(), // userName - would need user table
-                "user" + person.getUserId() + "@example.com", // userEmail - would need user table
+                userName,
+                userEmail,
                 person.getIsActive(),
                 person.getActiveSince()
         );

@@ -476,16 +476,38 @@ public class ProjectInnovationController {
     
     private InnovationTypeDto getInnovationTypeInfo(Long typeId) {
         if (typeId == null) return null;
-        // Data based on the query we made previously
-        String typeName = switch (typeId.intValue()) {
-            case 1 -> "Genetic (varieties and breeds)";
-            case 2 -> "Production systems and Management practices";
-            case 3 -> "Social Science";
-            case 4 -> "Biophysical Research";
-            case 5 -> "Research and Communication Methodologies and Tools";
-            default -> "Innovation Type " + typeId;
-        };
-        return new InnovationTypeDto(typeId, typeName);
+        
+        try {
+            // Get innovation type from rep_ind_innovation_types table with all fields
+            return innovationTypeRepository.findById(typeId)
+                .map(innovationType -> new InnovationTypeDto(
+                    innovationType.getId(),
+                    innovationType.getName(),
+                    innovationType.getDefinition(),
+                    innovationType.getIsOldType(),
+                    innovationType.getPrmsIdEquivalent(),
+                    innovationType.getPrmsNameEquivalent()
+                ))
+                .orElse(new InnovationTypeDto(
+                    typeId, 
+                    "Innovation Type " + typeId,
+                    null, 
+                    null, 
+                    null, 
+                    null
+                ));
+        } catch (Exception e) {
+            // Fallback to hardcoded values if database query fails
+            String typeName = switch (typeId.intValue()) {
+                case 1 -> "Genetic (varieties and breeds)";
+                case 2 -> "Production systems and Management practices";
+                case 3 -> "Social Science";
+                case 4 -> "Biophysical Research";
+                case 5 -> "Research and Communication Methodologies and Tools";
+                default -> "Innovation Type " + typeId;
+            };
+            return new InnovationTypeDto(typeId, typeName, null, null, null, null);
+        }
     }
     
     private String getInnovationTypeNameById(Long typeId) {
@@ -982,7 +1004,6 @@ public class ProjectInnovationController {
                 info.getPhaseResearchId(),
                 info.getStageInnovationId(),
                 info.getGeographicScopeId(),
-                info.getInnovationTypeId(),
                 info.getRepIndRegionId(),
                 info.getRepIndContributionCrpId(),
                 info.getRepIndDegreeInnovationId(),

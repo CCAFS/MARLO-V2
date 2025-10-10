@@ -95,18 +95,6 @@ public class ProjectInnovationController {
         }
     }
     
-    @Deprecated(since = "1.0", forRemoval = true)
-    @Operation(summary = "Get all project innovations including inactive ones", 
-               description = "⚠️ DEPRECATED: Use /search instead (only returns active records). This endpoint returns both active and inactive project innovations")
-    @GetMapping("/all")
-    public ResponseEntity<List<ProjectInnovationResponse>> getAllProjectInnovationsIncludingInactive() {
-        List<ProjectInnovation> projectInnovations = projectInnovationUseCase.findAllProjectInnovationsIncludingInactive();
-        List<ProjectInnovationResponse> response = projectInnovations.stream()
-                .map(this::toResponse)
-                .toList();
-        return ResponseEntity.ok(response);
-    }
-    
     @Operation(summary = "Get project innovations by project ID", description = "Returns only active project innovations for the specified project")
     @GetMapping("/by-project")
     public ResponseEntity<List<ProjectInnovationResponse>> getProjectInnovationsByProjectId(

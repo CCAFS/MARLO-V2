@@ -20,7 +20,6 @@ public record InnovationInfo(
         Long phaseResearchId,
         Long stageInnovationId,
         Long geographicScopeId,
-        Long innovationTypeId,
         Long repIndRegionId,
         Long repIndContributionCrpId,
         Long repIndDegreeInnovationId,

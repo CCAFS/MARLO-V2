@@ -1079,7 +1079,6 @@ public class ProjectInnovationController {
                     innovationCount.intValue(),
                     countryCount.intValue(),
                     averageScalingReadiness,
-                    null, // No longer filtering by specific innovation
                     phaseId
             );
             
@@ -1088,7 +1087,7 @@ public class ProjectInnovationController {
         } catch (Exception e) {
             // Return empty stats in case of error
             InnovationCountryStatsResponse errorResponse = InnovationCountryStatsResponse.of(
-                    0, 0, 0.0, null, phaseId
+                    0, 0, 0.0, phaseId
             );
             return ResponseEntity.ok(errorResponse);
         }

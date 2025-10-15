@@ -15,9 +15,6 @@ public record InnovationCountryStatsResponse(
         @Schema(description = "Average scaling readiness of all innovations in the phase", example = "2.35")
         Double averageScalingReadiness,
         
-        @Schema(description = "Innovation ID filter applied", example = "1566")
-        Long innovationId,
-        
         @Schema(description = "Phase ID filter applied", example = "428")
         Long phaseId
 ) {
@@ -25,9 +22,9 @@ public record InnovationCountryStatsResponse(
     /**
      * Factory method to create stats response with rounded average scaling readiness
      */
-    public static InnovationCountryStatsResponse of(Integer innovationCount, Integer countryCount, Double averageScalingReadiness, Long innovationId, Long phaseId) {
+    public static InnovationCountryStatsResponse of(Integer innovationCount, Integer countryCount, Double averageScalingReadiness, Long phaseId) {
         Double roundedAverage = roundToTwoDecimals(averageScalingReadiness);
-        return new InnovationCountryStatsResponse(innovationCount, countryCount, roundedAverage, innovationId, phaseId);
+        return new InnovationCountryStatsResponse(innovationCount, countryCount, roundedAverage, phaseId);
     }
     
     /**

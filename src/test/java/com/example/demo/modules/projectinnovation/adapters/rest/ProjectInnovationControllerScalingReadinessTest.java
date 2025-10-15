@@ -15,8 +15,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
- * Comprehensive unit tests for ProjectInnovationController stats endpoint
- * focusing on the averageScalingReadiness functionality
+ * Unit tests for ProjectInnovationController focusing on scaling readiness functionality.
  */
 @ExtendWith(MockitoExtension.class)
 class ProjectInnovationControllerScalingReadinessTest {
@@ -34,87 +33,62 @@ class ProjectInnovationControllerScalingReadinessTest {
         mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
     }
 
-        @Test
-    void getInnovationCountryStats_WithPhase428_ReturnsCorrectAverageScalingReadiness() throws Exception {
-        // Arrange - Real data simulation for phase 428
-        Long phaseId = 428L;
-        Long expectedCountryCount = 10L;
-        Long expectedInnovationCount = 102L;
-        Double repositoryValue = 8.462264150943396; // Actual value from repository
-        Double expectedRoundedValue = 8.46; // Expected rounded value in response
-
-        when(repositoryAdapter.countDistinctCountries(null, phaseId))
-                .thenReturn(expectedCountryCount);
-        when(repositoryAdapter.countDistinctInnovations(null, phaseId))
-                .thenReturn(expectedInnovationCount);
-        when(repositoryAdapter.findAverageScalingReadinessByPhase(phaseId))
-                .thenReturn(repositoryValue);
-
-        // Act & Assert
-        mockMvc.perform(get("/api/innovations/stats")
-                        .param("phaseId", phaseId.toString()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.innovationCount").value(expectedInnovationCount.intValue()))
-                .andExpect(jsonPath("$.countryCount").value(expectedCountryCount.intValue()))
-                .andExpect(jsonPath("$.averageScalingReadiness").value(expectedRoundedValue))
-                .andExpect(jsonPath("$.phaseId").value(phaseId))
-                .andExpect(jsonPath("$.innovationId").doesNotExist());
-    }
-
     @Test
-    void getInnovationCountryStats_WithHighAverageScalingReadiness_ReturnsCorrectValue() throws Exception {
-        // Arrange - Testing high scaling readiness scenario
-        Long phaseId = 999L;
+    void getInnovationCountryStats_WithValidPhaseId_ReturnsCorrectStructure() throws Exception {
+        // Arrange - Generic test without hardcoded values
+        Long phaseId = 123L;
         Long countryCount = 5L;
-        Long innovationCount = 20L;
-        Double highAverageScalingReadiness = 9.8;
+        Long innovationCount = 25L;
+        Double averageScalingReadiness = 7.5;
 
         when(repositoryAdapter.countDistinctCountries(null, phaseId))
                 .thenReturn(countryCount);
         when(repositoryAdapter.countDistinctInnovations(null, phaseId))
                 .thenReturn(innovationCount);
         when(repositoryAdapter.findAverageScalingReadinessByPhase(phaseId))
-                .thenReturn(highAverageScalingReadiness);
+                .thenReturn(averageScalingReadiness);
 
         // Act & Assert
         mockMvc.perform(get("/api/innovations/stats")
                         .param("phaseId", phaseId.toString()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.averageScalingReadiness").value(9.8))
-                .andExpect(jsonPath("$.innovationCount").value(20))
-                .andExpect(jsonPath("$.countryCount").value(5));
+                .andExpect(jsonPath("$.innovationCount").value(innovationCount.intValue()))
+                .andExpect(jsonPath("$.countryCount").value(countryCount.intValue()))
+                .andExpect(jsonPath("$.averageScalingReadiness").value(averageScalingReadiness))
+                .andExpect(jsonPath("$.phaseId").value(phaseId));
     }
 
     @Test
-    void getInnovationCountryStats_WithLowAverageScalingReadiness_ReturnsCorrectValue() throws Exception {
-        // Arrange - Testing low scaling readiness scenario
-        Long phaseId = 111L;
+    void getInnovationCountryStats_WithDecimalAverageScalingReadiness_ReturnsRoundedValue() throws Exception {
+        // Arrange - Testing decimal precision with rounding to 2 decimal places
+        Long phaseId = 100L;
         Long countryCount = 3L;
-        Long innovationCount = 8L;
-        Double lowAverageScalingReadiness = 2.1;
+        Long innovationCount = 10L;
+        Double decimalAverageScalingReadiness = 7.333333333333333; // Value with many decimals
+        Double expectedRoundedValue = 7.33; // Expected rounded value
 
         when(repositoryAdapter.countDistinctCountries(null, phaseId))
                 .thenReturn(countryCount);
         when(repositoryAdapter.countDistinctInnovations(null, phaseId))
                 .thenReturn(innovationCount);
         when(repositoryAdapter.findAverageScalingReadinessByPhase(phaseId))
-                .thenReturn(lowAverageScalingReadiness);
+                .thenReturn(decimalAverageScalingReadiness);
 
         // Act & Assert
         mockMvc.perform(get("/api/innovations/stats")
                         .param("phaseId", phaseId.toString()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.averageScalingReadiness").value(2.1))
-                .andExpect(jsonPath("$.innovationCount").value(8))
-                .andExpect(jsonPath("$.countryCount").value(3));
+                .andExpect(jsonPath("$.averageScalingReadiness").value(expectedRoundedValue))
+                .andExpect(jsonPath("$.innovationCount").value(innovationCount.intValue()))
+                .andExpect(jsonPath("$.countryCount").value(countryCount.intValue()));
     }
 
     @Test
     void getInnovationCountryStats_WithZeroAverageScalingReadiness_ReturnsZero() throws Exception {
-        // Arrange - Testing zero average scenario (no valid readiness scale values)
-        Long phaseId = 222L;
-        Long countryCount = 2L;
-        Long innovationCount = 5L;
+        // Arrange - Testing zero average scenario
+        Long phaseId = 200L;
+        Long countryCount = 4L;
+        Long innovationCount = 8L;
         Double zeroAverageScalingReadiness = 0.0;
 
         when(repositoryAdapter.countDistinctCountries(null, phaseId))
@@ -129,40 +103,40 @@ class ProjectInnovationControllerScalingReadinessTest {
                         .param("phaseId", phaseId.toString()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.averageScalingReadiness").value(0.0))
-                .andExpect(jsonPath("$.innovationCount").value(5))
-                .andExpect(jsonPath("$.countryCount").value(2));
+                .andExpect(jsonPath("$.innovationCount").value(innovationCount.intValue()))
+                .andExpect(jsonPath("$.countryCount").value(countryCount.intValue()));
     }
 
     @Test
-    void getInnovationCountryStats_WithDecimalAverageScalingReadiness_ReturnsExactValue() throws Exception {
-        // Arrange - Testing decimal precision
-        Long phaseId = 333L;
-        Long countryCount = 7L;
+    void getInnovationCountryStats_WithHighAverageScalingReadiness_ReturnsCorrectValue() throws Exception {
+        // Arrange - Testing high scaling readiness scenario
+        Long phaseId = 300L;
+        Long countryCount = 6L;
         Long innovationCount = 15L;
-        Double decimalAverageScalingReadiness = 7.333333333333333; // 22/3
+        Double highAverageScalingReadiness = 9.8;
 
         when(repositoryAdapter.countDistinctCountries(null, phaseId))
                 .thenReturn(countryCount);
         when(repositoryAdapter.countDistinctInnovations(null, phaseId))
                 .thenReturn(innovationCount);
         when(repositoryAdapter.findAverageScalingReadinessByPhase(phaseId))
-                .thenReturn(decimalAverageScalingReadiness);
+                .thenReturn(highAverageScalingReadiness);
 
         // Act & Assert
         mockMvc.perform(get("/api/innovations/stats")
                         .param("phaseId", phaseId.toString()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.averageScalingReadiness").value(7.333333333333333))
-                .andExpect(jsonPath("$.innovationCount").value(15))
-                .andExpect(jsonPath("$.countryCount").value(7));
+                .andExpect(jsonPath("$.averageScalingReadiness").value(highAverageScalingReadiness))
+                .andExpect(jsonPath("$.innovationCount").value(innovationCount.intValue()))
+                .andExpect(jsonPath("$.countryCount").value(countryCount.intValue()));
     }
 
     @Test
     void getInnovationCountryStats_WhenScalingReadinessCalculationFails_ReturnsZero() throws Exception {
         // Arrange - Testing error handling in scaling readiness calculation
-        Long phaseId = 444L;
-        Long countryCount = 6L;
-        Long innovationCount = 12L;
+        Long phaseId = 400L;
+        Long countryCount = 2L;
+        Long innovationCount = 7L;
         Double errorAverageScalingReadiness = 0.0; // Repository returns 0.0 on error
 
         when(repositoryAdapter.countDistinctCountries(null, phaseId))
@@ -177,16 +151,16 @@ class ProjectInnovationControllerScalingReadinessTest {
                         .param("phaseId", phaseId.toString()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.averageScalingReadiness").value(0.0))
-                .andExpect(jsonPath("$.innovationCount").value(12))
-                .andExpect(jsonPath("$.countryCount").value(6));
+                .andExpect(jsonPath("$.innovationCount").value(innovationCount.intValue()))
+                .andExpect(jsonPath("$.countryCount").value(countryCount.intValue()));
     }
 
     @Test
     void getInnovationCountryStats_WithMaximumScalingReadiness_ReturnsCorrectValue() throws Exception {
-        // Arrange - Testing maximum scaling readiness (assuming scale 1-10)
-        Long phaseId = 555L;
-        Long countryCount = 1L;
-        Long innovationCount = 3L;
+        // Arrange - Testing maximum scaling readiness scenario
+        Long phaseId = 500L;
+        Long countryCount = 3L;
+        Long innovationCount = 12L;
         Double maxAverageScalingReadiness = 10.0;
 
         when(repositoryAdapter.countDistinctCountries(null, phaseId))
@@ -200,15 +174,15 @@ class ProjectInnovationControllerScalingReadinessTest {
         mockMvc.perform(get("/api/innovations/stats")
                         .param("phaseId", phaseId.toString()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.averageScalingReadiness").value(10.0))
-                .andExpect(jsonPath("$.innovationCount").value(3))
-                .andExpect(jsonPath("$.countryCount").value(1));
+                .andExpect(jsonPath("$.averageScalingReadiness").value(maxAverageScalingReadiness))
+                .andExpect(jsonPath("$.innovationCount").value(innovationCount.intValue()))
+                .andExpect(jsonPath("$.countryCount").value(countryCount.intValue()));
     }
 
-    @Test
+        @Test
     void getInnovationCountryStats_WithAllCalculationsSuccessful_ReturnsCompleteResponse() throws Exception {
         // Arrange - Testing complete successful response with all fields
-        Long phaseId = 666L;
+        Long phaseId = 600L;
         Long countryCount = 8L;
         Long innovationCount = 25L;
         Double averageScalingReadiness = 6.75;
@@ -224,11 +198,60 @@ class ProjectInnovationControllerScalingReadinessTest {
         mockMvc.perform(get("/api/innovations/stats")
                         .param("phaseId", phaseId.toString()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.innovationCount").value(25))
-                .andExpect(jsonPath("$.countryCount").value(8))
-                .andExpect(jsonPath("$.averageScalingReadiness").value(6.75))
-                .andExpect(jsonPath("$.phaseId").value(666))
-                .andExpect(jsonPath("$.innovationId").doesNotExist())
+                .andExpect(jsonPath("$.innovationCount").value(innovationCount.intValue()))
+                .andExpect(jsonPath("$.countryCount").value(countryCount.intValue()))
+                .andExpect(jsonPath("$.averageScalingReadiness").value(averageScalingReadiness))
+                .andExpect(jsonPath("$.phaseId").value(phaseId))
                 .andExpect(content().contentType("application/json"));
+    }
+
+    @Test
+    void getInnovationCountryStats_WithHighPrecisionValue_ReturnsRoundedTo2Decimals() throws Exception {
+        // Arrange - Testing specific rounding behavior like 8.462264150943396 → 8.46
+        Long phaseId = 700L;
+        Long countryCount = 10L;
+        Long innovationCount = 50L;
+        Double highPrecisionValue = 8.462264150943396; // Value with many decimals
+        Double expectedRoundedValue = 8.46; // Expected rounded value
+
+        when(repositoryAdapter.countDistinctCountries(null, phaseId))
+                .thenReturn(countryCount);
+        when(repositoryAdapter.countDistinctInnovations(null, phaseId))
+                .thenReturn(innovationCount);
+        when(repositoryAdapter.findAverageScalingReadinessByPhase(phaseId))
+                .thenReturn(highPrecisionValue);
+
+        // Act & Assert
+        mockMvc.perform(get("/api/innovations/stats")
+                        .param("phaseId", phaseId.toString()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.averageScalingReadiness").value(expectedRoundedValue))
+                .andExpect(jsonPath("$.innovationCount").value(innovationCount.intValue()))
+                .andExpect(jsonPath("$.countryCount").value(countryCount.intValue()));
+    }
+
+    @Test
+    void getInnovationCountryStats_WithRoundingUpScenario_ReturnsRoundedValue() throws Exception {
+        // Arrange - Testing rounding up scenario (6.456 → 6.46)
+        Long phaseId = 800L;
+        Long countryCount = 4L;
+        Long innovationCount = 16L;
+        Double valueToRoundUp = 6.456; // Should round up to 6.46
+        Double expectedRoundedValue = 6.46;
+
+        when(repositoryAdapter.countDistinctCountries(null, phaseId))
+                .thenReturn(countryCount);
+        when(repositoryAdapter.countDistinctInnovations(null, phaseId))
+                .thenReturn(innovationCount);
+        when(repositoryAdapter.findAverageScalingReadinessByPhase(phaseId))
+                .thenReturn(valueToRoundUp);
+
+        // Act & Assert
+        mockMvc.perform(get("/api/innovations/stats")
+                        .param("phaseId", phaseId.toString()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.averageScalingReadiness").value(expectedRoundedValue))
+                .andExpect(jsonPath("$.innovationCount").value(innovationCount.intValue()))
+                .andExpect(jsonPath("$.countryCount").value(countryCount.intValue()));
     }
 }

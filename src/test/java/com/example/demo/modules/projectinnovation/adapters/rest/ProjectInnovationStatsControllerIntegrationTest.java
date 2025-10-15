@@ -11,21 +11,21 @@ import org.springframework.test.context.ActiveProfiles;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Test de integración para el endpoint de stats
+ * Integration test for the stats endpoint
  * 
- * NOTA: Este test está deshabilitado (@Disabled) porque:
- * 1. Requiere una base de datos real funcionando
- * 2. Los datos pueden cambiar y hacer fallar los tests
- * 3. Es más lento que los tests unitarios con mocks
+ * NOTE: This test is disabled (@Disabled) because:
+ * 1. Requires a real database to be running
+ * 2. Data can change and cause test failures
+ * 3. Slower than unit tests with mocks
  * 
- * Para habilitarlo:
- * 1. Eliminar @Disabled
- * 2. Configurar perfil de test con base de datos de prueba
- * 3. Usar datos de test conocidos y estables
+ * To enable it:
+ * 1. Remove @Disabled annotation
+ * 2. Configure test profile with test database
+ * 3. Use known and stable test data
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
-@Disabled("Requiere base de datos de test configurada")
+@Disabled("Requires test database configuration")
 class ProjectInnovationStatsControllerIntegrationTest {
 
     @LocalServerPort

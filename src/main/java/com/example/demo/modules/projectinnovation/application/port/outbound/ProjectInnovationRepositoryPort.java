@@ -39,4 +39,7 @@ public interface ProjectInnovationRepositoryPort {
     List<ProjectInnovationInfo> findActiveInnovationsInfoWithFilters(Long phase, Integer readinessScale, Long innovationTypeId);
     List<ProjectInnovationInfo> findActiveInnovationsInfoBySdgFilters(Long innovationId, Long phase, Long sdgId);
     List<ProjectInnovationInfo> findAllActiveInnovationsInfo();
+    
+    // Statistics methods
+    Double findAverageScalingReadinessByPhase(Long phaseId);
 }

@@ -191,13 +191,42 @@ public class ProjectInnovationRepositoryAdapter implements ProjectInnovationRepo
         return institutionJpaRepository.findActiveInstitutionsByIds(institutionIds);
     }
     
-    // New method for innovation and country statistics
+    // Statistics methods for innovation and country counting
     public Long countDistinctCountries(Long innovationId, Long phaseId) {
         return projectInnovationCountryJpaRepository.countDistinctCountriesByInnovationAndPhase(innovationId, phaseId);
     }
     
     public Long countDistinctInnovations(Long innovationId, Long phaseId) {
         return projectInnovationCountryJpaRepository.countDistinctInnovationsByInnovationAndPhase(innovationId, phaseId);
+    }
+    
+    /**
+     * Calculate the average scaling readiness for innovations in a specific phase
+     * @param phaseId The phase ID to filter innovations
+     * @return Average scaling readiness value, or 0.0 if no valid values found
+     */
+    public Double findAverageScalingReadinessByPhase(Long phaseId) {
+        try {
+            List<ProjectInnovationInfo> innovations = projectInnovationInfoJpaRepository.findByIdPhase(phaseId);
+            
+            List<Integer> readinessScales = innovations.stream()
+                    .map(ProjectInnovationInfo::getReadinessScale)
+                    .filter(java.util.Objects::nonNull)
+                    .collect(java.util.stream.Collectors.toList());
+            
+            if (readinessScales.isEmpty()) {
+                return 0.0;
+            }
+            
+            double sum = readinessScales.stream()
+                    .mapToInt(Integer::intValue)
+                    .sum();
+            
+            return sum / readinessScales.size();
+            
+        } catch (Exception e) {
+            return 0.0;
+        }
     }
     
     /**

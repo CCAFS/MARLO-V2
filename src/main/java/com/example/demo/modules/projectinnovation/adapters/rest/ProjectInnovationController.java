@@ -1059,7 +1059,7 @@ public class ProjectInnovationController {
     }
     
     @Operation(summary = "Get innovation and country statistics by phase",
-               description = "Returns count of active innovations and unique countries for a specific phase. Provides aggregate statistics for all innovations within the specified phase.")
+               description = "Returns count of active innovations, unique countries, and average scaling readiness for a specific phase. Provides comprehensive aggregate statistics for all innovations within the specified phase.")
     @GetMapping("/stats")
     public ResponseEntity<InnovationCountryStatsResponse> getInnovationCountryStats(
             @Parameter(description = "Phase ID to get statistics for", example = "428", required = true)
@@ -1072,9 +1072,13 @@ public class ProjectInnovationController {
             // Get count of unique innovations for this phase
             Long innovationCount = repositoryAdapter.countDistinctInnovations(null, phaseId);
             
+            // Get average scaling readiness for this phase
+            Double averageScalingReadiness = repositoryAdapter.findAverageScalingReadinessByPhase(phaseId);
+            
             InnovationCountryStatsResponse response = InnovationCountryStatsResponse.of(
                     innovationCount.intValue(),
                     countryCount.intValue(),
+                    averageScalingReadiness,
                     null, // No longer filtering by specific innovation
                     phaseId
             );
@@ -1084,7 +1088,7 @@ public class ProjectInnovationController {
         } catch (Exception e) {
             // Return empty stats in case of error
             InnovationCountryStatsResponse errorResponse = InnovationCountryStatsResponse.of(
-                    0, 0, null, phaseId
+                    0, 0, 0.0, null, phaseId
             );
             return ResponseEntity.ok(errorResponse);
         }

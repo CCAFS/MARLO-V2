@@ -5,7 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 /**
- * Repositorio JPA para la entidad Phase
+ * JPA Repository for Phase entity
  */
 @Repository
 public interface PhaseJpaRepository extends JpaRepository<Phase, Long> {

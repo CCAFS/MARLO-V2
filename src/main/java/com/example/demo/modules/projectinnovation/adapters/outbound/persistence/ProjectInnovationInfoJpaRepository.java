@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 /**
- * Repositorio JPA para la entidad ProjectInnovationInfo
+ * JPA Repository for ProjectInnovationInfo entity
  */
 @Repository
 public interface ProjectInnovationInfoJpaRepository extends JpaRepository<ProjectInnovationInfo, Long> {

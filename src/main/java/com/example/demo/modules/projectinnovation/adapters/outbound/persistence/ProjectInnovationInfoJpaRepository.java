@@ -25,10 +25,28 @@ public interface ProjectInnovationInfoJpaRepository extends JpaRepository<Projec
     // Find all innovations by phase
     List<ProjectInnovationInfo> findByIdPhase(Long idPhase);
     
+    // OPTIMIZED: Using EXISTS instead of JOIN for better performance
     @Query("SELECT pii FROM ProjectInnovationInfo pii " +
-           "JOIN ProjectInnovation pi ON pii.projectInnovationId = pi.id " +
-           "WHERE pii.idPhase = :phaseId AND pi.isActive = true")
+           "WHERE pii.idPhase = :phaseId " +
+           "AND EXISTS (SELECT 1 FROM ProjectInnovation pi " +
+                       "WHERE pi.id = pii.projectInnovationId AND pi.isActive = true)")
     List<ProjectInnovationInfo> findByPhaseAndActiveInnovation(@Param("phaseId") Long phaseId);
+    
+    // NATIVE QUERY: Ultra-optimized for production
+    @Query(value = "SELECT pii.* FROM project_innovation_info pii " +
+                   "WHERE pii.id_phase = :phaseId " +
+                   "AND pii.project_innovation_id IN (" +
+                       "SELECT pi.id FROM project_innovations pi WHERE pi.is_active = 1)", 
+           nativeQuery = true)
+    List<ProjectInnovationInfo> findByPhaseAndActiveInnovationNative(@Param("phaseId") Long phaseId);
+    
+    // OPTIMIZED: Direct query for average calculation without loading full entities
+    @Query("SELECT AVG(CAST(pii.readinessScale AS double)) FROM ProjectInnovationInfo pii " +
+           "WHERE pii.idPhase = :phaseId " +
+           "AND pii.readinessScale IS NOT NULL " +
+           "AND EXISTS (SELECT 1 FROM ProjectInnovation pi " +
+                       "WHERE pi.id = pii.projectInnovationId AND pi.isActive = true)")
+    Double findAverageScalingReadinessByPhaseOptimized(@Param("phaseId") Long phaseId);
     
     // JOIN queries temporarily commented for testing
     // @Query("SELECT pii FROM ProjectInnovationInfo pii " +

@@ -20,17 +20,39 @@ public interface ProjectInnovationCountryJpaRepository extends JpaRepository<Pro
            "WHERE pic.projectInnovationId IN :innovationIds")
     List<ProjectInnovationCountry> findByInnovationIds(@Param("innovationIds") List<Long> innovationIds);
     
+    // OPTIMIZED: Using EXISTS instead of JOIN for better performance
     @Query("SELECT COUNT(DISTINCT pic.idCountry) FROM ProjectInnovationCountry pic " +
-           "JOIN ProjectInnovation pi ON pic.projectInnovationId = pi.id " +
-           "WHERE pi.isActive = true " +
+           "WHERE (:phaseId IS NULL OR pic.idPhase = :phaseId) " +
            "AND (:innovationId IS NULL OR pic.projectInnovationId = :innovationId) " +
-           "AND (:phaseId IS NULL OR pic.idPhase = :phaseId)")
+           "AND EXISTS (SELECT 1 FROM ProjectInnovation pi " +
+                       "WHERE pi.id = pic.projectInnovationId AND pi.isActive = true)")
     Long countDistinctCountriesByInnovationAndPhase(@Param("innovationId") Long innovationId, @Param("phaseId") Long phaseId);
     
+    // OPTIMIZED: Using EXISTS instead of JOIN for better performance
     @Query("SELECT COUNT(DISTINCT pic.projectInnovationId) FROM ProjectInnovationCountry pic " +
-           "JOIN ProjectInnovation pi ON pic.projectInnovationId = pi.id " +
-           "WHERE pi.isActive = true " +
+           "WHERE (:phaseId IS NULL OR pic.idPhase = :phaseId) " +
            "AND (:innovationId IS NULL OR pic.projectInnovationId = :innovationId) " +
-           "AND (:phaseId IS NULL OR pic.idPhase = :phaseId)")
+           "AND EXISTS (SELECT 1 FROM ProjectInnovation pi " +
+                       "WHERE pi.id = pic.projectInnovationId AND pi.isActive = true)")
     Long countDistinctInnovationsByInnovationAndPhase(@Param("innovationId") Long innovationId, @Param("phaseId") Long phaseId);
+    
+    // NATIVE QUERY: Ultra-optimized for production with proper indexing
+    @Query(value = "SELECT COUNT(DISTINCT pic.id_country) " +
+                   "FROM project_innovation_country pic " +
+                   "WHERE (:phaseId IS NULL OR pic.id_phase = :phaseId) " +
+                   "AND (:innovationId IS NULL OR pic.project_innovation_id = :innovationId) " +
+                   "AND pic.project_innovation_id IN (" +
+                       "SELECT pi.id FROM project_innovations pi WHERE pi.is_active = 1)", 
+           nativeQuery = true)
+    Long countDistinctCountriesByInnovationAndPhaseNative(@Param("innovationId") Long innovationId, @Param("phaseId") Long phaseId);
+    
+    // NATIVE QUERY: Ultra-optimized for production with proper indexing
+    @Query(value = "SELECT COUNT(DISTINCT pic.project_innovation_id) " +
+                   "FROM project_innovation_country pic " +
+                   "WHERE (:phaseId IS NULL OR pic.id_phase = :phaseId) " +
+                   "AND (:innovationId IS NULL OR pic.project_innovation_id = :innovationId) " +
+                   "AND pic.project_innovation_id IN (" +
+                       "SELECT pi.id FROM project_innovations pi WHERE pi.is_active = 1)", 
+           nativeQuery = true)
+    Long countDistinctInnovationsByInnovationAndPhaseNative(@Param("innovationId") Long innovationId, @Param("phaseId") Long phaseId);
 }

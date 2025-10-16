@@ -202,30 +202,39 @@ public class ProjectInnovationRepositoryAdapter implements ProjectInnovationRepo
     
     /**
      * Calculate the average scaling readiness for innovations in a specific phase
+     * OPTIMIZED: Using direct query instead of loading all entities and processing in memory
      * @param phaseId The phase ID to filter innovations
      * @return Average scaling readiness value, or 0.0 if no valid values found
      */
     public Double findAverageScalingReadinessByPhase(Long phaseId) {
         try {
-            List<ProjectInnovationInfo> innovations = projectInnovationInfoJpaRepository.findByIdPhase(phaseId);
-            
-            List<Integer> readinessScales = innovations.stream()
-                    .map(ProjectInnovationInfo::getReadinessScale)
-                    .filter(java.util.Objects::nonNull)
-                    .collect(java.util.stream.Collectors.toList());
-            
-            if (readinessScales.isEmpty()) {
-                return 0.0;
-            }
-            
-            double sum = readinessScales.stream()
-                    .mapToInt(Integer::intValue)
-                    .sum();
-            
-            return sum / readinessScales.size();
+            // OPTIMIZED: Direct database calculation instead of loading entities
+            Double average = projectInnovationInfoJpaRepository.findAverageScalingReadinessByPhaseOptimized(phaseId);
+            return average != null ? average : 0.0;
             
         } catch (Exception e) {
-            return 0.0;
+            // Fallback to original implementation if optimized query fails
+            try {
+                List<ProjectInnovationInfo> innovations = projectInnovationInfoJpaRepository.findByIdPhase(phaseId);
+                
+                List<Integer> readinessScales = innovations.stream()
+                        .map(ProjectInnovationInfo::getReadinessScale)
+                        .filter(java.util.Objects::nonNull)
+                        .collect(java.util.stream.Collectors.toList());
+                
+                if (readinessScales.isEmpty()) {
+                    return 0.0;
+                }
+                
+                double sum = readinessScales.stream()
+                        .mapToInt(Integer::intValue)
+                        .sum();
+                
+                return sum / readinessScales.size();
+                
+            } catch (Exception fallbackException) {
+                return 0.0;
+            }
         }
     }
     

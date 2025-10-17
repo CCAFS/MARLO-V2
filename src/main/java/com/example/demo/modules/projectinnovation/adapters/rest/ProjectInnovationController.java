@@ -1014,7 +1014,7 @@ public class ProjectInnovationController {
                 .toList();
         List<ProjectInnovationPartnershipPerson> contactPersons = repositoryAdapter.findContactPersonsByPartnershipIds(partnershipIds);
         
-        List<ProjectInnovationPartnershipResponse> partnershipsResponse = partnerships.stream()
+        List<ProjectInnovationPartnershipResponse> contactPersonsResponse = partnerships.stream()
                 .map(partnership -> toPartnershipResponse(partnership, institutions, contactPersons))
                 .toList();
         
@@ -1089,7 +1089,7 @@ public class ProjectInnovationController {
                 regionsResponse,
                 countriesResponse,
                 organizationsResponse,
-                partnershipsResponse,
+                contactPersonsResponse,
                 contributingOrganizationsResponse
         );
     }

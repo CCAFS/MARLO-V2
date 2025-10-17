@@ -82,6 +82,7 @@ public record InnovationInfo(
         List<ProjectInnovationSdgResponse> sdgs,                          // SDGs
         List<ProjectInnovationRegionResponse> regions,                    // Regions
         List<ProjectInnovationCountryResponse> countries,                 // Countries
+        List<ProjectInnovationReferenceResponse> references,              // References / Evidences
         List<ProjectInnovationOrganizationResponse> organizations,        // Contact Organizations
         List<ProjectInnovationPartnershipResponse> contactPersons,       // External Partners with Contact Names
         List<ProjectInnovationContributingOrganizationResponse> contributingOrganizations // Contributing Organizations

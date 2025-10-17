@@ -768,6 +768,23 @@ public class ProjectInnovationController {
         );
     }
     
+    private ProjectInnovationReferenceResponse toReferenceResponse(ProjectInnovationReference reference) {
+        return new ProjectInnovationReferenceResponse(
+                reference.getId(),
+                reference.getReference(),
+                reference.getIdPhase(),
+                reference.getLink(),
+                reference.getIsExternalAuthor(),
+                reference.getHasEvidenceByDeliverable(),
+                reference.getDeliverableId(),
+                reference.getTypeId(),
+                reference.getActiveSince(),
+                reference.getCreatedBy(),
+                reference.getModifiedBy(),
+                reference.getModificationJustification()
+        );
+    }
+    
     private ProjectInnovationOrganizationResponse toOrganizationResponse(ProjectInnovationOrganization organization) {
         String organizationTypeName = getOrganizationTypeName(organization.getRepIndOrganizationTypeId());
         return new ProjectInnovationOrganizationResponse(
@@ -975,6 +992,12 @@ public class ProjectInnovationController {
                 .map(this::toCountryResponse)
                 .toList();
         
+        // Get References associated with the innovation and phase
+        List<ProjectInnovationReference> references = repositoryAdapter.findReferencesByInnovationIdAndPhase(innovationId, phaseId);
+        List<ProjectInnovationReferenceResponse> referencesResponse = references.stream()
+                .map(this::toReferenceResponse)
+                .toList();
+        
         // Get Organizations
         List<ProjectInnovationOrganization> organizations = repositoryAdapter.findOrganizationsByInnovationIdAndPhase(innovationId, phaseId);
         List<ProjectInnovationOrganizationResponse> organizationsResponse = organizations.stream()
@@ -1088,6 +1111,7 @@ public class ProjectInnovationController {
                 sdgsResponse,
                 regionsResponse,
                 countriesResponse,
+                referencesResponse,
                 organizationsResponse,
                 contactPersonsResponse,
                 contributingOrganizationsResponse

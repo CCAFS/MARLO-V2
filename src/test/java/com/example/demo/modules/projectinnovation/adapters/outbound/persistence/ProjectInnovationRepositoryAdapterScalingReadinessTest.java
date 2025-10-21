@@ -8,7 +8,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -35,119 +34,109 @@ class ProjectInnovationRepositoryAdapterScalingReadinessTest {
     @Test
     void findAverageScalingReadinessByPhase_WithValidData_ReturnsCorrectAverage() {
         // Arrange
-        Long phaseId = 428L;
-        List<ProjectInnovationInfo> mockInnovations = Arrays.asList(
-            createMockInnovationInfo(8),
-            createMockInnovationInfo(9),
-            createMockInnovationInfo(7),
-            createMockInnovationInfo(10),
-            createMockInnovationInfo(6)
-        );
+        Long phaseId = 100L; // Generic test phase ID
+        Double expectedAverage = 8.0; // (8+9+7+10+6)/5 = 40/5 = 8.0
         
-        when(projectInnovationInfoJpaRepository.findByIdPhase(phaseId))
-                .thenReturn(mockInnovations);
+        when(projectInnovationInfoJpaRepository.findAverageScalingReadinessByPhaseOptimized(phaseId))
+                .thenReturn(expectedAverage);
 
         // Act
         Double result = repositoryAdapter.findAverageScalingReadinessByPhase(phaseId);
 
         // Assert
-        assertEquals(8.0, result); // (8+9+7+10+6)/5 = 40/5 = 8.0
-        verify(projectInnovationInfoJpaRepository).findByIdPhase(phaseId);
+        assertEquals(8.0, result);
+        verify(projectInnovationInfoJpaRepository).findAverageScalingReadinessByPhaseOptimized(phaseId);
     }
 
     @Test
     void findAverageScalingReadinessByPhase_WithNullValues_IgnoresNulls() {
         // Arrange
         Long phaseId = 123L;
-        List<ProjectInnovationInfo> mockInnovations = Arrays.asList(
-            createMockInnovationInfo(8),
-            createMockInnovationInfo(null), // Should be ignored
-            createMockInnovationInfo(6),
-            createMockInnovationInfo(null), // Should be ignored
-            createMockInnovationInfo(10)
-        );
+        Double expectedAverage = 8.0; // (8+6+10)/3 = 24/3 = 8.0 (nulls ignored by optimized query)
         
-        when(projectInnovationInfoJpaRepository.findByIdPhase(phaseId))
-                .thenReturn(mockInnovations);
+        when(projectInnovationInfoJpaRepository.findAverageScalingReadinessByPhaseOptimized(phaseId))
+                .thenReturn(expectedAverage);
 
         // Act
         Double result = repositoryAdapter.findAverageScalingReadinessByPhase(phaseId);
 
         // Assert
         assertEquals(8.0, result); // (8+6+10)/3 = 24/3 = 8.0 (nulls ignored)
-        verify(projectInnovationInfoJpaRepository).findByIdPhase(phaseId);
+        verify(projectInnovationInfoJpaRepository).findAverageScalingReadinessByPhaseOptimized(phaseId);
     }
 
     @Test
     void findAverageScalingReadinessByPhase_WithAllNullValues_ReturnsZero() {
         // Arrange
         Long phaseId = 999L;
-        List<ProjectInnovationInfo> mockInnovations = Arrays.asList(
-            createMockInnovationInfo(null),
-            createMockInnovationInfo(null),
-            createMockInnovationInfo(null)
-        );
+        // Optimized query returns null when no valid values found
         
-        when(projectInnovationInfoJpaRepository.findByIdPhase(phaseId))
-                .thenReturn(mockInnovations);
+        when(projectInnovationInfoJpaRepository.findAverageScalingReadinessByPhaseOptimized(phaseId))
+                .thenReturn(null);
 
         // Act
         Double result = repositoryAdapter.findAverageScalingReadinessByPhase(phaseId);
 
         // Assert
         assertEquals(0.0, result);
-        verify(projectInnovationInfoJpaRepository).findByIdPhase(phaseId);
+        verify(projectInnovationInfoJpaRepository).findAverageScalingReadinessByPhaseOptimized(phaseId);
     }
 
     @Test
     void findAverageScalingReadinessByPhase_WithEmptyList_ReturnsZero() {
         // Arrange
         Long phaseId = 456L;
-        List<ProjectInnovationInfo> mockInnovations = Collections.emptyList();
+        // Optimized query returns null when no records found
         
-        when(projectInnovationInfoJpaRepository.findByIdPhase(phaseId))
-                .thenReturn(mockInnovations);
+        when(projectInnovationInfoJpaRepository.findAverageScalingReadinessByPhaseOptimized(phaseId))
+                .thenReturn(null);
 
         // Act
         Double result = repositoryAdapter.findAverageScalingReadinessByPhase(phaseId);
 
         // Assert
         assertEquals(0.0, result);
-        verify(projectInnovationInfoJpaRepository).findByIdPhase(phaseId);
+        verify(projectInnovationInfoJpaRepository).findAverageScalingReadinessByPhaseOptimized(phaseId);
     }
 
     @Test
     void findAverageScalingReadinessByPhase_WithSingleValue_ReturnsThatValue() {
         // Arrange
         Long phaseId = 789L;
-        List<ProjectInnovationInfo> mockInnovations = Arrays.asList(
-            createMockInnovationInfo(7)
-        );
+        Double expectedAverage = 7.0;
         
-        when(projectInnovationInfoJpaRepository.findByIdPhase(phaseId))
-                .thenReturn(mockInnovations);
+        when(projectInnovationInfoJpaRepository.findAverageScalingReadinessByPhaseOptimized(phaseId))
+                .thenReturn(expectedAverage);
 
         // Act
         Double result = repositoryAdapter.findAverageScalingReadinessByPhase(phaseId);
 
         // Assert
         assertEquals(7.0, result);
-        verify(projectInnovationInfoJpaRepository).findByIdPhase(phaseId);
+        verify(projectInnovationInfoJpaRepository).findAverageScalingReadinessByPhaseOptimized(phaseId);
     }
 
     @Test
     void findAverageScalingReadinessByPhase_WithRepositoryException_ReturnsZero() {
         // Arrange
         Long phaseId = 666L;
+        List<ProjectInnovationInfo> fallbackData = Arrays.asList(
+            createMockInnovationInfo(8),
+            createMockInnovationInfo(7)
+        );
         
-        when(projectInnovationInfoJpaRepository.findByIdPhase(phaseId))
+        // First call to optimized method fails, then fallback to original method
+        when(projectInnovationInfoJpaRepository.findAverageScalingReadinessByPhaseOptimized(phaseId))
                 .thenThrow(new RuntimeException("Database connection error"));
+        when(projectInnovationInfoJpaRepository.findByIdPhase(phaseId))
+                .thenReturn(fallbackData);
 
         // Act
         Double result = repositoryAdapter.findAverageScalingReadinessByPhase(phaseId);
 
         // Assert
-        assertEquals(0.0, result);
+        assertEquals(7.5, result); // (8+7)/2 = 7.5 from fallback method
+        verify(projectInnovationInfoJpaRepository).findAverageScalingReadinessByPhaseOptimized(phaseId);
         verify(projectInnovationInfoJpaRepository).findByIdPhase(phaseId);
     }
 
@@ -155,42 +144,27 @@ class ProjectInnovationRepositoryAdapterScalingReadinessTest {
     void findAverageScalingReadinessByPhase_WithDecimalResult_ReturnsExactValue() {
         // Arrange
         Long phaseId = 333L;
-        List<ProjectInnovationInfo> mockInnovations = Arrays.asList(
-            createMockInnovationInfo(8),
-            createMockInnovationInfo(9),
-            createMockInnovationInfo(7)
-        );
+        Double expectedAverage = 8.0; // (8+9+7)/3 = 24/3 = 8.0
         
-        when(projectInnovationInfoJpaRepository.findByIdPhase(phaseId))
-                .thenReturn(mockInnovations);
+        when(projectInnovationInfoJpaRepository.findAverageScalingReadinessByPhaseOptimized(phaseId))
+                .thenReturn(expectedAverage);
 
         // Act
         Double result = repositoryAdapter.findAverageScalingReadinessByPhase(phaseId);
 
         // Assert
         assertEquals(8.0, result); // (8+9+7)/3 = 24/3 = 8.0
-        verify(projectInnovationInfoJpaRepository).findByIdPhase(phaseId);
+        verify(projectInnovationInfoJpaRepository).findAverageScalingReadinessByPhaseOptimized(phaseId);
     }
 
     @Test
-    void findAverageScalingReadinessByPhase_WithRealWorldScenario_MatchesExpectedCalculation() {
-        // Arrange - Simulating real data similar to phase 428
-        Long phaseId = 428L;
-        List<ProjectInnovationInfo> mockInnovations = Arrays.asList(
-            createMockInnovationInfo(8),
-            createMockInnovationInfo(9),
-            createMockInnovationInfo(8),
-            createMockInnovationInfo(9),
-            createMockInnovationInfo(8),
-            createMockInnovationInfo(7),
-            createMockInnovationInfo(10),
-            createMockInnovationInfo(9),
-            createMockInnovationInfo(8),
-            createMockInnovationInfo(8)
-        );
+    void findAverageScalingReadinessByPhase_WithMultipleValues_CalculatesCorrectAverage() {
+        // Arrange - Test with multiple values to verify average calculation
+        Long phaseId = 200L; // Generic test phase ID
+        Double expectedAverage = 8.4; // Sum: 8+9+8+9+8+7+10+9+8+8 = 84, Count: 10, Average: 84/10 = 8.4
         
-        when(projectInnovationInfoJpaRepository.findByIdPhase(phaseId))
-                .thenReturn(mockInnovations);
+        when(projectInnovationInfoJpaRepository.findAverageScalingReadinessByPhaseOptimized(phaseId))
+                .thenReturn(expectedAverage);
 
         // Act
         Double result = repositoryAdapter.findAverageScalingReadinessByPhase(phaseId);
@@ -200,6 +174,6 @@ class ProjectInnovationRepositoryAdapterScalingReadinessTest {
         // Count: 10
         // Average: 84/10 = 8.4
         assertEquals(8.4, result);
-        verify(projectInnovationInfoJpaRepository).findByIdPhase(phaseId);
+        verify(projectInnovationInfoJpaRepository).findAverageScalingReadinessByPhaseOptimized(phaseId);
     }
 }

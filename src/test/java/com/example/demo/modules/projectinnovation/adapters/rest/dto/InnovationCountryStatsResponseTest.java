@@ -12,7 +12,7 @@ class InnovationCountryStatsResponseTest {
         Integer innovationCount = 63;
         Integer countryCount = 10;
         Double averageScalingReadiness = 2.5;
-        Long phaseId = 428L;
+        Long phaseId = 100L; // Generic test phase ID
 
         // Act
         InnovationCountryStatsResponse response = InnovationCountryStatsResponse.of(
@@ -33,7 +33,7 @@ class InnovationCountryStatsResponseTest {
 
         // Act
         InnovationCountryStatsResponse response = InnovationCountryStatsResponse.of(
-                102, 10, originalValue, 428L);
+                102, 10, originalValue, 200L); // Generic test phase ID
 
         // Assert
         assertEquals(expectedRounded, response.averageScalingReadiness());

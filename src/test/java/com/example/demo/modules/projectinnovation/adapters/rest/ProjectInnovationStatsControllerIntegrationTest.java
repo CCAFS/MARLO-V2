@@ -2,11 +2,11 @@ package com.example.demo.modules.projectinnovation.adapters.rest;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
+// import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.context.ActiveProfiles;
+// import org.springframework.test.context.ActiveProfiles;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -23,8 +23,8 @@ import static org.junit.jupiter.api.Assertions.*;
  * 2. Configure test profile with test database
  * 3. Use known and stable test data
  */
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles("test")
+// @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+// @ActiveProfiles("test")
 @Disabled("Requires test database configuration")
 class ProjectInnovationStatsControllerIntegrationTest {
 

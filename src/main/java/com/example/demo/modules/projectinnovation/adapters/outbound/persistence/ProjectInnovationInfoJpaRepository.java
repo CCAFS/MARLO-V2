@@ -25,10 +25,28 @@ public interface ProjectInnovationInfoJpaRepository extends JpaRepository<Projec
     // Find all innovations by phase
     List<ProjectInnovationInfo> findByIdPhase(Long idPhase);
     
+    // OPTIMIZED: Using EXISTS instead of JOIN for better performance
     @Query("SELECT pii FROM ProjectInnovationInfo pii " +
-           "JOIN ProjectInnovation pi ON pii.projectInnovationId = pi.id " +
-           "WHERE pii.idPhase = :phaseId AND pi.isActive = true")
+           "WHERE pii.idPhase = :phaseId " +
+           "AND EXISTS (SELECT 1 FROM ProjectInnovation pi " +
+                       "WHERE pi.id = pii.projectInnovationId AND pi.isActive = true)")
     List<ProjectInnovationInfo> findByPhaseAndActiveInnovation(@Param("phaseId") Long phaseId);
+    
+    // NATIVE QUERY: Ultra-optimized for production
+    @Query(value = "SELECT pii.* FROM project_innovation_info pii " +
+                   "WHERE pii.id_phase = :phaseId " +
+                   "AND pii.project_innovation_id IN (" +
+                       "SELECT pi.id FROM project_innovations pi WHERE pi.is_active = 1)", 
+           nativeQuery = true)
+    List<ProjectInnovationInfo> findByPhaseAndActiveInnovationNative(@Param("phaseId") Long phaseId);
+    
+    // OPTIMIZED: Direct query for average calculation without loading full entities
+    @Query("SELECT AVG(CAST(pii.readinessScale AS double)) FROM ProjectInnovationInfo pii " +
+           "WHERE pii.idPhase = :phaseId " +
+           "AND pii.readinessScale IS NOT NULL " +
+           "AND EXISTS (SELECT 1 FROM ProjectInnovation pi " +
+                       "WHERE pi.id = pii.projectInnovationId AND pi.isActive = true)")
+    Double findAverageScalingReadinessByPhaseOptimized(@Param("phaseId") Long phaseId);
     
     // JOIN queries temporarily commented for testing
     // @Query("SELECT pii FROM ProjectInnovationInfo pii " +
@@ -50,11 +68,17 @@ public interface ProjectInnovationInfoJpaRepository extends JpaRepository<Projec
            "AND (:phase IS NULL OR pii.id_phase = :phase) " +
            "AND (:readinessScale IS NULL OR pii.readiness_scale = :readinessScale) " +
            "AND (:innovationTypeId IS NULL OR pii.innovation_type_id = :innovationTypeId) " +
+           "AND (:countryIds IS NULL OR EXISTS ( " +
+               "SELECT 1 FROM project_innovation_countries pic " +
+               "WHERE pic.project_innovation_id = pii.project_innovation_id " +
+               "AND pic.id_phase = pii.id_phase " +
+               "AND pic.id_country IN (:countryIds))) " +
            "ORDER BY pii.id DESC", nativeQuery = true)
     List<ProjectInnovationInfo> findActiveInnovationsInfoWithFilters(
             @Param("phase") Long phase,
             @Param("readinessScale") Integer readinessScale,
-            @Param("innovationTypeId") Long innovationTypeId);
+            @Param("innovationTypeId") Long innovationTypeId,
+            @Param("countryIds") List<Long> countryIds);
     
     // Find innovation info by SDG relationship
     @Query(value = "SELECT DISTINCT pii.* FROM project_innovation_info pii " +
@@ -65,11 +89,17 @@ public interface ProjectInnovationInfoJpaRepository extends JpaRepository<Projec
            "AND (:innovationId IS NULL OR pis.innovation_id = :innovationId) " +
            "AND (:phase IS NULL OR pis.id_phase = :phase) " +
            "AND (:sdgId IS NULL OR pis.sdg_id = :sdgId) " +
+           "AND (:countryIds IS NULL OR EXISTS ( " +
+               "SELECT 1 FROM project_innovation_countries pic " +
+               "WHERE pic.project_innovation_id = pii.project_innovation_id " +
+               "AND pic.id_phase = pii.id_phase " +
+               "AND pic.id_country IN (:countryIds))) " +
            "ORDER BY pii.id DESC", nativeQuery = true)
     List<ProjectInnovationInfo> findActiveInnovationsInfoBySdgFilters(
             @Param("innovationId") Long innovationId,
             @Param("phase") Long phase,
-            @Param("sdgId") Long sdgId);
+            @Param("sdgId") Long sdgId,
+            @Param("countryIds") List<Long> countryIds);
     
     // Find all active innovations info
     @Query(value = "SELECT DISTINCT pii.* FROM project_innovation_info pii " +

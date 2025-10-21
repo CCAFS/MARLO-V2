@@ -159,13 +159,13 @@ public class ProjectInnovationService implements ProjectInnovationUseCase {
     
     // New methods that return ProjectInnovationInfo instead of ProjectInnovation
     @Override
-    public List<ProjectInnovationInfo> findActiveInnovationsInfoWithFilters(Long phase, Integer readinessScale, Long innovationTypeId) {
-        return projectInnovationRepositoryPort.findActiveInnovationsInfoWithFilters(phase, readinessScale, innovationTypeId);
+    public List<ProjectInnovationInfo> findActiveInnovationsInfoWithFilters(Long phase, Integer readinessScale, Long innovationTypeId, List<Long> countryIds) {
+        return projectInnovationRepositoryPort.findActiveInnovationsInfoWithFilters(phase, readinessScale, innovationTypeId, countryIds);
     }
     
     @Override
-    public List<ProjectInnovationInfo> findActiveInnovationsInfoBySdgFilters(Long innovationId, Long phase, Long sdgId) {
-        return projectInnovationRepositoryPort.findActiveInnovationsInfoBySdgFilters(innovationId, phase, sdgId);
+    public List<ProjectInnovationInfo> findActiveInnovationsInfoBySdgFilters(Long innovationId, Long phase, Long sdgId, List<Long> countryIds) {
+        return projectInnovationRepositoryPort.findActiveInnovationsInfoBySdgFilters(innovationId, phase, sdgId, countryIds);
     }
     
     @Override

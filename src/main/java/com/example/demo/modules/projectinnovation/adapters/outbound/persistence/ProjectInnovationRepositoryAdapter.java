@@ -19,6 +19,7 @@ public class ProjectInnovationRepositoryAdapter implements ProjectInnovationRepo
     private final ProjectInnovationPartnershipJpaRepository projectInnovationPartnershipJpaRepository;
     private final ProjectInnovationPartnershipPersonJpaRepository projectInnovationPartnershipPersonJpaRepository;
     private final ProjectInnovationContributingOrganizationJpaRepository projectInnovationContributingOrganizationJpaRepository;
+    private final ProjectInnovationReferenceJpaRepository projectInnovationReferenceJpaRepository;
     private final InstitutionJpaRepository institutionJpaRepository;
     private final UserJpaRepository userJpaRepository;
     
@@ -32,6 +33,7 @@ public class ProjectInnovationRepositoryAdapter implements ProjectInnovationRepo
             ProjectInnovationPartnershipJpaRepository projectInnovationPartnershipJpaRepository,
             ProjectInnovationPartnershipPersonJpaRepository projectInnovationPartnershipPersonJpaRepository,
             ProjectInnovationContributingOrganizationJpaRepository projectInnovationContributingOrganizationJpaRepository,
+            ProjectInnovationReferenceJpaRepository projectInnovationReferenceJpaRepository,
             InstitutionJpaRepository institutionJpaRepository,
             UserJpaRepository userJpaRepository) {
         this.projectInnovationJpaRepository = projectInnovationJpaRepository;
@@ -43,6 +45,7 @@ public class ProjectInnovationRepositoryAdapter implements ProjectInnovationRepo
         this.projectInnovationPartnershipJpaRepository = projectInnovationPartnershipJpaRepository;
         this.projectInnovationPartnershipPersonJpaRepository = projectInnovationPartnershipPersonJpaRepository;
         this.projectInnovationContributingOrganizationJpaRepository = projectInnovationContributingOrganizationJpaRepository;
+        this.projectInnovationReferenceJpaRepository = projectInnovationReferenceJpaRepository;
         this.institutionJpaRepository = institutionJpaRepository;
         this.userJpaRepository = userJpaRepository;
     }
@@ -148,13 +151,15 @@ public class ProjectInnovationRepositoryAdapter implements ProjectInnovationRepo
     
     // New methods that return ProjectInnovationInfo instead of ProjectInnovation
     @Override
-    public List<ProjectInnovationInfo> findActiveInnovationsInfoWithFilters(Long phase, Integer readinessScale, Long innovationTypeId) {
-        return projectInnovationInfoJpaRepository.findActiveInnovationsInfoWithFilters(phase, readinessScale, innovationTypeId);
+    public List<ProjectInnovationInfo> findActiveInnovationsInfoWithFilters(Long phase, Integer readinessScale, Long innovationTypeId, List<Long> countryIds) {
+        List<Long> normalizedCountryIds = (countryIds == null || countryIds.isEmpty()) ? null : countryIds;
+        return projectInnovationInfoJpaRepository.findActiveInnovationsInfoWithFilters(phase, readinessScale, innovationTypeId, normalizedCountryIds);
     }
     
     @Override
-    public List<ProjectInnovationInfo> findActiveInnovationsInfoBySdgFilters(Long innovationId, Long phase, Long sdgId) {
-        return projectInnovationInfoJpaRepository.findActiveInnovationsInfoBySdgFilters(innovationId, phase, sdgId);
+    public List<ProjectInnovationInfo> findActiveInnovationsInfoBySdgFilters(Long innovationId, Long phase, Long sdgId, List<Long> countryIds) {
+        List<Long> normalizedCountryIds = (countryIds == null || countryIds.isEmpty()) ? null : countryIds;
+        return projectInnovationInfoJpaRepository.findActiveInnovationsInfoBySdgFilters(innovationId, phase, sdgId, normalizedCountryIds);
     }
     
     @Override
@@ -202,30 +207,39 @@ public class ProjectInnovationRepositoryAdapter implements ProjectInnovationRepo
     
     /**
      * Calculate the average scaling readiness for innovations in a specific phase
+     * OPTIMIZED: Using direct query instead of loading all entities and processing in memory
      * @param phaseId The phase ID to filter innovations
      * @return Average scaling readiness value, or 0.0 if no valid values found
      */
     public Double findAverageScalingReadinessByPhase(Long phaseId) {
         try {
-            List<ProjectInnovationInfo> innovations = projectInnovationInfoJpaRepository.findByIdPhase(phaseId);
-            
-            List<Integer> readinessScales = innovations.stream()
-                    .map(ProjectInnovationInfo::getReadinessScale)
-                    .filter(java.util.Objects::nonNull)
-                    .collect(java.util.stream.Collectors.toList());
-            
-            if (readinessScales.isEmpty()) {
-                return 0.0;
-            }
-            
-            double sum = readinessScales.stream()
-                    .mapToInt(Integer::intValue)
-                    .sum();
-            
-            return sum / readinessScales.size();
+            // OPTIMIZED: Direct database calculation instead of loading entities
+            Double average = projectInnovationInfoJpaRepository.findAverageScalingReadinessByPhaseOptimized(phaseId);
+            return average != null ? average : 0.0;
             
         } catch (Exception e) {
-            return 0.0;
+            // Fallback to original implementation if optimized query fails
+            try {
+                List<ProjectInnovationInfo> innovations = projectInnovationInfoJpaRepository.findByIdPhase(phaseId);
+                
+                List<Integer> readinessScales = innovations.stream()
+                        .map(ProjectInnovationInfo::getReadinessScale)
+                        .filter(java.util.Objects::nonNull)
+                        .collect(java.util.stream.Collectors.toList());
+                
+                if (readinessScales.isEmpty()) {
+                    return 0.0;
+                }
+                
+                double sum = readinessScales.stream()
+                        .mapToInt(Integer::intValue)
+                        .sum();
+                
+                return sum / readinessScales.size();
+                
+            } catch (Exception fallbackException) {
+                return 0.0;
+            }
         }
     }
     
@@ -234,6 +248,13 @@ public class ProjectInnovationRepositoryAdapter implements ProjectInnovationRepo
      */
     public List<ProjectInnovationContributingOrganization> findContributingOrganizationsByInnovationIdAndPhase(Long innovationId, Long phaseId) {
         return projectInnovationContributingOrganizationJpaRepository.findByProjectInnovationIdAndPhaseId(innovationId, phaseId);
+    }
+    
+    /**
+     * Find references associated with an innovation and phase.
+     */
+    public List<ProjectInnovationReference> findReferencesByInnovationIdAndPhase(Long innovationId, Long phaseId) {
+        return projectInnovationReferenceJpaRepository.findByProjectInnovationIdAndIdPhase(innovationId, phaseId);
     }
     
     /**

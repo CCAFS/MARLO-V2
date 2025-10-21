@@ -80,7 +80,8 @@ public record ProjectInnovationInfoCompleteWithRelationsResponse(
         List<ProjectInnovationSdgResponse> sdgs,                          // SDGs
         List<ProjectInnovationRegionResponse> regions,                    // Regions
         List<ProjectInnovationCountryResponse> countries,                 // Countries
+        List<ProjectInnovationReferenceResponse> references,              // References / Evidences
         List<ProjectInnovationOrganizationResponse> organizations,        // Contact Organizations
-        List<ProjectInnovationPartnershipResponse> externalPartners      // External Partners with Contact Names
+        List<ProjectInnovationPartnershipResponse> contactPersons        // External Partners with Contact Names
 ) {
 }

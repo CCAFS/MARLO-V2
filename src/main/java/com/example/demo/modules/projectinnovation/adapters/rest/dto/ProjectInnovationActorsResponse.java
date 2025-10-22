@@ -39,6 +39,7 @@ public record ProjectInnovationActorsResponse(
         Long id,
         String name,
         String description,
-        Boolean isActive
+        Boolean isActive,
+        String prmsNameEquivalent
     ) {}
 }

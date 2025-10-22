@@ -22,7 +22,8 @@ public class ProjectInnovationActorsMapper {
                 actors.getActor().getId(),
                 actors.getActor().getName(),
                 actors.getActor().getDescription(),
-                actors.getActor().getIsActive()
+                actors.getActor().getIsActive(),
+                actors.getActor().getPrmsNameEquivalent()
             );
         }
         

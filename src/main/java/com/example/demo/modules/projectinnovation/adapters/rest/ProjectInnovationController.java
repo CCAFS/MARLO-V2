@@ -3,6 +3,7 @@ package com.example.demo.modules.projectinnovation.adapters.rest;
 import com.example.demo.modules.innovationtype.adapters.rest.dto.InnovationTypeResponse;
 import com.example.demo.modules.innovationtype.adapters.outbound.persistence.InnovationTypeRepositoryAdapter;
 import com.example.demo.modules.projectinnovation.adapters.rest.dto.*;
+import com.example.demo.modules.projectinnovation.adapters.rest.dto.ProjectInnovationCompleteSearchResponse;
 import com.example.demo.modules.projectinnovation.adapters.rest.mapper.ProjectInnovationActorsMapper;
 import com.example.demo.modules.projectinnovation.adapters.outbound.persistence.ProjectInnovationRepositoryAdapter;
 import com.example.demo.modules.projectinnovation.adapters.outbound.persistence.LocElementJpaRepository;
@@ -326,6 +327,92 @@ public class ProjectInnovationController {
         
         ProjectInnovationSimpleSearchResponse searchResponse = 
             ProjectInnovationSimpleSearchResponse.of(response, totalCount, appliedFilters, pagination);
+            
+        return ResponseEntity.ok(searchResponse);
+    }
+    
+    @Operation(summary = "Search innovations with complete information", 
+               description = "Returns active innovations with complete information including all relationships (SDGs, regions, countries, organizations, partners, references, actors) - same as info endpoint but for multiple innovations. Supports pagination with offset and limit parameters.")
+    @GetMapping("/search-complete")
+    public ResponseEntity<ProjectInnovationCompleteSearchResponse> searchInnovationsComplete(
+            @Parameter(description = "Phase ID to filter by", example = "425")
+            @RequestParam(required = false) Long phase,
+            @Parameter(description = "Readiness scale to filter by", example = "7")
+            @RequestParam(required = false) Integer readinessScale,
+            @Parameter(description = "Innovation type ID to filter by", example = "1")
+            @RequestParam(required = false) Long innovationTypeId,
+            @Parameter(description = "Innovation ID to filter by (for SDG search)", example = "1566")
+            @RequestParam(required = false) Long innovationId,
+            @Parameter(description = "SDG ID to filter by", example = "2")
+            @RequestParam(required = false) Long sdgId,
+            @Parameter(description = "Country IDs to filter by (repeat parameter for multiple values)", example = "113")
+            @RequestParam(required = false) List<Long> countryIds,
+            @Parameter(description = "Number of records to skip (pagination)", example = "0")
+            @RequestParam(required = false, defaultValue = "0") Integer offset,
+            @Parameter(description = "Maximum number of records to return (pagination)", example = "20")
+            @RequestParam(required = false, defaultValue = "20") Integer limit) {
+        
+        // Validate pagination parameters
+        if (offset < 0) offset = 0;
+        if (limit <= 0) limit = 20;
+        if (limit > 100) limit = 100; // Maximum limit to prevent performance issues
+        
+        // Normalize optional filters
+        List<Long> normalizedCountryIds = normalizeCountryIds(countryIds);
+        boolean hasCountryFilter = normalizedCountryIds != null;
+        
+        // Get innovation info with filters instead of just innovation entities
+        List<ProjectInnovationInfo> allInnovations;
+        String searchType;
+        
+        // If any SDG-related filter is provided, use SDG search
+        if (sdgId != null || (innovationId != null && phase != null)) {
+            allInnovations = projectInnovationUseCase.findActiveInnovationsInfoBySdgFilters(innovationId, phase, sdgId, normalizedCountryIds);
+            searchType = hasCountryFilter ? "SDG_AND_COUNTRY_FILTERS" : "SDG_FILTERS";
+        }
+        // If any general filter is provided, use general search
+        else if (phase != null || readinessScale != null || innovationTypeId != null || hasCountryFilter) {
+            allInnovations = projectInnovationUseCase.findActiveInnovationsInfoWithFilters(phase, readinessScale, innovationTypeId, normalizedCountryIds);
+            if (hasCountryFilter && phase == null && readinessScale == null && innovationTypeId == null) {
+                searchType = "COUNTRY_FILTERS";
+            } else if (hasCountryFilter) {
+                searchType = "GENERAL_AND_COUNTRY_FILTERS";
+            } else {
+                searchType = "GENERAL_FILTERS";
+            }
+        }
+        // If no filters provided, return all active innovations with info
+        else {
+            allInnovations = projectInnovationUseCase.findAllActiveInnovationsInfo();
+            searchType = "ALL_ACTIVE";
+        }
+        
+        // Get total count before pagination
+        int totalCount = allInnovations.size();
+        
+        // Apply pagination
+        List<ProjectInnovationInfo> paginatedInnovations = allInnovations.stream()
+                .skip(offset)
+                .limit(limit)
+                .toList();
+        
+        // Build complete innovation info for each result
+        List<InnovationInfo> response = paginatedInnovations.stream()
+                .map(info -> toCompleteInfoWithRelationsResponse(info, info.getProjectInnovationId(), info.getIdPhase()))
+                .toList();
+        
+        // Create filters metadata
+        ProjectInnovationCompleteSearchResponse.SearchFilters appliedFilters = 
+            new ProjectInnovationCompleteSearchResponse.SearchFilters(
+                phase, readinessScale, innovationTypeId, innovationId, sdgId, normalizedCountryIds, searchType
+            );
+        
+        // Create pagination metadata
+        ProjectInnovationCompleteSearchResponse.PaginationInfo pagination = 
+            ProjectInnovationCompleteSearchResponse.PaginationInfo.of(offset, limit, totalCount);
+        
+        ProjectInnovationCompleteSearchResponse searchResponse = 
+            ProjectInnovationCompleteSearchResponse.of(response, totalCount, appliedFilters, pagination);
             
         return ResponseEntity.ok(searchResponse);
     }

@@ -29,11 +29,11 @@ public interface ProjectInnovationCountryJpaRepository extends JpaRepository<Pro
     Long countDistinctCountriesByInnovationAndPhase(@Param("innovationId") Long innovationId, @Param("phaseId") Long phaseId);
     
     // OPTIMIZED: Using EXISTS instead of JOIN for better performance
-    @Query("SELECT COUNT(DISTINCT pic.projectInnovationId) FROM ProjectInnovationCountry pic " +
-           "WHERE (:phaseId IS NULL OR pic.idPhase = :phaseId) " +
-           "AND (:innovationId IS NULL OR pic.projectInnovationId = :innovationId) " +
+    @Query("SELECT COUNT(DISTINCT pii.projectInnovationId) FROM ProjectInnovationInfo pii " +
+           "WHERE (:phaseId IS NULL OR pii.idPhase = :phaseId) " +
+           "AND (:innovationId IS NULL OR pii.projectInnovationId = :innovationId) " +
            "AND EXISTS (SELECT 1 FROM ProjectInnovation pi " +
-                       "WHERE pi.id = pic.projectInnovationId AND pi.isActive = true)")
+                       "WHERE pi.id = pii.projectInnovationId AND pi.isActive = true)")
     Long countDistinctInnovationsByInnovationAndPhase(@Param("innovationId") Long innovationId, @Param("phaseId") Long phaseId);
     
     // NATIVE QUERY: Ultra-optimized for production with proper indexing

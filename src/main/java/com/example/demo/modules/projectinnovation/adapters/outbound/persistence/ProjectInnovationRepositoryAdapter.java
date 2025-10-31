@@ -16,6 +16,7 @@ public class ProjectInnovationRepositoryAdapter implements ProjectInnovationRepo
     private final ProjectInnovationRegionJpaRepository projectInnovationRegionJpaRepository;
     private final ProjectInnovationCountryJpaRepository projectInnovationCountryJpaRepository;
     private final ProjectInnovationOrganizationJpaRepository projectInnovationOrganizationJpaRepository;
+    private final ProjectInnovationAllianceOrganizationJpaRepository projectInnovationAllianceOrganizationJpaRepository;
     private final ProjectInnovationPartnershipJpaRepository projectInnovationPartnershipJpaRepository;
     private final ProjectInnovationPartnershipPersonJpaRepository projectInnovationPartnershipPersonJpaRepository;
     private final ProjectInnovationContributingOrganizationJpaRepository projectInnovationContributingOrganizationJpaRepository;
@@ -30,6 +31,7 @@ public class ProjectInnovationRepositoryAdapter implements ProjectInnovationRepo
             ProjectInnovationRegionJpaRepository projectInnovationRegionJpaRepository,
             ProjectInnovationCountryJpaRepository projectInnovationCountryJpaRepository,
             ProjectInnovationOrganizationJpaRepository projectInnovationOrganizationJpaRepository,
+            ProjectInnovationAllianceOrganizationJpaRepository projectInnovationAllianceOrganizationJpaRepository,
             ProjectInnovationPartnershipJpaRepository projectInnovationPartnershipJpaRepository,
             ProjectInnovationPartnershipPersonJpaRepository projectInnovationPartnershipPersonJpaRepository,
             ProjectInnovationContributingOrganizationJpaRepository projectInnovationContributingOrganizationJpaRepository,
@@ -42,6 +44,7 @@ public class ProjectInnovationRepositoryAdapter implements ProjectInnovationRepo
         this.projectInnovationRegionJpaRepository = projectInnovationRegionJpaRepository;
         this.projectInnovationCountryJpaRepository = projectInnovationCountryJpaRepository;
         this.projectInnovationOrganizationJpaRepository = projectInnovationOrganizationJpaRepository;
+        this.projectInnovationAllianceOrganizationJpaRepository = projectInnovationAllianceOrganizationJpaRepository;
         this.projectInnovationPartnershipJpaRepository = projectInnovationPartnershipJpaRepository;
         this.projectInnovationPartnershipPersonJpaRepository = projectInnovationPartnershipPersonJpaRepository;
         this.projectInnovationContributingOrganizationJpaRepository = projectInnovationContributingOrganizationJpaRepository;
@@ -182,6 +185,10 @@ public class ProjectInnovationRepositoryAdapter implements ProjectInnovationRepo
     
     public List<ProjectInnovationOrganization> findOrganizationsByInnovationIdAndPhase(Long innovationId, Long phaseId) {
         return projectInnovationOrganizationJpaRepository.findByProjectInnovationIdAndIdPhase(innovationId, phaseId);
+    }
+    
+    public List<ProjectInnovationAllianceOrganization> findAllianceOrganizationsByInnovationIdAndPhase(Long innovationId, Long phaseId) {
+        return projectInnovationAllianceOrganizationJpaRepository.findByProjectInnovationIdAndIdPhaseAndIsActive(innovationId, phaseId, true);
     }
     
     public List<ProjectInnovationPartnership> findPartnershipsByInnovationIdAndPhase(Long innovationId, Long phaseId) {

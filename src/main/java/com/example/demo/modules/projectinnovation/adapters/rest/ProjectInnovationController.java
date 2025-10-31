@@ -883,6 +883,39 @@ public class ProjectInnovationController {
         );
     }
     
+    private ProjectInnovationAllianceOrganizationResponse toAllianceOrganizationResponse(
+            ProjectInnovationAllianceOrganization allianceOrganization,
+            List<Institution> institutions) {
+        
+        Institution institution = allianceOrganization.getInstitutionId() == null ? null :
+                institutions.stream()
+                        .filter(inst -> inst.getId().equals(allianceOrganization.getInstitutionId()))
+                        .findFirst()
+                        .orElse(null);
+        
+        String institutionName = institution != null ? institution.getName() : null;
+        String institutionAcronym = institution != null ? institution.getAcronym() : null;
+        
+        return new ProjectInnovationAllianceOrganizationResponse(
+                allianceOrganization.getId(),
+                allianceOrganization.getProjectInnovationId(),
+                allianceOrganization.getIdPhase(),
+                allianceOrganization.getInstitutionTypeId(),
+                getInstitutionTypeName(allianceOrganization.getInstitutionTypeId()),
+                allianceOrganization.getOrganizationName(),
+                allianceOrganization.getIsScalingPartner(),
+                allianceOrganization.getIsActive(),
+                allianceOrganization.getActiveSince(),
+                allianceOrganization.getCreatedBy(),
+                allianceOrganization.getModifiedBy(),
+                allianceOrganization.getModificationJustification(),
+                allianceOrganization.getInstitutionId(),
+                institutionName,
+                institutionAcronym,
+                allianceOrganization.getNumber()
+        );
+    }
+    
     private ProjectInnovationContributingOrganizationResponse toContributingOrganizationResponse(
             ProjectInnovationContributingOrganization contributingOrg, 
             List<Institution> institutions) {
@@ -1031,6 +1064,11 @@ public class ProjectInnovationController {
         };
     }
     
+    private String getInstitutionTypeName(Long institutionTypeId) {
+        if (institutionTypeId == null) return null;
+        return "Institution Type " + institutionTypeId;
+    }
+    
     private String getPartnerTypeName(Long partnerTypeId) {
         if (partnerTypeId == null) return null;
         return switch (partnerTypeId.intValue()) {
@@ -1089,6 +1127,19 @@ public class ProjectInnovationController {
         List<ProjectInnovationOrganization> organizations = repositoryAdapter.findOrganizationsByInnovationIdAndPhase(innovationId, phaseId);
         List<ProjectInnovationOrganizationResponse> organizationsResponse = organizations.stream()
                 .map(this::toOrganizationResponse)
+                .toList();
+        
+        // Get Alliance Organizations (only active records)
+        List<ProjectInnovationAllianceOrganization> allianceOrganizations = repositoryAdapter.findAllianceOrganizationsByInnovationIdAndPhase(innovationId, phaseId);
+        List<Long> allianceInstitutionIds = allianceOrganizations.stream()
+                .map(ProjectInnovationAllianceOrganization::getInstitutionId)
+                .filter(Objects::nonNull)
+                .distinct()
+                .toList();
+        List<Institution> allianceInstitutions = allianceInstitutionIds.isEmpty() ?
+                Collections.emptyList() : repositoryAdapter.findInstitutionsByIds(allianceInstitutionIds);
+        List<ProjectInnovationAllianceOrganizationResponse> allianceOrganizationsResponse = allianceOrganizations.stream()
+                .map(org -> toAllianceOrganizationResponse(org, allianceInstitutions))
                 .toList();
         
         // Get Contributing Organizations (deduplicated by ID to avoid duplicates)
@@ -1200,6 +1251,7 @@ public class ProjectInnovationController {
                 countriesResponse,
                 referencesResponse,
                 organizationsResponse,
+                allianceOrganizationsResponse,
                 contactPersonsResponse,
                 contributingOrganizationsResponse
         );

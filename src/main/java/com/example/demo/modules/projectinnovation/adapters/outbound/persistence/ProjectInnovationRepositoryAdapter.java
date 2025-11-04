@@ -4,7 +4,9 @@ import com.example.demo.modules.projectinnovation.application.port.outbound.Proj
 import com.example.demo.modules.projectinnovation.domain.model.*;
 import org.springframework.stereotype.Component;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Component
@@ -21,6 +23,7 @@ public class ProjectInnovationRepositoryAdapter implements ProjectInnovationRepo
     private final ProjectInnovationPartnershipPersonJpaRepository projectInnovationPartnershipPersonJpaRepository;
     private final ProjectInnovationContributingOrganizationJpaRepository projectInnovationContributingOrganizationJpaRepository;
     private final ProjectInnovationReferenceJpaRepository projectInnovationReferenceJpaRepository;
+    private final DeliverableInfoJpaRepository deliverableInfoJpaRepository;
     private final InstitutionJpaRepository institutionJpaRepository;
     private final UserJpaRepository userJpaRepository;
     
@@ -36,6 +39,7 @@ public class ProjectInnovationRepositoryAdapter implements ProjectInnovationRepo
             ProjectInnovationPartnershipPersonJpaRepository projectInnovationPartnershipPersonJpaRepository,
             ProjectInnovationContributingOrganizationJpaRepository projectInnovationContributingOrganizationJpaRepository,
             ProjectInnovationReferenceJpaRepository projectInnovationReferenceJpaRepository,
+            DeliverableInfoJpaRepository deliverableInfoJpaRepository,
             InstitutionJpaRepository institutionJpaRepository,
             UserJpaRepository userJpaRepository) {
         this.projectInnovationJpaRepository = projectInnovationJpaRepository;
@@ -49,6 +53,7 @@ public class ProjectInnovationRepositoryAdapter implements ProjectInnovationRepo
         this.projectInnovationPartnershipPersonJpaRepository = projectInnovationPartnershipPersonJpaRepository;
         this.projectInnovationContributingOrganizationJpaRepository = projectInnovationContributingOrganizationJpaRepository;
         this.projectInnovationReferenceJpaRepository = projectInnovationReferenceJpaRepository;
+        this.deliverableInfoJpaRepository = deliverableInfoJpaRepository;
         this.institutionJpaRepository = institutionJpaRepository;
         this.userJpaRepository = userJpaRepository;
     }
@@ -261,7 +266,35 @@ public class ProjectInnovationRepositoryAdapter implements ProjectInnovationRepo
      * Find references associated with an innovation and phase.
      */
     public List<ProjectInnovationReference> findReferencesByInnovationIdAndPhase(Long innovationId, Long phaseId) {
-        return projectInnovationReferenceJpaRepository.findByProjectInnovationIdAndIdPhase(innovationId, phaseId);
+        List<ProjectInnovationReference> references =
+                projectInnovationReferenceJpaRepository.findByProjectInnovationIdAndIdPhase(innovationId, phaseId);
+
+        // Preload deliverable titles scoped to the current phase to avoid N+1 queries
+        List<Long> deliverableIds = references.stream()
+                .map(ProjectInnovationReference::getDeliverableId)
+                .filter(java.util.Objects::nonNull)
+                .distinct()
+                .toList();
+
+        if (!deliverableIds.isEmpty()) {
+            Map<Long, String> deliverableTitles = new HashMap<>();
+            deliverableInfoJpaRepository.findActiveByDeliverableIdInAndPhase(deliverableIds, phaseId).forEach(info -> {
+                Long deliverableId = info.getDeliverableId();
+                if (deliverableId == null || deliverableTitles.containsKey(deliverableId)) {
+                    return;
+                }
+                deliverableTitles.put(deliverableId, info.getTitle());
+            });
+
+            references.forEach(reference -> {
+                Long deliverableId = reference.getDeliverableId();
+                if (deliverableId != null) {
+                    reference.setDeliverableName(deliverableTitles.get(deliverableId));
+                }
+            });
+        }
+
+        return references;
     }
     
     /**

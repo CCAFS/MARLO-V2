@@ -27,6 +27,9 @@ public record ProjectInnovationReferenceResponse(
     @Schema(description = "Deliverable ID associated with the reference", example = "987")
     Long deliverableId,
     
+    @Schema(description = "Deliverable name associated with the reference", example = "Training manual on climate-smart agriculture")
+    String deliverableName,
+    
     @Schema(description = "Type ID associated with the reference", example = "3")
     Long typeId,
     

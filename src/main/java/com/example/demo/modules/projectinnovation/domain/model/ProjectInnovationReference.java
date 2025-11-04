@@ -59,4 +59,7 @@ public class ProjectInnovationReference {
     
     @Column(name = "modification_justification", columnDefinition = "TEXT")
     private String modificationJustification;
+
+    @Transient
+    private String deliverableName;
 }

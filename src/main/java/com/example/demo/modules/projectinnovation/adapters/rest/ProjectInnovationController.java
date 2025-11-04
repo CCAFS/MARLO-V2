@@ -864,6 +864,7 @@ public class ProjectInnovationController {
                 reference.getIsExternalAuthor(),
                 reference.getHasEvidenceByDeliverable(),
                 reference.getDeliverableId(),
+                reference.getDeliverableName(),
                 reference.getTypeId(),
                 reference.getActiveSince(),
                 reference.getCreatedBy(),

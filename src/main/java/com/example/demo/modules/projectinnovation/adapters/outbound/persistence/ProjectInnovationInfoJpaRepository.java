@@ -47,6 +47,15 @@ public interface ProjectInnovationInfoJpaRepository extends JpaRepository<Projec
            "AND EXISTS (SELECT 1 FROM ProjectInnovation pi " +
                        "WHERE pi.id = pii.projectInnovationId AND pi.isActive = true)")
     Double findAverageScalingReadinessByPhaseOptimized(@Param("phaseId") Long phaseId);
+
+    @Query("SELECT pii FROM ProjectInnovationInfo pii " +
+           "WHERE pii.projectInnovationId IN :projectInnovationIds " +
+           "AND pii.idPhase = :phaseId " +
+           "AND EXISTS (SELECT 1 FROM ProjectInnovation pi " +
+                       "WHERE pi.id = pii.projectInnovationId AND pi.isActive = true)")
+    List<ProjectInnovationInfo> findActiveByProjectInnovationIdsAndPhase(
+            @Param("projectInnovationIds") List<Long> projectInnovationIds,
+            @Param("phaseId") Long phaseId);
     
     // JOIN queries temporarily commented for testing
     // @Query("SELECT pii FROM ProjectInnovationInfo pii " +

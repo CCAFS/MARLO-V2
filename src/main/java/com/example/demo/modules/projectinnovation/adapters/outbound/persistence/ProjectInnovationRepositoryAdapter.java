@@ -23,6 +23,7 @@ public class ProjectInnovationRepositoryAdapter implements ProjectInnovationRepo
     private final ProjectInnovationPartnershipPersonJpaRepository projectInnovationPartnershipPersonJpaRepository;
     private final ProjectInnovationContributingOrganizationJpaRepository projectInnovationContributingOrganizationJpaRepository;
     private final ProjectInnovationReferenceJpaRepository projectInnovationReferenceJpaRepository;
+    private final ProjectInnovationBundleJpaRepository projectInnovationBundleJpaRepository;
     private final DeliverableInfoJpaRepository deliverableInfoJpaRepository;
     private final InstitutionJpaRepository institutionJpaRepository;
     private final UserJpaRepository userJpaRepository;
@@ -39,6 +40,7 @@ public class ProjectInnovationRepositoryAdapter implements ProjectInnovationRepo
             ProjectInnovationPartnershipPersonJpaRepository projectInnovationPartnershipPersonJpaRepository,
             ProjectInnovationContributingOrganizationJpaRepository projectInnovationContributingOrganizationJpaRepository,
             ProjectInnovationReferenceJpaRepository projectInnovationReferenceJpaRepository,
+            ProjectInnovationBundleJpaRepository projectInnovationBundleJpaRepository,
             DeliverableInfoJpaRepository deliverableInfoJpaRepository,
             InstitutionJpaRepository institutionJpaRepository,
             UserJpaRepository userJpaRepository) {
@@ -53,6 +55,7 @@ public class ProjectInnovationRepositoryAdapter implements ProjectInnovationRepo
         this.projectInnovationPartnershipPersonJpaRepository = projectInnovationPartnershipPersonJpaRepository;
         this.projectInnovationContributingOrganizationJpaRepository = projectInnovationContributingOrganizationJpaRepository;
         this.projectInnovationReferenceJpaRepository = projectInnovationReferenceJpaRepository;
+        this.projectInnovationBundleJpaRepository = projectInnovationBundleJpaRepository;
         this.deliverableInfoJpaRepository = deliverableInfoJpaRepository;
         this.institutionJpaRepository = institutionJpaRepository;
         this.userJpaRepository = userJpaRepository;
@@ -295,6 +298,23 @@ public class ProjectInnovationRepositoryAdapter implements ProjectInnovationRepo
         }
 
         return references;
+    }
+    
+    /**
+     * Find bundles associated with an innovation and phase (active only).
+     */
+    public List<ProjectInnovationBundle> findBundlesByInnovationIdAndPhase(Long innovationId, Long phaseId) {
+        return projectInnovationBundleJpaRepository.findByProjectInnovationIdAndIdPhaseAndIsActiveTrue(innovationId, phaseId);
+    }
+    
+    /**
+     * Find active innovation info records for a set of innovations within a phase.
+     */
+    public List<ProjectInnovationInfo> findActiveInfoByInnovationIdsAndPhase(List<Long> innovationIds, Long phaseId) {
+        if (innovationIds == null || innovationIds.isEmpty()) {
+            return List.of();
+        }
+        return projectInnovationInfoJpaRepository.findActiveByProjectInnovationIdsAndPhase(innovationIds, phaseId);
     }
     
     /**

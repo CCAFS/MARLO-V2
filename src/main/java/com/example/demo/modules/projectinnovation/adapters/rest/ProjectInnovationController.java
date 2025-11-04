@@ -12,6 +12,8 @@ import com.example.demo.modules.projectinnovation.application.port.inbound.Proje
 import com.example.demo.modules.projectinnovation.application.service.ProjectInnovationActorsService;
 import com.example.demo.modules.projectinnovation.domain.model.*;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -872,6 +874,24 @@ public class ProjectInnovationController {
                 reference.getModificationJustification()
         );
     }
+
+    private ProjectInnovationBundleResponse toBundleResponse(ProjectInnovationBundle bundle, ProjectInnovationInfo bundleInfo) {
+        String bundleName = bundleInfo != null ? bundleInfo.getTitle() : null;
+        Integer readinessScale = bundleInfo != null ? bundleInfo.getReadinessScale() : null;
+        return new ProjectInnovationBundleResponse(
+                bundle.getId(),
+                bundle.getProjectInnovationId(),
+                bundle.getSelectedInnovationId(),
+                bundleName,
+                readinessScale,
+                bundle.getIdPhase(),
+                bundle.getIsActive(),
+                bundle.getActiveSince(),
+                bundle.getCreatedBy(),
+                bundle.getModifiedBy(),
+                bundle.getModificationJustification()
+        );
+    }
     
     private ProjectInnovationOrganizationResponse toOrganizationResponse(ProjectInnovationOrganization organization) {
         String organizationTypeName = getOrganizationTypeName(organization.getRepIndOrganizationTypeId());
@@ -1179,6 +1199,47 @@ public class ProjectInnovationController {
         List<ProjectInnovationPartnershipResponse> contactPersonsResponse = partnerships.stream()
                 .map(partnership -> toPartnershipResponse(partnership, institutions, contactPersons))
                 .toList();
+
+        // Get Bundles (active only)
+        List<ProjectInnovationBundle> bundles = repositoryAdapter.findBundlesByInnovationIdAndPhase(innovationId, phaseId);
+        Map<Long, java.util.Set<Long>> innovationIdsByPhase = new HashMap<>();
+
+        for (ProjectInnovationBundle bundle : bundles) {
+            Long selectedInnovationId = bundle.getSelectedInnovationId();
+            if (selectedInnovationId == null) {
+                continue;
+            }
+            Long bundlePhase = bundle.getIdPhase() != null ? bundle.getIdPhase() : phaseId;
+            innovationIdsByPhase
+                    .computeIfAbsent(bundlePhase, key -> new java.util.HashSet<>())
+                    .add(selectedInnovationId);
+        }
+
+        Map<String, ProjectInnovationInfo> bundleInfoByInnovationAndPhase = new HashMap<>();
+        for (Map.Entry<Long, java.util.Set<Long>> entry : innovationIdsByPhase.entrySet()) {
+            Long bundlePhase = entry.getKey();
+            List<Long> innovationsForPhase = entry.getValue().stream().distinct().toList();
+            if (innovationsForPhase.isEmpty()) {
+                continue;
+            }
+            List<ProjectInnovationInfo> bundleInfos = repositoryAdapter.findActiveInfoByInnovationIdsAndPhase(innovationsForPhase, bundlePhase);
+            for (ProjectInnovationInfo bundleInfoEntry : bundleInfos) {
+                Long bundleInnovationId = bundleInfoEntry.getProjectInnovationId();
+                if (bundleInnovationId != null) {
+                    String key = bundleInfoKey(bundleInnovationId, bundlePhase);
+                    bundleInfoByInnovationAndPhase.putIfAbsent(key, bundleInfoEntry);
+                }
+            }
+        }
+
+        List<ProjectInnovationBundleResponse> bundlesResponse = bundles.stream()
+                .map(bundle -> {
+                    Long bundlePhase = bundle.getIdPhase() != null ? bundle.getIdPhase() : phaseId;
+                    String key = bundleInfoKey(bundle.getSelectedInnovationId(), bundlePhase);
+                    ProjectInnovationInfo bundleInfo = bundleInfoByInnovationAndPhase.get(key);
+                    return toBundleResponse(bundle, bundleInfo);
+                })
+                .toList();
         
         return new InnovationInfo(
                 info.getId(),
@@ -1254,8 +1315,16 @@ public class ProjectInnovationController {
                 organizationsResponse,
                 allianceOrganizationsResponse,
                 contactPersonsResponse,
-                contributingOrganizationsResponse
+                contributingOrganizationsResponse,
+                bundlesResponse
         );
+    }
+    
+    private String bundleInfoKey(Long innovationId, Long phaseId) {
+        if (innovationId == null || phaseId == null) {
+            return innovationId + ":" + phaseId;
+        }
+        return innovationId + ":" + phaseId;
     }
     
     @Operation(summary = "Get innovation and country statistics by phase",

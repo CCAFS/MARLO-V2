@@ -10,6 +10,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
+import org.springframework.security.web.header.writers.StaticHeadersWriter;
 
 /**
  * Security configuration adding Helmet-like headers and registering the rate limiting filter.
@@ -40,19 +41,20 @@ public class SecurityConfig {
                         .permitAll()
                         .anyRequest()
                         .permitAll())
-                .headers(headers -> headers
-                        .contentTypeOptions(Customizer.withDefaults())
-                        .xssProtection(xss -> xss.block(true))
-                        .httpStrictTransportSecurity(hsts -> hsts
-                                .includeSubDomains(true)
-                                .maxAgeInSeconds(31536000))
-                        .frameOptions(frame -> frame.sameOrigin())
-                        .contentSecurityPolicy(csp -> csp
-                                .policyDirectives("default-src 'self'; frame-ancestors 'self'; object-src 'none'; frame-src 'self'; img-src 'self' data: https:; script-src 'self'; style-src 'self' 'unsafe-inline'"))
-                        .referrerPolicy(referrer -> referrer
-                                .policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.SAME_ORIGIN))
-                        .permissionsPolicy(policy -> policy
-                                .policy("geolocation=(), camera=(), microphone=(), fullscreen=(self)")))
+                .headers(headers -> {
+                    headers.contentTypeOptions(Customizer.withDefaults());
+                    headers.httpStrictTransportSecurity(hsts -> hsts
+                            .includeSubDomains(true)
+                            .maxAgeInSeconds(31536000));
+                    headers.frameOptions(frame -> frame.sameOrigin());
+                    headers.contentSecurityPolicy(csp -> csp
+                            .policyDirectives("default-src 'self'; frame-ancestors 'self'; object-src 'none'; frame-src 'self'; img-src 'self' data: https:; script-src 'self'; style-src 'self' 'unsafe-inline'"));
+                    headers.referrerPolicy(referrer -> referrer
+                            .policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.SAME_ORIGIN));
+                    headers.permissionsPolicy(policy -> policy
+                            .policy("geolocation=(), camera=(), microphone=(), fullscreen=(self)"));
+                    headers.addHeaderWriter(new StaticHeadersWriter("X-XSS-Protection", "1; mode=block"));
+                })
                 .addFilterBefore(rateLimitingFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

@@ -20,11 +20,10 @@ import org.springframework.util.AntPathMatcher;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.bucket4j.Bandwidth;
-import com.bucket4j.Bucket;
-import com.bucket4j.Bucket4j;
-import com.bucket4j.ConsumptionProbe;
-import com.bucket4j.Refill;
+import io.github.bucket4j.Bandwidth;
+import io.github.bucket4j.Bucket;
+import io.github.bucket4j.ConsumptionProbe;
+import io.github.bucket4j.Refill;
 
 /**
  * Simple in-memory rate limiting filter based on client identifier.
@@ -94,7 +93,7 @@ public class RateLimitingFilter extends OncePerRequestFilter {
         return bucketCache.computeIfAbsent(clientId, key -> {
             Refill refill = Refill.greedy(properties.getRefillTokens(), properties.getRefillPeriod());
             Bandwidth limit = Bandwidth.classic(properties.getCapacity(), refill);
-            return Bucket4j.builder().addLimit(limit).build();
+            return Bucket.builder().addLimit(limit).build();
         });
     }
 

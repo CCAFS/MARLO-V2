@@ -103,10 +103,16 @@ class InnovationReportServiceTest {
         assertThrows(IllegalArgumentException.class,
                 () -> reportService.createReport(INNOVATION_ID, "", USER_LASTNAME, USER_EMAIL, INTEREST));
         assertThrows(IllegalArgumentException.class,
-                () -> reportService.createReport(INNOVATION_ID, USER_NAME, "", USER_EMAIL, INTEREST));
-        assertThrows(IllegalArgumentException.class,
                 () -> reportService.createReport(INNOVATION_ID, USER_NAME, USER_LASTNAME, "bad-email", INTEREST));
         verify(reportRepository, never()).save(any());
+    }
+
+    @Test
+    void createReport_allowsOptionalLastnameAndEmail() {
+        when(reportRepository.save(any(InnovationCatalogReport.class))).thenReturn(report);
+
+        assertDoesNotThrow(() -> reportService.createReport(INNOVATION_ID, USER_NAME, null, null, INTEREST));
+        verify(reportRepository, atLeastOnce()).save(any(InnovationCatalogReport.class));
     }
 
     @Test

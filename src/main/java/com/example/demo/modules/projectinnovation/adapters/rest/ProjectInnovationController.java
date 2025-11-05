@@ -874,6 +874,23 @@ public class ProjectInnovationController {
                 reference.getModificationJustification()
         );
     }
+    
+    private ProjectInnovationComplementarySolutionResponse toComplementarySolutionResponse(ProjectInnovationComplementarySolution solution) {
+        return new ProjectInnovationComplementarySolutionResponse(
+                solution.getId(),
+                solution.getTitle(),
+                solution.getShortTitle(),
+                solution.getShortDescription(),
+                solution.getProjectInnovationTypeId(),
+                getInnovationTypeInfo(solution.getProjectInnovationTypeId()),
+                solution.getIdPhase(),
+                solution.getIsActive(),
+                solution.getActiveSince(),
+                solution.getCreatedBy(),
+                solution.getModifiedBy(),
+                solution.getModificationJustification()
+        );
+    }
 
     private ProjectInnovationBundleResponse toBundleResponse(ProjectInnovationBundle bundle, ProjectInnovationInfo bundleInfo) {
         String bundleName = bundleInfo != null ? bundleInfo.getTitle() : null;
@@ -1144,6 +1161,12 @@ public class ProjectInnovationController {
                 .map(this::toReferenceResponse)
                 .toList();
         
+        // Get Complementary Solutions associated with the innovation and phase
+        List<ProjectInnovationComplementarySolution> complementarySolutions = repositoryAdapter.findComplementarySolutionsByInnovationIdAndPhase(innovationId, phaseId);
+        List<ProjectInnovationComplementarySolutionResponse> complementarySolutionsResponse = complementarySolutions.stream()
+                .map(this::toComplementarySolutionResponse)
+                .toList();
+        
         // Get Organizations
         List<ProjectInnovationOrganization> organizations = repositoryAdapter.findOrganizationsByInnovationIdAndPhase(innovationId, phaseId);
         List<ProjectInnovationOrganizationResponse> organizationsResponse = organizations.stream()
@@ -1316,6 +1339,7 @@ public class ProjectInnovationController {
                 allianceOrganizationsResponse,
                 contactPersonsResponse,
                 contributingOrganizationsResponse,
+                complementarySolutionsResponse,
                 bundlesResponse
         );
     }

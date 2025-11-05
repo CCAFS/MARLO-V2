@@ -2,7 +2,6 @@ package com.example.demo.modules.innovationreports.adapters.web.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
@@ -19,15 +18,12 @@ public class CreateInnovationReportRequestDto {
     @NotBlank(message = "User name is required")
     private String userName;
 
-    @Schema(description = "Reporter last name", example = "Smith", required = true)
+    @Schema(description = "Reporter last name", example = "Smith", required = false)
     @JsonProperty("user_lastname")
-    @NotBlank(message = "User lastname is required")
     private String userLastname;
 
-    @Schema(description = "Reporter email address", example = "jane.smith@example.com", required = true)
+    @Schema(description = "Reporter email address", example = "jane.smith@example.com", required = false)
     @JsonProperty("user_email")
-    @NotBlank(message = "User email is required")
-    @Email(message = "Invalid email format")
     private String userEmail;
 
     @Schema(description = "Narrative describing the stakeholder interest in the innovation", example = "Interested in piloting the innovation in West Africa.")

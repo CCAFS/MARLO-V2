@@ -43,10 +43,10 @@ public class InnovationReportService implements InnovationReportUseCase {
     @Override
     @Transactional(readOnly = true)
     public List<InnovationCatalogReport> getActiveReportsByUserEmail(String userEmail) {
-        validateEmail(userEmail);
+        String normalizedEmail = normalizeRequiredEmail(userEmail);
 
         try {
-            return reportRepository.findActiveReportsByUserEmail(userEmail);
+            return reportRepository.findActiveReportsByUserEmail(normalizedEmail);
         } catch (DataAccessException e) {
             logger.error("Database error while fetching reports for user {}: {}", userEmail, e.getMessage());
             throw new RuntimeException("Database error occurred while fetching user reports", e);
@@ -70,10 +70,9 @@ public class InnovationReportService implements InnovationReportUseCase {
 
     @Override
     public InnovationCatalogReport createReport(Long innovationId, String userName, String userLastname, String userEmail, String interestNarrative) {
-        validateReportParameters(innovationId, userName, userLastname, userEmail);
+        InnovationCatalogReport report = buildReport(innovationId, userName, userLastname, userEmail, interestNarrative);
 
         try {
-            InnovationCatalogReport report = new InnovationCatalogReport(innovationId, userName, userLastname, userEmail, interestNarrative);
             return reportRepository.save(report);
         } catch (DataAccessException e) {
             logger.error("Database error while creating report for innovation {}: {}", innovationId, e.getMessage());
@@ -83,10 +82,9 @@ public class InnovationReportService implements InnovationReportUseCase {
 
     @Override
     public InnovationCatalogReport createReportWithAudit(Long innovationId, String userName, String userLastname, String userEmail, String interestNarrative, String modificationJustification) {
-        validateReportParameters(innovationId, userName, userLastname, userEmail);
+        InnovationCatalogReport report = buildReport(innovationId, userName, userLastname, userEmail, interestNarrative);
 
         try {
-            InnovationCatalogReport report = new InnovationCatalogReport(innovationId, userName, userLastname, userEmail, interestNarrative);
             report.setModificationJustification(modificationJustification);
             return reportRepository.save(report);
         } catch (DataAccessException e) {
@@ -109,25 +107,63 @@ public class InnovationReportService implements InnovationReportUseCase {
         }
     }
 
-    private void validateReportParameters(Long innovationId, String userName, String userLastname, String userEmail) {
+    private InnovationCatalogReport buildReport(Long innovationId,
+                                               String userName,
+                                               String userLastname,
+                                               String userEmail,
+                                               String interestNarrative) {
         if (innovationId == null) {
             throw new IllegalArgumentException("Innovation ID cannot be null");
         }
-        if (userName == null || userName.trim().isEmpty()) {
-            throw new IllegalArgumentException("User name cannot be null or empty");
-        }
-        if (userLastname == null || userLastname.trim().isEmpty()) {
-            throw new IllegalArgumentException("User lastname cannot be null or empty");
-        }
-        validateEmail(userEmail);
+
+        String normalizedUserName = normalizeRequired(userName, "User name");
+        String normalizedLastname = normalizeOptional(userLastname);
+        String normalizedEmail = normalizeOptionalEmail(userEmail);
+
+        return new InnovationCatalogReport(
+                innovationId,
+                normalizedUserName,
+                normalizedLastname,
+                normalizedEmail,
+                interestNarrative
+        );
     }
 
-    private void validateEmail(String email) {
-        if (email == null || email.trim().isEmpty()) {
+    private String normalizeRequired(String value, String fieldName) {
+        String normalized = normalizeOptional(value);
+        if (normalized == null) {
+            throw new IllegalArgumentException(fieldName + " cannot be null or empty");
+        }
+        return normalized;
+    }
+
+    private String normalizeOptional(String value) {
+        if (value == null) {
+            return null;
+        }
+        String trimmed = value.trim();
+        return trimmed.isEmpty() ? null : trimmed;
+    }
+
+    private String normalizeRequiredEmail(String email) {
+        String normalized = normalizeOptional(email);
+        if (normalized == null) {
             throw new IllegalArgumentException("User email cannot be null or empty");
         }
-        if (!EMAIL_PATTERN.matcher(email).matches()) {
+        if (!EMAIL_PATTERN.matcher(normalized).matches()) {
             throw new IllegalArgumentException("Invalid email format");
         }
+        return normalized;
+    }
+
+    private String normalizeOptionalEmail(String email) {
+        String normalized = normalizeOptional(email);
+        if (normalized == null) {
+            return null;
+        }
+        if (!EMAIL_PATTERN.matcher(normalized).matches()) {
+            throw new IllegalArgumentException("Invalid email format");
+        }
+        return normalized;
     }
 }

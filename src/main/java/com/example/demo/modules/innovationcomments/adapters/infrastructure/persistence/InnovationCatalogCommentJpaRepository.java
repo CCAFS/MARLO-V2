@@ -1,6 +1,7 @@
 package com.example.demo.modules.innovationcomments.adapters.infrastructure.persistence;
 
 import com.example.demo.modules.innovationcomments.domain.model.InnovationCatalogComment;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -80,6 +81,16 @@ public interface InnovationCatalogCommentJpaRepository extends JpaRepository<Inn
            "WHERE c.innovationId = :innovationId " +
            "ORDER BY c.activeSince DESC")
     List<InnovationCatalogComment> findAllCommentsByInnovationId(@Param("innovationId") Long innovationId);
+    
+    /**
+     * Finds all comments ordered by active since descending.
+     */
+    List<InnovationCatalogComment> findAllByOrderByActiveSinceDesc();
+    
+    /**
+     * Finds comments ordered by active since descending limited by pageable.
+     */
+    List<InnovationCatalogComment> findAllByOrderByActiveSinceDesc(Pageable pageable);
     
     /**
      * Soft delete - marks comment as inactive instead of deleting it

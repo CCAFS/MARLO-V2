@@ -71,6 +71,13 @@ public interface InnovationCommentUseCase {
     List<InnovationCatalogComment> getRecentActiveCommentsByInnovationId(Long innovationId);
     
     /**
+     * Get all comments ordered by newest first, optionally limited.
+     * @param limit Maximum number of comments to return. Null means all.
+     * @return List of comments ordered by activeSince descending.
+     */
+    List<InnovationCatalogComment> getAllComments(Integer limit);
+    
+    /**
      * Soft delete a comment (mark as inactive)
      * @param commentId The comment ID to deactivate
      * @return true if the comment was successfully deactivated

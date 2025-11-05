@@ -151,6 +151,29 @@ public class InnovationCommentService implements InnovationCommentUseCase {
     
     @Override
     @Transactional(readOnly = true)
+    public List<InnovationCatalogComment> getAllComments(Integer limit) {
+        Integer sanitizedLimit = null;
+        if (limit != null) {
+            if (limit <= 0) {
+                throw new IllegalArgumentException("Limit must be greater than zero");
+            }
+            sanitizedLimit = limit;
+        }
+        
+        try {
+            return commentRepository.findAllCommentsOrderByActiveSinceDesc(sanitizedLimit);
+        } catch (DataAccessException e) {
+            logger.error("Database error while fetching comments: {}", e.getMessage());
+            if (isTableNotExistsError(e)) {
+                logger.warn("Table 'innovation_catalog_comments' does not exist in database");
+                throw new RuntimeException("Comments table not found. Please ensure the database schema is properly initialized.", e);
+            }
+            throw new RuntimeException("Database error occurred while fetching comments", e);
+        }
+    }
+    
+    @Override
+    @Transactional(readOnly = true)
     public List<InnovationCatalogComment> getRecentActiveCommentsByInnovationId(Long innovationId) {
         if (innovationId == null) {
             throw new IllegalArgumentException("Innovation ID cannot be null");

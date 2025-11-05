@@ -83,6 +83,7 @@ public record ProjectInnovationInfoCompleteWithRelationsResponse(
         List<ProjectInnovationReferenceResponse> references,              // References / Evidences
         List<ProjectInnovationOrganizationResponse> organizations,        // Contact Organizations
         List<ProjectInnovationPartnershipResponse> contactPersons,        // External Partners with Contact Names
+        List<ProjectInnovationComplementarySolutionResponse> complementarySolutions, // Complementary solutions
         List<ProjectInnovationBundleResponse> bundles                     // Bundled innovations
 ) {
 }

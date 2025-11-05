@@ -24,6 +24,7 @@ public class ProjectInnovationRepositoryAdapter implements ProjectInnovationRepo
     private final ProjectInnovationContributingOrganizationJpaRepository projectInnovationContributingOrganizationJpaRepository;
     private final ProjectInnovationReferenceJpaRepository projectInnovationReferenceJpaRepository;
     private final ProjectInnovationBundleJpaRepository projectInnovationBundleJpaRepository;
+    private final ProjectInnovationComplementarySolutionJpaRepository projectInnovationComplementarySolutionJpaRepository;
     private final DeliverableInfoJpaRepository deliverableInfoJpaRepository;
     private final InstitutionJpaRepository institutionJpaRepository;
     private final UserJpaRepository userJpaRepository;
@@ -41,6 +42,7 @@ public class ProjectInnovationRepositoryAdapter implements ProjectInnovationRepo
             ProjectInnovationContributingOrganizationJpaRepository projectInnovationContributingOrganizationJpaRepository,
             ProjectInnovationReferenceJpaRepository projectInnovationReferenceJpaRepository,
             ProjectInnovationBundleJpaRepository projectInnovationBundleJpaRepository,
+            ProjectInnovationComplementarySolutionJpaRepository projectInnovationComplementarySolutionJpaRepository,
             DeliverableInfoJpaRepository deliverableInfoJpaRepository,
             InstitutionJpaRepository institutionJpaRepository,
             UserJpaRepository userJpaRepository) {
@@ -56,6 +58,7 @@ public class ProjectInnovationRepositoryAdapter implements ProjectInnovationRepo
         this.projectInnovationContributingOrganizationJpaRepository = projectInnovationContributingOrganizationJpaRepository;
         this.projectInnovationReferenceJpaRepository = projectInnovationReferenceJpaRepository;
         this.projectInnovationBundleJpaRepository = projectInnovationBundleJpaRepository;
+        this.projectInnovationComplementarySolutionJpaRepository = projectInnovationComplementarySolutionJpaRepository;
         this.deliverableInfoJpaRepository = deliverableInfoJpaRepository;
         this.institutionJpaRepository = institutionJpaRepository;
         this.userJpaRepository = userJpaRepository;
@@ -305,6 +308,13 @@ public class ProjectInnovationRepositoryAdapter implements ProjectInnovationRepo
      */
     public List<ProjectInnovationBundle> findBundlesByInnovationIdAndPhase(Long innovationId, Long phaseId) {
         return projectInnovationBundleJpaRepository.findByProjectInnovationIdAndIdPhaseAndIsActiveTrue(innovationId, phaseId);
+    }
+    
+    /**
+     * Find complementary solutions associated with an innovation and phase (active only).
+     */
+    public List<ProjectInnovationComplementarySolution> findComplementarySolutionsByInnovationIdAndPhase(Long innovationId, Long phaseId) {
+        return projectInnovationComplementarySolutionJpaRepository.findByProjectInnovationIdAndIdPhaseAndIsActiveTrue(innovationId, phaseId);
     }
     
     /**

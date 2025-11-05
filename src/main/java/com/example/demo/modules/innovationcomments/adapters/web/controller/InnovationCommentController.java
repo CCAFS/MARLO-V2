@@ -39,6 +39,40 @@ public class InnovationCommentController {
     }
     
     @Operation(
+        summary = "Get all comments",
+        description = "Retrieves all comments ordered by most recent first. Optionally limit the number of comments returned."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Successfully retrieved comments"),
+        @ApiResponse(responseCode = "400", description = "Invalid limit parameter"),
+        @ApiResponse(responseCode = "503", description = "Comments table unavailable"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @GetMapping
+    public ResponseEntity<List<InnovationCommentResponseDto>> getAllComments(
+            @Parameter(description = "Maximum number of comments to return", required = false, example = "10")
+            @RequestParam(value = "limit", required = false) Integer limit) {
+        
+        try {
+            List<InnovationCatalogComment> comments = commentUseCase.getAllComments(limit);
+            return ResponseEntity.ok(commentMapper.toResponseDtoList(comments));
+        } catch (IllegalArgumentException e) {
+            logger.warn("Invalid limit parameter provided: {}", e.getMessage());
+            return ResponseEntity.badRequest().build();
+        } catch (RuntimeException e) {
+            if (e.getMessage() != null && e.getMessage().contains("table not found")) {
+                logger.error("Database table not found: {}", e.getMessage());
+                return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build();
+            }
+            logger.error("Error fetching comments: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        } catch (Exception e) {
+            logger.error("Unexpected error fetching comments: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+    
+    @Operation(
         summary = "Get active comments by innovation ID",
         description = "Retrieves all active comments for a specific innovation, ordered by creation date descending"
     )

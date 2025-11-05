@@ -2,6 +2,7 @@ package com.example.demo.modules.innovationcomments.adapters.infrastructure.pers
 
 import com.example.demo.modules.innovationcomments.domain.model.InnovationCatalogComment;
 import com.example.demo.modules.innovationcomments.domain.port.out.InnovationCommentRepository;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -60,6 +61,14 @@ public class InnovationCommentRepositoryAdapter implements InnovationCommentRepo
     @Override
     public List<InnovationCatalogComment> findAllCommentsByInnovationId(Long innovationId) {
         return jpaRepository.findAllCommentsByInnovationId(innovationId);
+    }
+    
+    @Override
+    public List<InnovationCatalogComment> findAllCommentsOrderByActiveSinceDesc(Integer limit) {
+        if (limit == null || limit <= 0) {
+            return jpaRepository.findAllByOrderByActiveSinceDesc();
+        }
+        return jpaRepository.findAllByOrderByActiveSinceDesc(PageRequest.of(0, limit));
     }
     
     @Override

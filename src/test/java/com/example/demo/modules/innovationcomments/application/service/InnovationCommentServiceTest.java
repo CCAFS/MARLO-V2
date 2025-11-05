@@ -16,6 +16,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.*;
 
 /**
@@ -227,6 +228,45 @@ class InnovationCommentServiceTest {
         assertNotNull(result);
         assertEquals(1, result.size());
         verify(commentRepository, times(1)).findRecentActiveCommentsByInnovationId(testInnovationId);
+    }
+    
+    @Test
+    void getAllComments_NoLimit_ReturnsAll() {
+        // Arrange
+        List<InnovationCatalogComment> expectedComments = Arrays.asList(testCommentEntity);
+        when(commentRepository.findAllCommentsOrderByActiveSinceDesc(isNull())).thenReturn(expectedComments);
+        
+        // Act
+        List<InnovationCatalogComment> result = commentService.getAllComments(null);
+        
+        // Assert
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        verify(commentRepository, times(1)).findAllCommentsOrderByActiveSinceDesc(isNull());
+    }
+    
+    @Test
+    void getAllComments_WithLimit_ReturnsLimited() {
+        // Arrange
+        List<InnovationCatalogComment> expectedComments = Arrays.asList(testCommentEntity);
+        when(commentRepository.findAllCommentsOrderByActiveSinceDesc(5)).thenReturn(expectedComments);
+        
+        // Act
+        List<InnovationCatalogComment> result = commentService.getAllComments(5);
+        
+        // Assert
+        assertNotNull(result);
+        verify(commentRepository, times(1)).findAllCommentsOrderByActiveSinceDesc(5);
+    }
+    
+    @Test
+    void getAllComments_InvalidLimit_ThrowsException() {
+        // Act & Assert
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> commentService.getAllComments(0));
+        
+        assertEquals("Limit must be greater than zero", exception.getMessage());
+        verify(commentRepository, never()).findAllCommentsOrderByActiveSinceDesc(any());
     }
     
     @Test

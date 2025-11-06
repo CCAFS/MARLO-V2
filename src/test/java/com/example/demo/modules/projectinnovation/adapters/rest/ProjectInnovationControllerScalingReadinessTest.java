@@ -1,10 +1,15 @@
 package com.example.demo.modules.projectinnovation.adapters.rest;
 
+import com.example.demo.modules.innovationtype.adapters.outbound.persistence.InnovationTypeRepositoryAdapter;
+import com.example.demo.modules.projectinnovation.adapters.outbound.persistence.LocElementJpaRepository;
 import com.example.demo.modules.projectinnovation.adapters.outbound.persistence.ProjectInnovationRepositoryAdapter;
+import com.example.demo.modules.projectinnovation.adapters.rest.mapper.ProjectInnovationActorsMapper;
+import com.example.demo.modules.projectinnovation.application.port.inbound.ProjectInnovationUseCase;
+import com.example.demo.modules.projectinnovation.application.service.ProjectInnovationActorsService;
+import com.example.demo.modules.sustainabledevelopmentgoals.adapters.outbound.persistence.SustainableDevelopmentGoalJpaRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.web.servlet.MockMvc;
@@ -21,15 +26,41 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class ProjectInnovationControllerScalingReadinessTest {
 
     @Mock
+    private ProjectInnovationUseCase projectInnovationUseCase;
+
+    @Mock
+    private ProjectInnovationActorsService actorsService;
+
+    @Mock
+    private ProjectInnovationActorsMapper actorsMapper;
+
+    @Mock
     private ProjectInnovationRepositoryAdapter repositoryAdapter;
 
-    @InjectMocks
+    @Mock
+    private LocElementJpaRepository locElementRepository;
+
+    @Mock
+    private InnovationTypeRepositoryAdapter innovationTypeRepository;
+
+    @Mock
+    private SustainableDevelopmentGoalJpaRepository sdgRepository;
+
     private ProjectInnovationController controller;
 
     private MockMvc mockMvc;
 
     @BeforeEach
     void setUp() {
+        controller = new ProjectInnovationController(
+                projectInnovationUseCase,
+                actorsService,
+                actorsMapper,
+                repositoryAdapter,
+                locElementRepository,
+                innovationTypeRepository,
+                sdgRepository
+        );
         mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
     }
 

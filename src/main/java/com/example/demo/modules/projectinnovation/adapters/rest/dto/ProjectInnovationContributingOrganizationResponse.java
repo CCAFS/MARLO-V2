@@ -10,5 +10,7 @@ public record ProjectInnovationContributingOrganizationResponse(
         Long idPhase,
         Long institutionId,
         String institutionName,
-        String institutionAcronym
+        String institutionAcronym,
+        String city,
+        String headquarterLocationName
 ) {}

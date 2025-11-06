@@ -6,6 +6,7 @@ import com.example.demo.modules.projectinnovation.adapters.rest.dto.*;
 import com.example.demo.modules.projectinnovation.adapters.rest.dto.ProjectInnovationCompleteSearchResponse;
 import com.example.demo.modules.projectinnovation.adapters.rest.mapper.ProjectInnovationActorsMapper;
 import com.example.demo.modules.projectinnovation.adapters.outbound.persistence.ProjectInnovationRepositoryAdapter;
+import com.example.demo.modules.projectinnovation.adapters.outbound.persistence.ProjectInnovationRepositoryAdapter.HeadquarterLocation;
 import com.example.demo.modules.projectinnovation.adapters.outbound.persistence.LocElementJpaRepository;
 import com.example.demo.modules.sustainabledevelopmentgoals.adapters.outbound.persistence.SustainableDevelopmentGoalJpaRepository;
 import com.example.demo.modules.projectinnovation.application.port.inbound.ProjectInnovationUseCase;
@@ -959,8 +960,9 @@ public class ProjectInnovationController {
     }
     
     private ProjectInnovationContributingOrganizationResponse toContributingOrganizationResponse(
-            ProjectInnovationContributingOrganization contributingOrg, 
-            List<Institution> institutions) {
+            ProjectInnovationContributingOrganization contributingOrg,
+            List<Institution> institutions,
+            Map<Long, HeadquarterLocation> headquarterLocations) {
         
         Institution institution = institutions.stream()
                 .filter(inst -> inst.getId().equals(contributingOrg.getInstitutionId()))
@@ -969,6 +971,11 @@ public class ProjectInnovationController {
         
         String institutionName = institution != null ? institution.getName() : "Institution " + contributingOrg.getInstitutionId();
         String institutionAcronym = institution != null ? institution.getAcronym() : null;
+        HeadquarterLocation headquarter = headquarterLocations.get(contributingOrg.getInstitutionId());
+        String city = headquarter != null ? headquarter.city() : null;
+        String headquarterLocationName = headquarter != null && headquarter.locationName() != null
+                ? headquarter.locationName()
+                : city;
         
         return new ProjectInnovationContributingOrganizationResponse(
                 contributingOrg.getId(),
@@ -976,7 +983,9 @@ public class ProjectInnovationController {
                 contributingOrg.getIdPhase(),
                 contributingOrg.getInstitutionId(),
                 institutionName,
-                institutionAcronym
+                institutionAcronym,
+                city,
+                headquarterLocationName
         );
     }
     
@@ -1207,8 +1216,10 @@ public class ProjectInnovationController {
                 .toList();
         List<Institution> contributingInstitutions = contributingInstitutionIds.isEmpty() ? 
                 Collections.emptyList() : repositoryAdapter.findInstitutionsByIds(contributingInstitutionIds);
+        Map<Long, HeadquarterLocation> contributingInstitutionHeadquarters =
+                repositoryAdapter.findHeadquarterCitiesByInstitutionIds(contributingInstitutionIds);
         List<ProjectInnovationContributingOrganizationResponse> contributingOrganizationsResponse = contributingOrganizations.stream()
-                .map(org -> toContributingOrganizationResponse(org, contributingInstitutions))
+                .map(org -> toContributingOrganizationResponse(org, contributingInstitutions, contributingInstitutionHeadquarters))
                 .toList();
         
         // Get Partnerships (External Partners)

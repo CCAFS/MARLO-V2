@@ -11,15 +11,14 @@ import com.example.demo.modules.sustainabledevelopmentgoals.adapters.outbound.pe
 import com.example.demo.modules.projectinnovation.application.port.inbound.ProjectInnovationUseCase;
 import com.example.demo.modules.projectinnovation.application.service.ProjectInnovationActorsService;
 import com.example.demo.modules.projectinnovation.domain.model.*;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -31,6 +30,8 @@ import java.util.List;
 @RequestMapping("/api/innovations")
 @Tag(name = "Innovation API", description = "API for managing innovations")
 public class ProjectInnovationController {
+    
+    private static final int DEFAULT_PAGINATION_LIMIT = 20;
     
     private final ProjectInnovationUseCase projectInnovationUseCase;
     private final ProjectInnovationActorsService actorsService;
@@ -186,8 +187,7 @@ public class ProjectInnovationController {
         
         // Validate pagination parameters
         if (offset < 0) offset = 0;
-        if (limit <= 0) limit = 20;
-        if (limit > 100) limit = 100; // Maximum limit to prevent performance issues
+        int normalizedLimit = normalizeLimit(limit);
         
         // Normalize optional filters
         List<Long> normalizedCountryIds = normalizeCountryIds(countryIds);
@@ -225,7 +225,7 @@ public class ProjectInnovationController {
         // Apply pagination
         List<ProjectInnovationInfo> paginatedInnovations = allInnovations.stream()
                 .skip(offset)
-                .limit(limit)
+                .limit(normalizedLimit)
                 .toList();
         
         List<ProjectInnovationInfoResponse> response = paginatedInnovations.stream()
@@ -240,7 +240,7 @@ public class ProjectInnovationController {
         
         // Create pagination metadata
         ProjectInnovationSearchResponse.PaginationInfo pagination = 
-            ProjectInnovationSearchResponse.PaginationInfo.of(offset, limit, totalCount);
+            ProjectInnovationSearchResponse.PaginationInfo.of(offset, normalizedLimit, totalCount);
         
         ProjectInnovationSearchResponse searchResponse = 
             ProjectInnovationSearchResponse.of(response, totalCount, appliedFilters, pagination);
@@ -271,8 +271,7 @@ public class ProjectInnovationController {
         
         // Validate pagination parameters
         if (offset < 0) offset = 0;
-        if (limit <= 0) limit = 20;
-        if (limit > 100) limit = 100; // Maximum limit to prevent performance issues
+        int normalizedLimit = normalizeLimit(limit);
         
         // Normalize optional filters
         List<Long> normalizedCountryIds = normalizeCountryIds(countryIds);
@@ -310,7 +309,7 @@ public class ProjectInnovationController {
         // Apply pagination
         List<ProjectInnovationInfo> paginatedInnovations = allInnovations.stream()
                 .skip(offset)
-                .limit(limit)
+                .limit(normalizedLimit)
                 .toList();
         
         List<ProjectInnovationSimpleResponse> response = paginatedInnovations.stream()
@@ -325,7 +324,7 @@ public class ProjectInnovationController {
         
         // Create pagination metadata
         ProjectInnovationSimpleSearchResponse.PaginationInfo pagination = 
-            ProjectInnovationSimpleSearchResponse.PaginationInfo.of(offset, limit, totalCount);
+            ProjectInnovationSimpleSearchResponse.PaginationInfo.of(offset, normalizedLimit, totalCount);
         
         ProjectInnovationSimpleSearchResponse searchResponse = 
             ProjectInnovationSimpleSearchResponse.of(response, totalCount, appliedFilters, pagination);
@@ -356,8 +355,7 @@ public class ProjectInnovationController {
         
         // Validate pagination parameters
         if (offset < 0) offset = 0;
-        if (limit <= 0) limit = 20;
-        if (limit > 100) limit = 100; // Maximum limit to prevent performance issues
+        int normalizedLimit = normalizeLimit(limit);
         
         // Normalize optional filters
         List<Long> normalizedCountryIds = normalizeCountryIds(countryIds);
@@ -395,7 +393,7 @@ public class ProjectInnovationController {
         // Apply pagination
         List<ProjectInnovationInfo> paginatedInnovations = allInnovations.stream()
                 .skip(offset)
-                .limit(limit)
+                .limit(normalizedLimit)
                 .toList();
         
         // Build complete innovation info for each result
@@ -411,7 +409,7 @@ public class ProjectInnovationController {
         
         // Create pagination metadata
         ProjectInnovationCompleteSearchResponse.PaginationInfo pagination = 
-            ProjectInnovationCompleteSearchResponse.PaginationInfo.of(offset, limit, totalCount);
+            ProjectInnovationCompleteSearchResponse.PaginationInfo.of(offset, normalizedLimit, totalCount);
         
         ProjectInnovationCompleteSearchResponse searchResponse = 
             ProjectInnovationCompleteSearchResponse.of(response, totalCount, appliedFilters, pagination);
@@ -547,6 +545,12 @@ public class ProjectInnovationController {
             regions,
             countries
         );
+    }
+
+    private int normalizeLimit(Integer requestedLimit) {
+        return (requestedLimit == null || requestedLimit <= 0)
+                ? DEFAULT_PAGINATION_LIMIT
+                : requestedLimit;
     }
 
     private List<Long> normalizeCountryIds(List<Long> countryIds) {

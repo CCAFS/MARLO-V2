@@ -2,16 +2,22 @@ package com.example.demo.modules.projectinnovation.adapters.outbound.persistence
 
 import com.example.demo.modules.projectinnovation.application.port.outbound.ProjectInnovationRepositoryPort;
 import com.example.demo.modules.projectinnovation.domain.model.*;
-import org.springframework.stereotype.Component;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.stereotype.Component;
 
 @Component
 public class ProjectInnovationRepositoryAdapter implements ProjectInnovationRepositoryPort {
     
+    private static final Logger log = LoggerFactory.getLogger(ProjectInnovationRepositoryAdapter.class);
+
     private final ProjectInnovationJpaRepository projectInnovationJpaRepository;
     private final ProjectInnovationInfoJpaRepository projectInnovationInfoJpaRepository;
     private final ProjectInnovationSdgJpaRepository projectInnovationSdgJpaRepository;
@@ -28,6 +34,9 @@ public class ProjectInnovationRepositoryAdapter implements ProjectInnovationRepo
     private final DeliverableInfoJpaRepository deliverableInfoJpaRepository;
     private final InstitutionJpaRepository institutionJpaRepository;
     private final UserJpaRepository userJpaRepository;
+    private final NamedParameterJdbcTemplate jdbcTemplate;
+    
+    public static record HeadquarterLocation(String city, Long locElementId, String locationName) {}
     
     public ProjectInnovationRepositoryAdapter(
             ProjectInnovationJpaRepository projectInnovationJpaRepository,
@@ -45,7 +54,8 @@ public class ProjectInnovationRepositoryAdapter implements ProjectInnovationRepo
             ProjectInnovationComplementarySolutionJpaRepository projectInnovationComplementarySolutionJpaRepository,
             DeliverableInfoJpaRepository deliverableInfoJpaRepository,
             InstitutionJpaRepository institutionJpaRepository,
-            UserJpaRepository userJpaRepository) {
+            UserJpaRepository userJpaRepository,
+            NamedParameterJdbcTemplate jdbcTemplate) {
         this.projectInnovationJpaRepository = projectInnovationJpaRepository;
         this.projectInnovationInfoJpaRepository = projectInnovationInfoJpaRepository;
         this.projectInnovationSdgJpaRepository = projectInnovationSdgJpaRepository;
@@ -62,6 +72,7 @@ public class ProjectInnovationRepositoryAdapter implements ProjectInnovationRepo
         this.deliverableInfoJpaRepository = deliverableInfoJpaRepository;
         this.institutionJpaRepository = institutionJpaRepository;
         this.userJpaRepository = userJpaRepository;
+        this.jdbcTemplate = jdbcTemplate;
     }
     
     @Override
@@ -212,6 +223,61 @@ public class ProjectInnovationRepositoryAdapter implements ProjectInnovationRepo
     
     public List<Institution> findInstitutionsByIds(List<Long> institutionIds) {
         return institutionJpaRepository.findActiveInstitutionsByIds(institutionIds);
+    }
+
+    public Map<Long, HeadquarterLocation> findHeadquarterCitiesByInstitutionIds(List<Long> institutionIds) {
+        if (institutionIds == null || institutionIds.isEmpty()) {
+            return Map.of();
+        }
+
+        List<Long> distinctIds = institutionIds.stream()
+                .filter(java.util.Objects::nonNull)
+                .distinct()
+                .toList();
+
+        if (distinctIds.isEmpty()) {
+            return Map.of();
+        }
+
+        String sql = """
+                SELECT il.institution_id AS institutionId,
+                       il.city AS city,
+                       il.loc_element_id AS locElementId,
+                       le.name AS locationName
+                FROM institutions_locations il
+                LEFT JOIN loc_elements le ON le.id = il.loc_element_id
+                WHERE il.institution_id IN (:institutionIds)
+                  AND (il.is_headquater = 1 OR il.is_headquater = true)
+                """;
+
+        MapSqlParameterSource parameters = new MapSqlParameterSource()
+                .addValue("institutionIds", distinctIds);
+
+        try {
+            return jdbcTemplate.query(sql, parameters, rs -> {
+                Map<Long, HeadquarterLocation> result = new HashMap<>();
+                while (rs.next()) {
+                    Long institutionId = rs.getLong("institutionId");
+                    String city = rs.getString("city");
+                    Long locElementId = rs.getObject("locElementId") != null ? rs.getLong("locElementId") : null;
+                    if (rs.wasNull()) {
+                        locElementId = null;
+                    }
+                    String locationName = rs.getString("locationName");
+                    if (institutionId != null && !result.containsKey(institutionId)) {
+                        result.put(institutionId, new HeadquarterLocation(
+                                (city != null && !city.isBlank()) ? city : null,
+                                locElementId,
+                                (locationName != null && !locationName.isBlank()) ? locationName : null
+                        ));
+                    }
+                }
+                return result;
+            });
+        } catch (DataAccessException ex) {
+            log.warn("Unable to load headquarter cities for institutions {}: {}", distinctIds, ex.getMessage());
+            return Map.of();
+        }
     }
     
     // Statistics methods for innovation and country counting

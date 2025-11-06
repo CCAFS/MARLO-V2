@@ -6,6 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 import java.util.Arrays;
 import java.util.List;
@@ -21,6 +22,9 @@ class ProjectInnovationRepositoryAdapterScalingReadinessTest {
 
     @Mock
     private ProjectInnovationInfoJpaRepository projectInnovationInfoJpaRepository;
+
+    @Mock
+    private NamedParameterJdbcTemplate jdbcTemplate;
 
     @InjectMocks
     private ProjectInnovationRepositoryAdapter repositoryAdapter;

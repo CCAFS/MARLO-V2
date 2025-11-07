@@ -32,6 +32,7 @@ public class ProjectInnovationRepositoryAdapter implements ProjectInnovationRepo
     private final ProjectInnovationBundleJpaRepository projectInnovationBundleJpaRepository;
     private final ProjectInnovationComplementarySolutionJpaRepository projectInnovationComplementarySolutionJpaRepository;
     private final DeliverableInfoJpaRepository deliverableInfoJpaRepository;
+    private final DeliverableDisseminationJpaRepository deliverableDisseminationJpaRepository;
     private final InstitutionJpaRepository institutionJpaRepository;
     private final UserJpaRepository userJpaRepository;
     private final NamedParameterJdbcTemplate jdbcTemplate;
@@ -53,6 +54,7 @@ public class ProjectInnovationRepositoryAdapter implements ProjectInnovationRepo
             ProjectInnovationBundleJpaRepository projectInnovationBundleJpaRepository,
             ProjectInnovationComplementarySolutionJpaRepository projectInnovationComplementarySolutionJpaRepository,
             DeliverableInfoJpaRepository deliverableInfoJpaRepository,
+            DeliverableDisseminationJpaRepository deliverableDisseminationJpaRepository,
             InstitutionJpaRepository institutionJpaRepository,
             UserJpaRepository userJpaRepository,
             NamedParameterJdbcTemplate jdbcTemplate) {
@@ -70,6 +72,7 @@ public class ProjectInnovationRepositoryAdapter implements ProjectInnovationRepo
         this.projectInnovationBundleJpaRepository = projectInnovationBundleJpaRepository;
         this.projectInnovationComplementarySolutionJpaRepository = projectInnovationComplementarySolutionJpaRepository;
         this.deliverableInfoJpaRepository = deliverableInfoJpaRepository;
+        this.deliverableDisseminationJpaRepository = deliverableDisseminationJpaRepository;
         this.institutionJpaRepository = institutionJpaRepository;
         this.userJpaRepository = userJpaRepository;
         this.jdbcTemplate = jdbcTemplate;
@@ -358,10 +361,23 @@ public class ProjectInnovationRepositoryAdapter implements ProjectInnovationRepo
                 deliverableTitles.put(deliverableId, info.getTitle());
             });
 
+            Map<Long, String> disseminationUrls = new HashMap<>();
+            deliverableDisseminationJpaRepository.findByDeliverableIdsAndPhase(deliverableIds, phaseId).forEach(dissemination -> {
+                Long deliverableId = dissemination.getDeliverableId();
+                if (deliverableId == null) {
+                    return;
+                }
+                if (!disseminationUrls.containsKey(deliverableId) && dissemination.getDisseminationUrl() != null
+                        && !dissemination.getDisseminationUrl().isBlank()) {
+                    disseminationUrls.put(deliverableId, dissemination.getDisseminationUrl());
+                }
+            });
+
             references.forEach(reference -> {
                 Long deliverableId = reference.getDeliverableId();
                 if (deliverableId != null) {
                     reference.setDeliverableName(deliverableTitles.get(deliverableId));
+                    reference.setDisseminationUrl(disseminationUrls.get(deliverableId));
                 }
             });
         }

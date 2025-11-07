@@ -5,6 +5,9 @@ import com.example.demo.modules.innovationcomments.adapters.web.dto.InnovationCo
 import com.example.demo.modules.innovationcomments.adapters.web.mapper.InnovationCommentMapper;
 import com.example.demo.modules.innovationcomments.domain.model.InnovationCatalogComment;
 import com.example.demo.modules.innovationcomments.domain.port.in.InnovationCommentUseCase;
+import com.example.demo.modules.projectinnovation.adapters.outbound.persistence.ProjectInnovationInfoJpaRepository;
+import com.example.demo.modules.projectinnovation.adapters.outbound.persistence.ProjectInnovationJpaRepository;
+import com.example.demo.modules.projectinnovation.domain.model.ProjectInnovationInfo;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -18,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * REST Controller for Innovation Comment operations
@@ -31,11 +35,17 @@ public class InnovationCommentController {
     private static final Logger logger = LoggerFactory.getLogger(InnovationCommentController.class);
     private final InnovationCommentUseCase commentUseCase;
     private final InnovationCommentMapper commentMapper;
+    private final ProjectInnovationInfoJpaRepository projectInnovationInfoRepository;
+    private final ProjectInnovationJpaRepository projectInnovationRepository;
     
     public InnovationCommentController(InnovationCommentUseCase commentUseCase, 
-                                     InnovationCommentMapper commentMapper) {
+                                     InnovationCommentMapper commentMapper,
+                                     ProjectInnovationInfoJpaRepository projectInnovationInfoRepository,
+                                     ProjectInnovationJpaRepository projectInnovationRepository) {
         this.commentUseCase = commentUseCase;
         this.commentMapper = commentMapper;
+        this.projectInnovationInfoRepository = projectInnovationInfoRepository;
+        this.projectInnovationRepository = projectInnovationRepository;
     }
     
     @Operation(
@@ -84,11 +94,20 @@ public class InnovationCommentController {
     @GetMapping("/innovation/{innovationId}")
     public ResponseEntity<List<InnovationCommentResponseDto>> getActiveCommentsByInnovationId(
             @Parameter(description = "Innovation ID to get comments for", required = true)
-            @PathVariable Long innovationId) {
+            @PathVariable Long innovationId,
+            @Parameter(description = "Phase ID used to resolve innovation name", required = true)
+            @RequestParam Long phaseId) {
         
         try {
+            if (phaseId == null) {
+                logger.warn("Phase ID is required to retrieve innovation name for comments");
+                return ResponseEntity.badRequest().build();
+            }
+
             List<InnovationCatalogComment> comments = commentUseCase.getActiveCommentsByInnovationId(innovationId);
             List<InnovationCommentResponseDto> responseDtos = commentMapper.toResponseDtoList(comments);
+            resolveActiveInnovationName(innovationId, phaseId)
+                    .ifPresent(name -> responseDtos.forEach(dto -> dto.setInnovationName(name)));
             return ResponseEntity.ok(responseDtos);
         } catch (IllegalArgumentException e) {
             logger.warn("Invalid request parameter for innovation ID {}: {}", innovationId, e.getMessage());
@@ -244,7 +263,30 @@ public class InnovationCommentController {
         }
     }
     
+    private Optional<String> resolveActiveInnovationName(Long innovationId, Long phaseId) {
+        try {
+            Optional<String> activeTitle = projectInnovationInfoRepository
+                    .findActiveTitleByProjectInnovationIdAndPhase(innovationId, phaseId)
+                    .filter(title -> title != null && !title.trim().isEmpty());
 
-    
+            if (activeTitle.isPresent()) {
+                return activeTitle;
+            }
+
+            boolean innovationIsActive = projectInnovationRepository.findByIdAndIsActive(innovationId, true).isPresent();
+            if (!innovationIsActive) {
+                return Optional.empty();
+            }
+
+            return Optional.ofNullable(projectInnovationInfoRepository
+                            .findByProjectInnovationIdAndIdPhase(innovationId, phaseId))
+                    .map(ProjectInnovationInfo::getTitle)
+                    .filter(title -> title != null && !title.trim().isEmpty());
+        } catch (Exception ex) {
+            logger.error("Failed to resolve innovation name for innovation {} and phase {}: {}",
+                    innovationId, phaseId, ex.getMessage());
+            return Optional.empty();
+        }
+    }
 
 }

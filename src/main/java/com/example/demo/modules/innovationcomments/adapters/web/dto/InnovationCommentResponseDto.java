@@ -35,7 +35,11 @@ public class InnovationCommentResponseDto {
     @Schema(description = "Comment text content", example = "This is a great innovation!")
     @JsonProperty("comment")
     private String comment;
-    
+
+    @Schema(description = "Innovation name", example = "Climate-smart irrigation technology")
+    @JsonProperty("innovation_name")
+    private String innovationName;
+
     @Schema(description = "Whether the comment is active", example = "true")
     @JsonProperty("is_active")
     private Boolean isActive;
@@ -62,6 +66,7 @@ public class InnovationCommentResponseDto {
         this.userLastname = userLastname;
         this.userEmail = userEmail;
         this.comment = comment;
+        this.innovationName = null;
         this.isActive = isActive;
         this.activeSince = activeSince;
         this.modificationJustification = modificationJustification;
@@ -139,5 +144,13 @@ public class InnovationCommentResponseDto {
     
     public void setModificationJustification(String modificationJustification) {
         this.modificationJustification = modificationJustification;
+    }
+
+    public String getInnovationName() {
+        return innovationName;
+    }
+
+    public void setInnovationName(String innovationName) {
+        this.innovationName = innovationName;
     }
 }

@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * JPA Repository for ProjectInnovationInfo entity
@@ -55,6 +56,15 @@ public interface ProjectInnovationInfoJpaRepository extends JpaRepository<Projec
                        "WHERE pi.id = pii.projectInnovationId AND pi.isActive = true)")
     List<ProjectInnovationInfo> findActiveByProjectInnovationIdsAndPhase(
             @Param("projectInnovationIds") List<Long> projectInnovationIds,
+            @Param("phaseId") Long phaseId);
+
+    @Query("SELECT pii.title FROM ProjectInnovationInfo pii " +
+           "JOIN ProjectInnovation pi ON pi.id = pii.projectInnovationId " +
+           "WHERE pii.projectInnovationId = :projectInnovationId " +
+           "AND pii.idPhase = :phaseId " +
+           "AND pi.isActive = true")
+    Optional<String> findActiveTitleByProjectInnovationIdAndPhase(
+            @Param("projectInnovationId") Long projectInnovationId,
             @Param("phaseId") Long phaseId);
     
     // JOIN queries temporarily commented for testing

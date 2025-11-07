@@ -23,9 +23,8 @@ public class CreateInnovationCommentRequestDto {
     @NotBlank(message = "User name is required")
     private String userName;
     
-    @Schema(description = "User's last name", example = "Doe", required = true)
+    @Schema(description = "User's last name", example = "Doe")
     @JsonProperty("user_lastname")
-    @NotBlank(message = "User lastname is required")
     private String userLastname;
     
     @Schema(description = "User's email address", example = "john.doe@example.com", required = true)

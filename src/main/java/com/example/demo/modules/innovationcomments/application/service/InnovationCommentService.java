@@ -248,9 +248,6 @@ public class InnovationCommentService implements InnovationCommentUseCase {
         if (userName == null || userName.trim().isEmpty()) {
             throw new IllegalArgumentException("User name cannot be null or empty");
         }
-        if (userLastname == null || userLastname.trim().isEmpty()) {
-            throw new IllegalArgumentException("User lastname cannot be null or empty");
-        }
         if (userEmail == null || userEmail.trim().isEmpty()) {
             throw new IllegalArgumentException("User email cannot be null or empty");
         }

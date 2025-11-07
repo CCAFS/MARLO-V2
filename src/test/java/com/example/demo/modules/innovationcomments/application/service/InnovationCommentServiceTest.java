@@ -141,13 +141,19 @@ class InnovationCommentServiceTest {
     }
     
     @Test
-    void createComment_NullUserLastname_ThrowsException() {
-        // Act & Assert
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, 
-            () -> commentService.createComment(testInnovationId, testUserName, null, testUserEmail, testCommentText));
+    void createComment_NullUserLastname_AllowsCreation() {
+        // Arrange
+        testCommentEntity.setUserLastname(null);
+        when(commentRepository.save(any(InnovationCatalogComment.class))).thenAnswer(invocation -> invocation.getArgument(0));
         
-        assertEquals("User lastname cannot be null or empty", exception.getMessage());
-        verify(commentRepository, never()).save(any());
+        // Act
+        InnovationCatalogComment result = commentService.createComment(
+                testInnovationId, testUserName, null, testUserEmail, testCommentText);
+        
+        // Assert
+        assertNotNull(result);
+        assertNull(result.getUserLastname());
+        verify(commentRepository, times(1)).save(any(InnovationCatalogComment.class));
     }
     
     @Test

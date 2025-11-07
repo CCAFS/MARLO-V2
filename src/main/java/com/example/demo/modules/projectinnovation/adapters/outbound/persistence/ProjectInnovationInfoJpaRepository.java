@@ -66,6 +66,8 @@ public interface ProjectInnovationInfoJpaRepository extends JpaRepository<Projec
     Optional<String> findActiveTitleByProjectInnovationIdAndPhase(
             @Param("projectInnovationId") Long projectInnovationId,
             @Param("phaseId") Long phaseId);
+
+    Optional<ProjectInnovationInfo> findTop1ByProjectInnovationIdOrderByIdDesc(Long projectInnovationId);
     
     // JOIN queries temporarily commented for testing
     // @Query("SELECT pii FROM ProjectInnovationInfo pii " +

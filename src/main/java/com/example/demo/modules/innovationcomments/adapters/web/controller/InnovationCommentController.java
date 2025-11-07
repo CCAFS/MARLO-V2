@@ -61,11 +61,20 @@ public class InnovationCommentController {
     @GetMapping
     public ResponseEntity<List<InnovationCommentResponseDto>> getAllComments(
             @Parameter(description = "Maximum number of comments to return", required = false, example = "10")
-            @RequestParam(value = "limit", required = false) Integer limit) {
+            @RequestParam(value = "limit", required = false) Integer limit,
+            @Parameter(description = "Phase ID used to resolve innovation names", required = false)
+            @RequestParam(value = "phaseId", required = false) Long phaseId) {
         
         try {
             List<InnovationCatalogComment> comments = commentUseCase.getAllComments(limit);
-            return ResponseEntity.ok(commentMapper.toResponseDtoList(comments));
+            List<InnovationCommentResponseDto> responseDtos = commentMapper.toResponseDtoList(comments);
+
+            if (responseDtos != null && !responseDtos.isEmpty()) {
+                responseDtos.forEach(dto -> resolveInnovationName(dto.getInnovationId(), phaseId)
+                        .ifPresent(dto::setInnovationName));
+            }
+
+            return ResponseEntity.ok(responseDtos);
         } catch (IllegalArgumentException e) {
             logger.warn("Invalid limit parameter provided: {}", e.getMessage());
             return ResponseEntity.badRequest().build();
@@ -94,19 +103,13 @@ public class InnovationCommentController {
     @GetMapping("/innovation/{innovationId}")
     public ResponseEntity<List<InnovationCommentResponseDto>> getActiveCommentsByInnovationId(
             @Parameter(description = "Innovation ID to get comments for", required = true)
-            @PathVariable Long innovationId,
-            @Parameter(description = "Phase ID used to resolve innovation name", required = true)
-            @RequestParam Long phaseId) {
+            @PathVariable Long innovationId) {
         
         try {
-            if (phaseId == null) {
-                logger.warn("Phase ID is required to retrieve innovation name for comments");
-                return ResponseEntity.badRequest().build();
-            }
-
             List<InnovationCatalogComment> comments = commentUseCase.getActiveCommentsByInnovationId(innovationId);
             List<InnovationCommentResponseDto> responseDtos = commentMapper.toResponseDtoList(comments);
-            resolveActiveInnovationName(innovationId, phaseId)
+
+            resolveInnovationName(innovationId, null)
                     .ifPresent(name -> responseDtos.forEach(dto -> dto.setInnovationName(name)));
             return ResponseEntity.ok(responseDtos);
         } catch (IllegalArgumentException e) {
@@ -263,30 +266,36 @@ public class InnovationCommentController {
         }
     }
     
-    private Optional<String> resolveActiveInnovationName(Long innovationId, Long phaseId) {
+    private Optional<String> resolveInnovationName(Long innovationId) {
+        return resolveInnovationName(innovationId, null);
+    }
+
+    private Optional<String> resolveInnovationName(Long innovationId, Long phaseId) {
         try {
-            Optional<String> activeTitle = projectInnovationInfoRepository
-                    .findActiveTitleByProjectInnovationIdAndPhase(innovationId, phaseId)
-                    .filter(title -> title != null && !title.trim().isEmpty());
+            if (phaseId != null) {
+                Optional<String> phaseTitle = Optional.ofNullable(
+                                projectInnovationInfoRepository.findByProjectInnovationIdAndIdPhase(innovationId, phaseId))
+                        .map(ProjectInnovationInfo::getTitle)
+                        .filter(this::hasText);
 
-            if (activeTitle.isPresent()) {
-                return activeTitle;
+                if (phaseTitle.isPresent()) {
+                    return phaseTitle;
+                }
             }
 
-            boolean innovationIsActive = projectInnovationRepository.findByIdAndIsActive(innovationId, true).isPresent();
-            if (!innovationIsActive) {
-                return Optional.empty();
-            }
-
-            return Optional.ofNullable(projectInnovationInfoRepository
-                            .findByProjectInnovationIdAndIdPhase(innovationId, phaseId))
+            return projectInnovationInfoRepository
+                    .findTop1ByProjectInnovationIdOrderByIdDesc(innovationId)
                     .map(ProjectInnovationInfo::getTitle)
-                    .filter(title -> title != null && !title.trim().isEmpty());
+                    .filter(this::hasText);
         } catch (Exception ex) {
-            logger.error("Failed to resolve innovation name for innovation {} and phase {}: {}",
-                    innovationId, phaseId, ex.getMessage());
+            logger.error("Failed to resolve innovation name for innovation {}: {}",
+                    innovationId, ex.getMessage());
             return Optional.empty();
         }
+    }
+
+    private boolean hasText(String value) {
+        return value != null && !value.trim().isEmpty();
     }
 
 }

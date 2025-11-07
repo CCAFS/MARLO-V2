@@ -872,6 +872,7 @@ public class ProjectInnovationController {
                 reference.getHasEvidenceByDeliverable(),
                 reference.getDeliverableId(),
                 reference.getDeliverableName(),
+                reference.getDisseminationUrl(),
                 reference.getTypeId(),
                 reference.getActiveSince(),
                 reference.getCreatedBy(),

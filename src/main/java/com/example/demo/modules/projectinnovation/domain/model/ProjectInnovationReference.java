@@ -62,4 +62,7 @@ public class ProjectInnovationReference {
 
     @Transient
     private String deliverableName;
+
+    @Transient
+    private String disseminationUrl;
 }

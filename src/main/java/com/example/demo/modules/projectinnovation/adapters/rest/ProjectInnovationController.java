@@ -1388,6 +1388,7 @@ public class ProjectInnovationController {
                 comment.getId(),
                 comment.getInnovationId(),
                 comment.getUserName(),
+                comment.getUserLastname(),
                 comment.getUserEmail(),
                 comment.getComment(),
                 innovationTitle

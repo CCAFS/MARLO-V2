@@ -94,7 +94,7 @@ public interface ProjectInnovationInfoJpaRepository extends JpaRepository<Projec
                "WHERE pic.project_innovation_id = pii.project_innovation_id " +
                "AND pic.id_phase = pii.id_phase " +
                "AND pic.id_country IN (:countryIds))) " +
-           "ORDER BY pii.id DESC", nativeQuery = true)
+           "ORDER BY pii.project_innovation_id DESC", nativeQuery = true)
     List<ProjectInnovationInfo> findActiveInnovationsInfoWithFilters(
             @Param("phase") Long phase,
             @Param("readinessScale") Integer readinessScale,
@@ -115,7 +115,7 @@ public interface ProjectInnovationInfoJpaRepository extends JpaRepository<Projec
                "WHERE pic.project_innovation_id = pii.project_innovation_id " +
                "AND pic.id_phase = pii.id_phase " +
                "AND pic.id_country IN (:countryIds))) " +
-           "ORDER BY pii.id DESC", nativeQuery = true)
+           "ORDER BY pii.project_innovation_id DESC", nativeQuery = true)
     List<ProjectInnovationInfo> findActiveInnovationsInfoBySdgFilters(
             @Param("innovationId") Long innovationId,
             @Param("phase") Long phase,
@@ -126,6 +126,6 @@ public interface ProjectInnovationInfoJpaRepository extends JpaRepository<Projec
     @Query(value = "SELECT DISTINCT pii.* FROM project_innovation_info pii " +
            "JOIN project_innovations p ON pii.project_innovation_id = p.id " +
            "WHERE p.is_active = true " +
-           "ORDER BY pii.id DESC", nativeQuery = true)
+           "ORDER BY pii.project_innovation_id DESC", nativeQuery = true)
     List<ProjectInnovationInfo> findAllActiveInnovationsInfo();
 }

@@ -1,7 +1,5 @@
 package com.example.demo.modules.projectinnovation.adapters.rest;
 
-import com.example.demo.modules.innovationcomments.domain.model.InnovationCatalogComment;
-import com.example.demo.modules.innovationcomments.domain.port.in.InnovationCommentUseCase;
 import com.example.demo.modules.innovationtype.adapters.rest.dto.InnovationTypeResponse;
 import com.example.demo.modules.innovationtype.adapters.outbound.persistence.InnovationTypeRepositoryAdapter;
 import com.example.demo.modules.projectinnovation.adapters.rest.dto.*;
@@ -43,7 +41,6 @@ public class ProjectInnovationController {
     private final LocElementJpaRepository locElementRepository;
     private final InnovationTypeRepositoryAdapter innovationTypeRepository;
     private final SustainableDevelopmentGoalJpaRepository sdgRepository;
-    private final InnovationCommentUseCase innovationCommentUseCase;
     
     public ProjectInnovationController(
             ProjectInnovationUseCase projectInnovationUseCase,
@@ -52,8 +49,7 @@ public class ProjectInnovationController {
             ProjectInnovationRepositoryAdapter repositoryAdapter,
             LocElementJpaRepository locElementRepository,
             InnovationTypeRepositoryAdapter innovationTypeRepository,
-            SustainableDevelopmentGoalJpaRepository sdgRepository,
-            InnovationCommentUseCase innovationCommentUseCase) {
+            SustainableDevelopmentGoalJpaRepository sdgRepository) {
         this.projectInnovationUseCase = projectInnovationUseCase;
         this.actorsService = actorsService;
         this.actorsMapper = actorsMapper;
@@ -61,7 +57,6 @@ public class ProjectInnovationController {
         this.locElementRepository = locElementRepository;
         this.innovationTypeRepository = innovationTypeRepository;
         this.sdgRepository = sdgRepository;
-        this.innovationCommentUseCase = innovationCommentUseCase;
     }
     
     @Operation(summary = "Get project innovation by ID")
@@ -1294,14 +1289,6 @@ public class ProjectInnovationController {
                 })
                 .toList();
 
-        List<InnovationCommentInfo> commentsResponse = Collections.emptyList();
-        if (innovationId != null) {
-            List<InnovationCatalogComment> activeComments = innovationCommentUseCase.getActiveCommentsByInnovationId(innovationId);
-            commentsResponse = activeComments.stream()
-                    .map(comment -> toCommentInfo(comment, info.getTitle()))
-                    .toList();
-        }
-        
         return new InnovationInfo(
                 info.getId(),
                 info.getProjectInnovationId(),
@@ -1378,23 +1365,10 @@ public class ProjectInnovationController {
                 contactPersonsResponse,
                 contributingOrganizationsResponse,
                 complementarySolutionsResponse,
-                bundlesResponse,
-                commentsResponse
+                bundlesResponse
         );
     }
 
-    private InnovationCommentInfo toCommentInfo(InnovationCatalogComment comment, String innovationTitle) {
-        return new InnovationCommentInfo(
-                comment.getId(),
-                comment.getInnovationId(),
-                comment.getUserName(),
-                comment.getUserLastname(),
-                comment.getUserEmail(),
-                comment.getComment(),
-                innovationTitle
-        );
-    }
-    
     private String bundleInfoKey(Long innovationId, Long phaseId) {
         if (innovationId == null || phaseId == null) {
             return innovationId + ":" + phaseId;

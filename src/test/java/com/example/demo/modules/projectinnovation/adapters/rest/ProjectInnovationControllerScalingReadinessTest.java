@@ -1,6 +1,5 @@
 package com.example.demo.modules.projectinnovation.adapters.rest;
 
-import com.example.demo.modules.innovationcomments.domain.port.in.InnovationCommentUseCase;
 import com.example.demo.modules.innovationtype.adapters.outbound.persistence.InnovationTypeRepositoryAdapter;
 import com.example.demo.modules.projectinnovation.adapters.outbound.persistence.LocElementJpaRepository;
 import com.example.demo.modules.projectinnovation.adapters.outbound.persistence.ProjectInnovationRepositoryAdapter;
@@ -47,9 +46,6 @@ class ProjectInnovationControllerScalingReadinessTest {
     @Mock
     private SustainableDevelopmentGoalJpaRepository sdgRepository;
 
-    @Mock
-    private InnovationCommentUseCase innovationCommentUseCase;
-
     private ProjectInnovationController controller;
 
     private MockMvc mockMvc;
@@ -63,8 +59,7 @@ class ProjectInnovationControllerScalingReadinessTest {
                 repositoryAdapter,
                 locElementRepository,
                 innovationTypeRepository,
-                sdgRepository,
-                innovationCommentUseCase
+                sdgRepository
         );
         mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
     }

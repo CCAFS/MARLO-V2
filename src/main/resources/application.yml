@@ -31,3 +31,16 @@ logging:
     org.springframework.web.servlet.DispatcherServlet: INFO
     org.springframework.web.servlet.view.RedirectView: INFO
     com.example.demo.platform.config.ApiGatewayBasePathFilter: INFO
+
+security:
+  rate-limit:
+    enabled: true
+    capacity: 100
+    refill-tokens: 100
+    refill-period: 1m
+    skip-paths:
+      - /actuator/health
+      - /actuator/info
+      - /v3/api-docs/**
+      - /swagger-ui/**
+      - /swagger-ui.html

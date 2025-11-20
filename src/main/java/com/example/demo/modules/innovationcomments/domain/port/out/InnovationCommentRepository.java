@@ -68,11 +68,12 @@ public interface InnovationCommentRepository {
     List<InnovationCatalogComment> findAllCommentsByInnovationId(Long innovationId);
     
     /**
-     * Find all comments ordered by activeSince descending, optionally limited.
+     * Find all comments ordered by activeSince descending, with pagination support.
+     * @param offset Number of records to skip. Null or 0 means start from beginning.
      * @param limit Maximum number of comments to return. If null, returns all.
      * @return List of comments ordered by newest first.
      */
-    List<InnovationCatalogComment> findAllCommentsOrderByActiveSinceDesc(Integer limit);
+    List<InnovationCatalogComment> findAllCommentsOrderByActiveSinceDesc(Integer offset, Integer limit);
     
     /**
      * Soft delete a comment by marking it as inactive

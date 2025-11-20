@@ -71,11 +71,12 @@ public interface InnovationCommentUseCase {
     List<InnovationCatalogComment> getRecentActiveCommentsByInnovationId(Long innovationId);
     
     /**
-     * Get all comments ordered by newest first, optionally limited.
+     * Get all comments ordered by newest first, with pagination support.
+     * @param offset Number of records to skip. Null or 0 means start from beginning.
      * @param limit Maximum number of comments to return. Null means all.
      * @return List of comments ordered by activeSince descending.
      */
-    List<InnovationCatalogComment> getAllComments(Integer limit);
+    List<InnovationCatalogComment> getAllComments(Integer offset, Integer limit);
     
     /**
      * Soft delete a comment (mark as inactive)

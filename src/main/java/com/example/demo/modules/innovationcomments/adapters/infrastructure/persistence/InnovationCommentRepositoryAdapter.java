@@ -2,7 +2,6 @@ package com.example.demo.modules.innovationcomments.adapters.infrastructure.pers
 
 import com.example.demo.modules.innovationcomments.domain.model.InnovationCatalogComment;
 import com.example.demo.modules.innovationcomments.domain.port.out.InnovationCommentRepository;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -64,11 +63,22 @@ public class InnovationCommentRepositoryAdapter implements InnovationCommentRepo
     }
     
     @Override
-    public List<InnovationCatalogComment> findAllCommentsOrderByActiveSinceDesc(Integer limit) {
+    public List<InnovationCatalogComment> findAllCommentsOrderByActiveSinceDesc(Integer offset, Integer limit) {
+        // Get all comments ordered by activeSince descending
+        List<InnovationCatalogComment> allComments = jpaRepository.findAllByOrderByActiveSinceDesc();
+        
+        // If no limit specified, return all comments
         if (limit == null || limit <= 0) {
-            return jpaRepository.findAllByOrderByActiveSinceDesc();
+            return allComments;
         }
-        return jpaRepository.findAllByOrderByActiveSinceDesc(PageRequest.of(0, limit));
+        
+        // Apply offset and limit using Stream (same pattern as search-complete)
+        int sanitizedOffset = (offset != null && offset > 0) ? offset : 0;
+        
+        return allComments.stream()
+                .skip(sanitizedOffset)  // Skip exactly 'offset' records
+                .limit(limit)           // Take maximum 'limit' records
+                .toList();
     }
     
     @Override

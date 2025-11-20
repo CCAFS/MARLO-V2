@@ -240,39 +240,39 @@ class InnovationCommentServiceTest {
     void getAllComments_NoLimit_ReturnsAll() {
         // Arrange
         List<InnovationCatalogComment> expectedComments = Arrays.asList(testCommentEntity);
-        when(commentRepository.findAllCommentsOrderByActiveSinceDesc(isNull())).thenReturn(expectedComments);
+        when(commentRepository.findAllCommentsOrderByActiveSinceDesc(eq(0), isNull())).thenReturn(expectedComments);
         
         // Act
-        List<InnovationCatalogComment> result = commentService.getAllComments(null);
+        List<InnovationCatalogComment> result = commentService.getAllComments(null, null);
         
         // Assert
         assertNotNull(result);
         assertEquals(1, result.size());
-        verify(commentRepository, times(1)).findAllCommentsOrderByActiveSinceDesc(isNull());
+        verify(commentRepository, times(1)).findAllCommentsOrderByActiveSinceDesc(eq(0), isNull());
     }
     
     @Test
     void getAllComments_WithLimit_ReturnsLimited() {
         // Arrange
         List<InnovationCatalogComment> expectedComments = Arrays.asList(testCommentEntity);
-        when(commentRepository.findAllCommentsOrderByActiveSinceDesc(5)).thenReturn(expectedComments);
+        when(commentRepository.findAllCommentsOrderByActiveSinceDesc(eq(0), eq(5))).thenReturn(expectedComments);
         
         // Act
-        List<InnovationCatalogComment> result = commentService.getAllComments(5);
+        List<InnovationCatalogComment> result = commentService.getAllComments(null, 5);
         
         // Assert
         assertNotNull(result);
-        verify(commentRepository, times(1)).findAllCommentsOrderByActiveSinceDesc(5);
+        verify(commentRepository, times(1)).findAllCommentsOrderByActiveSinceDesc(eq(0), eq(5));
     }
     
     @Test
     void getAllComments_InvalidLimit_ThrowsException() {
         // Act & Assert
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> commentService.getAllComments(0));
+                () -> commentService.getAllComments(null, 0));
         
         assertEquals("Limit must be greater than zero", exception.getMessage());
-        verify(commentRepository, never()).findAllCommentsOrderByActiveSinceDesc(any());
+        verify(commentRepository, never()).findAllCommentsOrderByActiveSinceDesc(any(), any());
     }
     
     @Test

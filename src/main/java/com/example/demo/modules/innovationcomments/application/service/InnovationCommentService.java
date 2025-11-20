@@ -151,8 +151,10 @@ public class InnovationCommentService implements InnovationCommentUseCase {
     
     @Override
     @Transactional(readOnly = true)
-    public List<InnovationCatalogComment> getAllComments(Integer limit) {
+    public List<InnovationCatalogComment> getAllComments(Integer offset, Integer limit) {
+        Integer sanitizedOffset = (offset != null && offset > 0) ? offset : 0;
         Integer sanitizedLimit = null;
+        
         if (limit != null) {
             if (limit <= 0) {
                 throw new IllegalArgumentException("Limit must be greater than zero");
@@ -161,7 +163,7 @@ public class InnovationCommentService implements InnovationCommentUseCase {
         }
         
         try {
-            return commentRepository.findAllCommentsOrderByActiveSinceDesc(sanitizedLimit);
+            return commentRepository.findAllCommentsOrderByActiveSinceDesc(sanitizedOffset, sanitizedLimit);
         } catch (DataAccessException e) {
             logger.error("Database error while fetching comments: {}", e.getMessage());
             if (isTableNotExistsError(e)) {

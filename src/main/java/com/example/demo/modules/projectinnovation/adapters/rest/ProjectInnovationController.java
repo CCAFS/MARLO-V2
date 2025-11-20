@@ -16,6 +16,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -23,6 +24,7 @@ import java.util.Objects;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -179,8 +181,8 @@ public class ProjectInnovationController {
             @RequestParam(required = false) Long innovationId,
             @Parameter(description = "SDG ID to filter by", example = "2")
             @RequestParam(required = false) Long sdgId,
-            @Parameter(description = "Country IDs to filter by (repeat parameter for multiple values)", example = "113")
-            @RequestParam(required = false) List<Long> countryIds,
+            @Parameter(description = "Country IDs to filter by (comma-separated or repeat parameter)", example = "113,126")
+            @RequestParam(required = false) List<String> countryIds,
             @Parameter(description = "Number of records to skip (pagination)", example = "0")
             @RequestParam(required = false, defaultValue = "0") Integer offset,
             @Parameter(description = "Maximum number of records to return (pagination)", example = "20")
@@ -263,8 +265,8 @@ public class ProjectInnovationController {
             @RequestParam(required = false) Long innovationId,
             @Parameter(description = "SDG ID to filter by", example = "2")
             @RequestParam(required = false) Long sdgId,
-            @Parameter(description = "Country IDs to filter by (repeat parameter for multiple values)", example = "113")
-            @RequestParam(required = false) List<Long> countryIds,
+            @Parameter(description = "Country IDs to filter by (comma-separated or repeat parameter)", example = "113,126")
+            @RequestParam(required = false) List<String> countryIds,
             @Parameter(description = "Number of records to skip (pagination)", example = "0")
             @RequestParam(required = false, defaultValue = "0") Integer offset,
             @Parameter(description = "Maximum number of records to return (pagination)", example = "20")
@@ -347,8 +349,8 @@ public class ProjectInnovationController {
             @RequestParam(required = false) Long innovationId,
             @Parameter(description = "SDG ID to filter by", example = "2")
             @RequestParam(required = false) Long sdgId,
-            @Parameter(description = "Country IDs to filter by (repeat parameter for multiple values)", example = "113")
-            @RequestParam(required = false) List<Long> countryIds,
+            @Parameter(description = "Country IDs to filter by (comma-separated or repeat parameter)", example = "113,126")
+            @RequestParam(required = false) List<String> countryIds,
             @Parameter(description = "Number of records to skip (pagination)", example = "0")
             @RequestParam(required = false, defaultValue = "0") Integer offset,
             @Parameter(description = "Maximum number of records to return (pagination)", example = "20")
@@ -563,12 +565,25 @@ public class ProjectInnovationController {
                 : requestedLimit;
     }
 
-    private List<Long> normalizeCountryIds(List<Long> countryIds) {
+    private List<Long> normalizeCountryIds(List<String> countryIds) {
         if (countryIds == null) {
             return null;
         }
         List<Long> filtered = countryIds.stream()
                 .filter(Objects::nonNull)
+                .flatMap(value -> Arrays.stream(value.split(",")))
+                .map(String::trim)
+                .filter(token -> !token.isEmpty())
+                .map(token -> {
+                    try {
+                        return Long.valueOf(token);
+                    } catch (NumberFormatException ex) {
+                        throw new ResponseStatusException(
+                                HttpStatus.BAD_REQUEST,
+                                "Invalid countryIds value: " + token
+                        );
+                    }
+                })
                 .distinct()
                 .toList();
         return filtered.isEmpty() ? null : filtered;

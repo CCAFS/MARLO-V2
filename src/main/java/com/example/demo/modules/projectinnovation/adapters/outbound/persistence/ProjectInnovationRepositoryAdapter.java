@@ -2,6 +2,7 @@ package com.example.demo.modules.projectinnovation.adapters.outbound.persistence
 
 import com.example.demo.modules.projectinnovation.application.port.outbound.ProjectInnovationRepositoryPort;
 import com.example.demo.modules.projectinnovation.domain.model.*;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -181,13 +182,19 @@ public class ProjectInnovationRepositoryAdapter implements ProjectInnovationRepo
     @Override
     public List<ProjectInnovationInfo> findActiveInnovationsInfoWithFilters(Long phase, Integer readinessScale, Long innovationTypeId, List<Long> countryIds) {
         List<Long> normalizedCountryIds = (countryIds == null || countryIds.isEmpty()) ? null : countryIds;
-        return projectInnovationInfoJpaRepository.findActiveInnovationsInfoWithFilters(phase, readinessScale, innovationTypeId, normalizedCountryIds);
+        boolean hasCountryFilter = normalizedCountryIds != null;
+        List<Long> queryCountryIds = hasCountryFilter ? normalizedCountryIds : Collections.singletonList(-1L);
+        return projectInnovationInfoJpaRepository.findActiveInnovationsInfoWithFilters(
+                phase, readinessScale, innovationTypeId, queryCountryIds, hasCountryFilter);
     }
     
     @Override
     public List<ProjectInnovationInfo> findActiveInnovationsInfoBySdgFilters(Long innovationId, Long phase, Long sdgId, List<Long> countryIds) {
         List<Long> normalizedCountryIds = (countryIds == null || countryIds.isEmpty()) ? null : countryIds;
-        return projectInnovationInfoJpaRepository.findActiveInnovationsInfoBySdgFilters(innovationId, phase, sdgId, normalizedCountryIds);
+        boolean hasCountryFilter = normalizedCountryIds != null;
+        List<Long> queryCountryIds = hasCountryFilter ? normalizedCountryIds : Collections.singletonList(-1L);
+        return projectInnovationInfoJpaRepository.findActiveInnovationsInfoBySdgFilters(
+                innovationId, phase, sdgId, queryCountryIds, hasCountryFilter);
     }
     
     @Override

@@ -50,23 +50,25 @@ public class InnovationCommentController {
     
     @Operation(
         summary = "Get all comments",
-        description = "Retrieves all comments ordered by most recent first. Optionally limit the number of comments returned."
+        description = "Retrieves all comments ordered by most recent first with pagination support. Use offset to skip records and limit to control page size."
     )
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved comments"),
-        @ApiResponse(responseCode = "400", description = "Invalid limit parameter"),
+        @ApiResponse(responseCode = "400", description = "Invalid pagination parameters"),
         @ApiResponse(responseCode = "503", description = "Comments table unavailable"),
         @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @GetMapping
     public ResponseEntity<List<InnovationCommentResponseDto>> getAllComments(
+            @Parameter(description = "Number of records to skip", required = false, example = "0")
+            @RequestParam(value = "offset", required = false, defaultValue = "0") Integer offset,
             @Parameter(description = "Maximum number of comments to return", required = false, example = "10")
             @RequestParam(value = "limit", required = false) Integer limit,
             @Parameter(description = "Phase ID used to resolve innovation names", required = false)
             @RequestParam(value = "phaseId", required = false) Long phaseId) {
         
         try {
-            List<InnovationCatalogComment> comments = commentUseCase.getAllComments(limit);
+            List<InnovationCatalogComment> comments = commentUseCase.getAllComments(offset, limit);
             List<InnovationCommentResponseDto> responseDtos = commentMapper.toResponseDtoList(comments);
 
             if (responseDtos != null && !responseDtos.isEmpty()) {

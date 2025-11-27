@@ -1337,6 +1337,7 @@ public class ProjectInnovationController {
                 info.getReasonNotCgiarContribution(),
                 info.getBeneficiariesNarrative(),
                 info.getKnowledgeResultsNarrative(),
+                maybeIncludeReasonKnowledgePotential(info),
                 info.getIntellectualPropertyInstitutionId(),
                 info.getHasLegalRestrictions(),
                 info.getHasAssetPotential(),
@@ -1389,6 +1390,17 @@ public class ProjectInnovationController {
             return innovationId + ":" + phaseId;
         }
         return innovationId + ":" + phaseId;
+    }
+
+    private String maybeIncludeReasonKnowledgePotential(ProjectInnovationInfo info) {
+        if (info == null) {
+            return null;
+        }
+        Long hasKnowledgePotentialId = info.getHasKnowledgePotentialId();
+        if (hasKnowledgePotentialId != null && hasKnowledgePotentialId.equals(2L)) {
+            return info.getReasonKnowledgePotential();
+        }
+        return null;
     }
     
     @Operation(summary = "Get innovation and country statistics by phase",

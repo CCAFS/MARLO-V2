@@ -115,6 +115,12 @@ public class ProjectInnovationInfo {
     
     @Column(name = "knowledge_results_narrative", columnDefinition = "TEXT")
     private String knowledgeResultsNarrative;
+
+    @Column(name = "has_knowledge_potential_id")
+    private Long hasKnowledgePotentialId;
+
+    @Column(name = "reason_knowledge_potential", columnDefinition = "TEXT")
+    private String reasonKnowledgePotential;
     
     @Column(name = "intellectual_property_institution_id")
     private Long intellectualPropertyInstitutionId;

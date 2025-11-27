@@ -89,17 +89,19 @@ public interface ProjectInnovationInfoJpaRepository extends JpaRepository<Projec
            "AND (:phase IS NULL OR pii.id_phase = :phase) " +
            "AND (:readinessScale IS NULL OR pii.readiness_scale = :readinessScale) " +
            "AND (:innovationTypeId IS NULL OR pii.innovation_type_id = :innovationTypeId) " +
-           "AND (:hasCountryFilter = false OR EXISTS ( " +
-               "SELECT 1 FROM project_innovation_countries pic " +
+           "AND (:hasCountryFilter = false OR ( " +
+               "SELECT COUNT(DISTINCT pic.id_country) " +
+               "FROM project_innovation_countries pic " +
                "WHERE pic.project_innovation_id = pii.project_innovation_id " +
                "AND pic.id_phase = pii.id_phase " +
-               "AND pic.id_country IN (:countryIds))) " +
+               "AND pic.id_country IN (:countryIds)) = :countryIdsCount) " +
            "ORDER BY pii.project_innovation_id DESC", nativeQuery = true)
     List<ProjectInnovationInfo> findActiveInnovationsInfoWithFilters(
             @Param("phase") Long phase,
             @Param("readinessScale") Integer readinessScale,
             @Param("innovationTypeId") Long innovationTypeId,
             @Param("countryIds") List<Long> countryIds,
+            @Param("countryIdsCount") int countryIdsCount,
             @Param("hasCountryFilter") boolean hasCountryFilter);
     
     // Find innovation info by SDG relationship
@@ -111,17 +113,19 @@ public interface ProjectInnovationInfoJpaRepository extends JpaRepository<Projec
            "AND (:innovationId IS NULL OR pis.innovation_id = :innovationId) " +
            "AND (:phase IS NULL OR pis.id_phase = :phase) " +
            "AND (:sdgId IS NULL OR pis.sdg_id = :sdgId) " +
-           "AND (:hasCountryFilter = false OR EXISTS ( " +
-               "SELECT 1 FROM project_innovation_countries pic " +
+           "AND (:hasCountryFilter = false OR ( " +
+               "SELECT COUNT(DISTINCT pic.id_country) " +
+               "FROM project_innovation_countries pic " +
                "WHERE pic.project_innovation_id = pii.project_innovation_id " +
                "AND pic.id_phase = pii.id_phase " +
-               "AND pic.id_country IN (:countryIds))) " +
+               "AND pic.id_country IN (:countryIds)) = :countryIdsCount) " +
            "ORDER BY pii.project_innovation_id DESC", nativeQuery = true)
     List<ProjectInnovationInfo> findActiveInnovationsInfoBySdgFilters(
             @Param("innovationId") Long innovationId,
             @Param("phase") Long phase,
             @Param("sdgId") Long sdgId,
             @Param("countryIds") List<Long> countryIds,
+            @Param("countryIdsCount") int countryIdsCount,
             @Param("hasCountryFilter") boolean hasCountryFilter);
     
     // Find all active innovations info

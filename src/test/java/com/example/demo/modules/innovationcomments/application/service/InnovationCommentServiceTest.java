@@ -27,6 +27,8 @@ class InnovationCommentServiceTest {
     
     @Mock
     private InnovationCommentRepository commentRepository;
+    @Mock
+    private CommentModerationService commentModerationService;
     
     @InjectMocks
     private InnovationCommentService commentService;
@@ -97,17 +99,19 @@ class InnovationCommentServiceTest {
     void createComment_Success() {
         // Arrange
         when(commentRepository.save(any(InnovationCatalogComment.class))).thenReturn(testCommentEntity);
-        
+
         // Act
         InnovationCatalogComment result = commentService.createComment(
             testInnovationId, testUserName, testUserLastname, testUserEmail, testCommentText);
-        
+
         // Assert
         assertNotNull(result);
         assertEquals(testCommentEntity.getId(), result.getId());
         assertEquals(testCommentEntity.getInnovationId(), result.getInnovationId());
         assertEquals(testCommentEntity.getUserName(), result.getUserName());
         verify(commentRepository, times(1)).save(any(InnovationCatalogComment.class));
+        verify(commentModerationService, times(1))
+                .validateComment(testInnovationId, testUserEmail, testCommentText);
     }
     
     @Test
@@ -175,11 +179,13 @@ class InnovationCommentServiceTest {
         // Act
         InnovationCatalogComment result = commentService.createCommentWithAudit(
             testInnovationId, testUserName, testUserLastname, testUserEmail, testCommentText, createdBy);
-        
+
         // Assert
         assertNotNull(result);
         assertEquals(testCommentEntity.getId(), result.getId());
         verify(commentRepository, times(1)).save(any(InnovationCatalogComment.class));
+        verify(commentModerationService, times(1))
+                .validateComment(testInnovationId, testUserEmail, testCommentText);
     }
     
     @Test

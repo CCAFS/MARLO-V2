@@ -2,7 +2,9 @@ package com.example.demo.modules.innovationcomments.adapters.web.controller;
 
 import com.example.demo.modules.innovationcomments.adapters.web.dto.CreateInnovationCommentRequestDto;
 import com.example.demo.modules.innovationcomments.adapters.web.dto.InnovationCommentResponseDto;
+import com.example.demo.modules.innovationcomments.adapters.web.dto.ModerationErrorResponse;
 import com.example.demo.modules.innovationcomments.adapters.web.mapper.InnovationCommentMapper;
+import com.example.demo.modules.innovationcomments.application.exception.CommentRejectedException;
 import com.example.demo.modules.innovationcomments.domain.model.InnovationCatalogComment;
 import com.example.demo.modules.innovationcomments.domain.port.in.InnovationCommentUseCase;
 import com.example.demo.modules.projectinnovation.adapters.outbound.persistence.ProjectInnovationInfoJpaRepository;
@@ -142,7 +144,7 @@ public class InnovationCommentController {
         @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @PostMapping
-    public ResponseEntity<InnovationCommentResponseDto> createComment(
+    public ResponseEntity<?> createComment(
             @Parameter(description = "Comment creation request", required = true)
             @Valid @RequestBody CreateInnovationCommentRequestDto requestDto) {
         
@@ -172,6 +174,10 @@ public class InnovationCommentController {
             logger.info("Successfully created comment for innovation {}", requestDto.getInnovationId());
             return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
             
+        } catch (CommentRejectedException e) {
+            logger.info("Comment blocked for innovation {} | reason={}", requestDto.getInnovationId(), e.getReasonCode());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ModerationErrorResponse(e.getUserMessage(), e.getReasonCode()));
         } catch (IllegalArgumentException e) {
             logger.warn("Invalid request data for comment creation: {}", e.getMessage());
             return ResponseEntity.badRequest().build();

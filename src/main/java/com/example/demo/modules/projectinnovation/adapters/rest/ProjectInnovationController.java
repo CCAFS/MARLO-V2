@@ -183,6 +183,8 @@ public class ProjectInnovationController {
             @RequestParam(required = false) Long sdgId,
             @Parameter(description = "Country IDs to filter by (comma-separated or repeat parameter)", example = "113,126")
             @RequestParam(required = false) List<String> countryIds,
+            @Parameter(description = "Actor IDs to filter by (comma-separated or repeat parameter)", example = "1,2")
+            @RequestParam(required = false) List<String> actorIds,
             @Parameter(description = "Number of records to skip (pagination)", example = "0")
             @RequestParam(required = false, defaultValue = "0") Integer offset,
             @Parameter(description = "Maximum number of records to return (pagination)", example = "20")
@@ -196,25 +198,22 @@ public class ProjectInnovationController {
         List<Long> normalizedCountryIds = normalizeCountryIds(countryIds);
         boolean hasCountryFilter = normalizedCountryIds != null;
         
+        List<Long> normalizedActorIds = normalizeActorIds(actorIds);
+        boolean hasActorFilter = normalizedActorIds != null;
+        
         // Get innovation info with filters instead of just innovation entities
         List<ProjectInnovationInfo> allInnovations;
         String searchType;
         
         // If any SDG-related filter is provided, use SDG search
         if (sdgId != null || (innovationId != null && phase != null)) {
-            allInnovations = projectInnovationUseCase.findActiveInnovationsInfoBySdgFilters(innovationId, phase, sdgId, normalizedCountryIds, null);
-            searchType = hasCountryFilter ? "SDG_AND_COUNTRY_FILTERS" : "SDG_FILTERS";
+            allInnovations = projectInnovationUseCase.findActiveInnovationsInfoBySdgFilters(innovationId, phase, sdgId, normalizedCountryIds, normalizedActorIds);
+            searchType = buildSearchType(hasCountryFilter, hasActorFilter, "SDG");
         }
         // If any general filter is provided, use general search
-        else if (phase != null || readinessScale != null || innovationTypeId != null || hasCountryFilter) {
-            allInnovations = projectInnovationUseCase.findActiveInnovationsInfoWithFilters(phase, readinessScale, innovationTypeId, normalizedCountryIds, null);
-            if (hasCountryFilter && phase == null && readinessScale == null && innovationTypeId == null) {
-                searchType = "COUNTRY_FILTERS";
-            } else if (hasCountryFilter) {
-                searchType = "GENERAL_AND_COUNTRY_FILTERS";
-            } else {
-                searchType = "GENERAL_FILTERS";
-            }
+        else if (phase != null || readinessScale != null || innovationTypeId != null || hasCountryFilter || hasActorFilter) {
+            allInnovations = projectInnovationUseCase.findActiveInnovationsInfoWithFilters(phase, readinessScale, innovationTypeId, normalizedCountryIds, normalizedActorIds);
+            searchType = buildSearchType(hasCountryFilter, hasActorFilter, "GENERAL");
         }
         // If no filters provided, return all active innovations with info
         else {
@@ -238,7 +237,7 @@ public class ProjectInnovationController {
         // Create filters metadata
         ProjectInnovationSearchResponse.SearchFilters appliedFilters = 
             new ProjectInnovationSearchResponse.SearchFilters(
-                phase, readinessScale, innovationTypeId, innovationId, sdgId, normalizedCountryIds, searchType
+                phase, readinessScale, innovationTypeId, innovationId, sdgId, normalizedCountryIds, normalizedActorIds, searchType
             );
         
         // Create pagination metadata
@@ -267,6 +266,8 @@ public class ProjectInnovationController {
             @RequestParam(required = false) Long sdgId,
             @Parameter(description = "Country IDs to filter by (comma-separated or repeat parameter)", example = "113,126")
             @RequestParam(required = false) List<String> countryIds,
+            @Parameter(description = "Actor IDs to filter by (comma-separated or repeat parameter)", example = "1,2")
+            @RequestParam(required = false) List<String> actorIds,
             @Parameter(description = "Number of records to skip (pagination)", example = "0")
             @RequestParam(required = false, defaultValue = "0") Integer offset,
             @Parameter(description = "Maximum number of records to return (pagination)", example = "20")
@@ -280,25 +281,22 @@ public class ProjectInnovationController {
         List<Long> normalizedCountryIds = normalizeCountryIds(countryIds);
         boolean hasCountryFilter = normalizedCountryIds != null;
         
+        List<Long> normalizedActorIds = normalizeActorIds(actorIds);
+        boolean hasActorFilter = normalizedActorIds != null;
+        
         // Get innovation info with filters (reusing existing logic)
         List<ProjectInnovationInfo> allInnovations;
         String searchType;
         
         // If any SDG-related filter is provided, use SDG search
         if (sdgId != null || (innovationId != null && phase != null)) {
-            allInnovations = projectInnovationUseCase.findActiveInnovationsInfoBySdgFilters(innovationId, phase, sdgId, normalizedCountryIds, null);
-            searchType = hasCountryFilter ? "SDG_AND_COUNTRY_FILTERS" : "SDG_FILTERS";
+            allInnovations = projectInnovationUseCase.findActiveInnovationsInfoBySdgFilters(innovationId, phase, sdgId, normalizedCountryIds, normalizedActorIds);
+            searchType = buildSearchType(hasCountryFilter, hasActorFilter, "SDG");
         }
         // If any general filter is provided, use general search
-        else if (phase != null || readinessScale != null || innovationTypeId != null || hasCountryFilter) {
-            allInnovations = projectInnovationUseCase.findActiveInnovationsInfoWithFilters(phase, readinessScale, innovationTypeId, normalizedCountryIds, null);
-            if (hasCountryFilter && phase == null && readinessScale == null && innovationTypeId == null) {
-                searchType = "COUNTRY_FILTERS";
-            } else if (hasCountryFilter) {
-                searchType = "GENERAL_AND_COUNTRY_FILTERS";
-            } else {
-                searchType = "GENERAL_FILTERS";
-            }
+        else if (phase != null || readinessScale != null || innovationTypeId != null || hasCountryFilter || hasActorFilter) {
+            allInnovations = projectInnovationUseCase.findActiveInnovationsInfoWithFilters(phase, readinessScale, innovationTypeId, normalizedCountryIds, normalizedActorIds);
+            searchType = buildSearchType(hasCountryFilter, hasActorFilter, "GENERAL");
         }
         // If no filters provided, return all active innovations with info
         else {
@@ -322,7 +320,7 @@ public class ProjectInnovationController {
         // Create filters metadata
         ProjectInnovationSimpleSearchResponse.SearchFilters appliedFilters = 
             new ProjectInnovationSimpleSearchResponse.SearchFilters(
-                phase, readinessScale, innovationTypeId, innovationId, sdgId, normalizedCountryIds, searchType
+                phase, readinessScale, innovationTypeId, innovationId, sdgId, normalizedCountryIds, normalizedActorIds, searchType
             );
         
         // Create pagination metadata

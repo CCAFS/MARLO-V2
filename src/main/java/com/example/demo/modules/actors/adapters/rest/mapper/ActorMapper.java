@@ -1,5 +1,6 @@
 package com.example.demo.modules.actors.adapters.rest.mapper;
 
+import com.example.demo.modules.actors.adapters.rest.dto.ActorControlListResponse;
 import com.example.demo.modules.actors.adapters.rest.dto.ActorResponse;
 import com.example.demo.modules.projectinnovation.domain.model.Actor;
 import org.springframework.stereotype.Component;
@@ -32,6 +33,20 @@ public class ActorMapper {
         
         return actors.stream()
                 .map(this::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    public List<ActorControlListResponse> toControlList(List<Actor> actors) {
+        if (actors == null) {
+            return List.of();
+        }
+
+        return actors.stream()
+                .map(actor -> new ActorControlListResponse(
+                        actor.getId(),
+                        actor.getName(),
+                        actor.getPrmsNameEquivalent()
+                ))
                 .collect(Collectors.toList());
     }
 }

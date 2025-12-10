@@ -14,4 +14,11 @@ public interface ActorRepositoryPort {
      * @return List of active actors
      */
     List<Actor> findAllActive();
+
+    /**
+     * Find active actors filtered by name fragment (case-insensitive)
+     * @param nameFilter Name fragment
+     * @return Matching active actors
+     */
+    List<Actor> findActiveByNameContaining(String nameFilter);
 }

@@ -20,10 +20,32 @@ public class ActorService {
     }
     
     /**
-     * Get all active actors
+     * Get active actors optionally filtered by name fragment
+     * @param nameFilter Optional filter (case-insensitive)
      * @return List of active actors
      */
-    public List<Actor> getAllActiveActors() {
-        return actorRepositoryPort.findAllActive();
+    public List<Actor> getActiveActors(String nameFilter) {
+        String normalizedFilter = normalizeFilter(nameFilter);
+        if (normalizedFilter == null) {
+            return actorRepositoryPort.findAllActive();
+        }
+        return actorRepositoryPort.findActiveByNameContaining(normalizedFilter);
+    }
+
+    private String normalizeFilter(String nameFilter) {
+        if (nameFilter == null) {
+            return null;
+        }
+
+        String trimmed = nameFilter.trim();
+        if (trimmed.isEmpty()) {
+            return null;
+        }
+
+        if ("null".equalsIgnoreCase(trimmed) || "undefined".equalsIgnoreCase(trimmed)) {
+            return null;
+        }
+
+        return trimmed;
     }
 }

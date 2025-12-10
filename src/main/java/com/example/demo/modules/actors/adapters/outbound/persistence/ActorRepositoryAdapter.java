@@ -24,4 +24,9 @@ public class ActorRepositoryAdapter implements ActorRepositoryPort {
     public List<Actor> findAllActive() {
         return actorJpaRepository.findAllActive();
     }
+
+    @Override
+    public List<Actor> findActiveByNameContaining(String nameFilter) {
+        return actorJpaRepository.findActiveByNameContaining(nameFilter);
+    }
 }

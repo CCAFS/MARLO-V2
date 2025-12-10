@@ -39,6 +39,7 @@ public record ProjectInnovationCompleteSearchResponse(
         Long sdgId,
         List<Long> countryIds,
         List<Long> actorIds,
+        String actorName,
         String searchType  // "SDG_FILTERS", "GENERAL_FILTERS", or "ALL_ACTIVE"
     ) {}
     
@@ -105,4 +106,3 @@ public record ProjectInnovationCompleteSearchResponse(
         );
     }
 }
-

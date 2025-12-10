@@ -40,6 +40,7 @@ public record ProjectInnovationSearchResponse(
         Long sdgId,
         List<Long> countryIds,
         List<Long> actorIds,
+        String actorName,
         String searchType  // "SDG_FILTERS", "GENERAL_FILTERS", or "ALL_ACTIVE"
     ) {}
     

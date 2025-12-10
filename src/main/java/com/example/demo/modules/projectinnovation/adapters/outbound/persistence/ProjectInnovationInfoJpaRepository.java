@@ -102,6 +102,15 @@ public interface ProjectInnovationInfoJpaRepository extends JpaRepository<Projec
                "AND pia.id_phase = pii.id_phase " +
                "AND pia.is_active = true " +
                "AND pia.actor_id IN (:actorIds)) = :actorIdsCount) " +
+           "AND (:hasActorNameFilter = false OR EXISTS ( " +
+               "SELECT 1 FROM project_innovation_actors pia_name " +
+               "JOIN actors a ON pia_name.actor_id = a.id " +
+               "WHERE pia_name.innovation_id = pii.project_innovation_id " +
+               "AND pia_name.id_phase = pii.id_phase " +
+               "AND pia_name.is_active = true " +
+               "AND a.is_active = true " +
+               "AND LOWER(a.name) LIKE LOWER(CONCAT('%', :actorName, '%')) " +
+           ")) " +
            "ORDER BY pii.project_innovation_id DESC", nativeQuery = true)
     List<ProjectInnovationInfo> findActiveInnovationsInfoWithFilters(
             @Param("phase") Long phase,
@@ -112,7 +121,9 @@ public interface ProjectInnovationInfoJpaRepository extends JpaRepository<Projec
             @Param("hasCountryFilter") boolean hasCountryFilter,
             @Param("actorIds") List<Long> actorIds,
             @Param("actorIdsCount") int actorIdsCount,
-            @Param("hasActorFilter") boolean hasActorFilter);
+            @Param("hasActorFilter") boolean hasActorFilter,
+            @Param("actorName") String actorName,
+            @Param("hasActorNameFilter") boolean hasActorNameFilter);
     
     // Find innovation info by SDG relationship
     @Query(value = "SELECT DISTINCT pii.* FROM project_innovation_info pii " +
@@ -136,6 +147,15 @@ public interface ProjectInnovationInfoJpaRepository extends JpaRepository<Projec
                "AND pia.id_phase = pii.id_phase " +
                "AND pia.is_active = true " +
                "AND pia.actor_id IN (:actorIds)) = :actorIdsCount) " +
+           "AND (:hasActorNameFilter = false OR EXISTS ( " +
+               "SELECT 1 FROM project_innovation_actors pia_name " +
+               "JOIN actors a ON pia_name.actor_id = a.id " +
+               "WHERE pia_name.innovation_id = pii.project_innovation_id " +
+               "AND pia_name.id_phase = pii.id_phase " +
+               "AND pia_name.is_active = true " +
+               "AND a.is_active = true " +
+               "AND LOWER(a.name) LIKE LOWER(CONCAT('%', :actorName, '%')) " +
+           ")) " +
            "ORDER BY pii.project_innovation_id DESC", nativeQuery = true)
     List<ProjectInnovationInfo> findActiveInnovationsInfoBySdgFilters(
             @Param("innovationId") Long innovationId,
@@ -146,7 +166,9 @@ public interface ProjectInnovationInfoJpaRepository extends JpaRepository<Projec
             @Param("hasCountryFilter") boolean hasCountryFilter,
             @Param("actorIds") List<Long> actorIds,
             @Param("actorIdsCount") int actorIdsCount,
-            @Param("hasActorFilter") boolean hasActorFilter);
+            @Param("hasActorFilter") boolean hasActorFilter,
+            @Param("actorName") String actorName,
+            @Param("hasActorNameFilter") boolean hasActorNameFilter);
     
     // Find all active innovations info
     @Query(value = "SELECT DISTINCT pii.* FROM project_innovation_info pii " +

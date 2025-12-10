@@ -180,7 +180,7 @@ public class ProjectInnovationRepositoryAdapter implements ProjectInnovationRepo
     
     // New methods that return ProjectInnovationInfo instead of ProjectInnovation
     @Override
-    public List<ProjectInnovationInfo> findActiveInnovationsInfoWithFilters(Long phase, Integer readinessScale, Long innovationTypeId, List<Long> countryIds, List<Long> actorIds) {
+    public List<ProjectInnovationInfo> findActiveInnovationsInfoWithFilters(Long phase, Integer readinessScale, Long innovationTypeId, List<Long> countryIds, List<Long> actorIds, String actorName) {
         List<Long> normalizedCountryIds = (countryIds == null || countryIds.isEmpty()) ? null : countryIds;
         boolean hasCountryFilter = normalizedCountryIds != null;
         int countryIdsCount = (normalizedCountryIds != null) ? normalizedCountryIds.size() : 0;
@@ -190,14 +190,18 @@ public class ProjectInnovationRepositoryAdapter implements ProjectInnovationRepo
         boolean hasActorFilter = normalizedActorIds != null;
         int actorIdsCount = (normalizedActorIds != null) ? normalizedActorIds.size() : 0;
         List<Long> queryActorIds = hasActorFilter ? normalizedActorIds : Collections.singletonList(-1L);
+        
+        String normalizedActorName = sanitizeTextFilter(actorName);
+        boolean hasActorNameFilter = normalizedActorName != null;
+        String queryActorName = hasActorNameFilter ? normalizedActorName : "";
         
         return projectInnovationInfoJpaRepository.findActiveInnovationsInfoWithFilters(
                 phase, readinessScale, innovationTypeId, queryCountryIds, countryIdsCount, hasCountryFilter,
-                queryActorIds, actorIdsCount, hasActorFilter);
+                queryActorIds, actorIdsCount, hasActorFilter, queryActorName, hasActorNameFilter);
     }
     
     @Override
-    public List<ProjectInnovationInfo> findActiveInnovationsInfoBySdgFilters(Long innovationId, Long phase, Long sdgId, List<Long> countryIds, List<Long> actorIds) {
+    public List<ProjectInnovationInfo> findActiveInnovationsInfoBySdgFilters(Long innovationId, Long phase, Long sdgId, List<Long> countryIds, List<Long> actorIds, String actorName) {
         List<Long> normalizedCountryIds = (countryIds == null || countryIds.isEmpty()) ? null : countryIds;
         boolean hasCountryFilter = normalizedCountryIds != null;
         int countryIdsCount = (normalizedCountryIds != null) ? normalizedCountryIds.size() : 0;
@@ -208,9 +212,13 @@ public class ProjectInnovationRepositoryAdapter implements ProjectInnovationRepo
         int actorIdsCount = (normalizedActorIds != null) ? normalizedActorIds.size() : 0;
         List<Long> queryActorIds = hasActorFilter ? normalizedActorIds : Collections.singletonList(-1L);
         
+        String normalizedActorName = sanitizeTextFilter(actorName);
+        boolean hasActorNameFilter = normalizedActorName != null;
+        String queryActorName = hasActorNameFilter ? normalizedActorName : "";
+        
         return projectInnovationInfoJpaRepository.findActiveInnovationsInfoBySdgFilters(
                 innovationId, phase, sdgId, queryCountryIds, countryIdsCount, hasCountryFilter,
-                queryActorIds, actorIdsCount, hasActorFilter);
+                queryActorIds, actorIdsCount, hasActorFilter, queryActorName, hasActorNameFilter);
     }
     
     @Override
@@ -437,5 +445,19 @@ public class ProjectInnovationRepositoryAdapter implements ProjectInnovationRepo
      */
     public Optional<User> findUserById(Long userId) {
         return userJpaRepository.findById(userId);
+    }
+
+    private String sanitizeTextFilter(String filter) {
+        if (filter == null) {
+            return null;
+        }
+        String trimmed = filter.trim();
+        if (trimmed.isEmpty()) {
+            return null;
+        }
+        if ("null".equalsIgnoreCase(trimmed) || "undefined".equalsIgnoreCase(trimmed)) {
+            return null;
+        }
+        return trimmed;
     }
 }

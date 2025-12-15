@@ -6,7 +6,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
@@ -180,7 +182,7 @@ public class ProjectInnovationRepositoryAdapter implements ProjectInnovationRepo
     
     // New methods that return ProjectInnovationInfo instead of ProjectInnovation
     @Override
-    public List<ProjectInnovationInfo> findActiveInnovationsInfoWithFilters(Long phase, Integer readinessScale, Long innovationTypeId, List<Long> countryIds, List<Long> actorIds, String actorName) {
+    public List<ProjectInnovationInfo> findActiveInnovationsInfoWithFilters(Long phase, Integer readinessScale, Long innovationTypeId, List<Long> countryIds, List<Long> actorIds, List<String> actorNames) {
         List<Long> normalizedCountryIds = (countryIds == null || countryIds.isEmpty()) ? null : countryIds;
         boolean hasCountryFilter = normalizedCountryIds != null;
         int countryIdsCount = (normalizedCountryIds != null) ? normalizedCountryIds.size() : 0;
@@ -191,17 +193,17 @@ public class ProjectInnovationRepositoryAdapter implements ProjectInnovationRepo
         int actorIdsCount = (normalizedActorIds != null) ? normalizedActorIds.size() : 0;
         List<Long> queryActorIds = hasActorFilter ? normalizedActorIds : Collections.singletonList(-1L);
         
-        String normalizedActorName = sanitizeTextFilter(actorName);
-        boolean hasActorNameFilter = normalizedActorName != null;
-        String queryActorName = hasActorNameFilter ? normalizedActorName : "";
+        List<String> normalizedActorNames = sanitizeTextFilters(actorNames);
+        boolean hasActorNameFilter = normalizedActorNames != null;
+        String actorNamePattern = hasActorNameFilter ? buildActorNamePattern(normalizedActorNames) : "";
         
         return projectInnovationInfoJpaRepository.findActiveInnovationsInfoWithFilters(
                 phase, readinessScale, innovationTypeId, queryCountryIds, countryIdsCount, hasCountryFilter,
-                queryActorIds, actorIdsCount, hasActorFilter, queryActorName, hasActorNameFilter);
+                queryActorIds, actorIdsCount, hasActorFilter, actorNamePattern, hasActorNameFilter);
     }
     
     @Override
-    public List<ProjectInnovationInfo> findActiveInnovationsInfoBySdgFilters(Long innovationId, Long phase, Long sdgId, List<Long> countryIds, List<Long> actorIds, String actorName) {
+    public List<ProjectInnovationInfo> findActiveInnovationsInfoBySdgFilters(Long innovationId, Long phase, Long sdgId, List<Long> countryIds, List<Long> actorIds, List<String> actorNames) {
         List<Long> normalizedCountryIds = (countryIds == null || countryIds.isEmpty()) ? null : countryIds;
         boolean hasCountryFilter = normalizedCountryIds != null;
         int countryIdsCount = (normalizedCountryIds != null) ? normalizedCountryIds.size() : 0;
@@ -212,13 +214,13 @@ public class ProjectInnovationRepositoryAdapter implements ProjectInnovationRepo
         int actorIdsCount = (normalizedActorIds != null) ? normalizedActorIds.size() : 0;
         List<Long> queryActorIds = hasActorFilter ? normalizedActorIds : Collections.singletonList(-1L);
         
-        String normalizedActorName = sanitizeTextFilter(actorName);
-        boolean hasActorNameFilter = normalizedActorName != null;
-        String queryActorName = hasActorNameFilter ? normalizedActorName : "";
+        List<String> normalizedActorNames = sanitizeTextFilters(actorNames);
+        boolean hasActorNameFilter = normalizedActorNames != null;
+        String actorNamePattern = hasActorNameFilter ? buildActorNamePattern(normalizedActorNames) : "";
         
         return projectInnovationInfoJpaRepository.findActiveInnovationsInfoBySdgFilters(
                 innovationId, phase, sdgId, queryCountryIds, countryIdsCount, hasCountryFilter,
-                queryActorIds, actorIdsCount, hasActorFilter, queryActorName, hasActorNameFilter);
+                queryActorIds, actorIdsCount, hasActorFilter, actorNamePattern, hasActorNameFilter);
     }
     
     @Override
@@ -459,5 +461,35 @@ public class ProjectInnovationRepositoryAdapter implements ProjectInnovationRepo
             return null;
         }
         return trimmed;
+    }
+
+    private List<String> sanitizeTextFilters(List<String> filters) {
+        if (filters == null || filters.isEmpty()) {
+            return null;
+        }
+        List<String> sanitized = filters.stream()
+                .map(this::sanitizeTextFilter)
+                .filter(Objects::nonNull)
+                .distinct()
+                .toList();
+        return sanitized.isEmpty() ? null : sanitized;
+    }
+
+    private String buildActorNamePattern(List<String> actorNames) {
+        return actorNames.stream()
+                .map(String::toLowerCase)
+                .map(this::escapeRegexSpecialCharacters)
+                .collect(Collectors.joining("|"));
+    }
+
+    private String escapeRegexSpecialCharacters(String input) {
+        StringBuilder escaped = new StringBuilder(input.length());
+        for (char ch : input.toCharArray()) {
+            if ("\\.[]{}()*+-?^$|".indexOf(ch) >= 0) {
+                escaped.append('\\');
+            }
+            escaped.append(ch);
+        }
+        return escaped.toString();
     }
 }

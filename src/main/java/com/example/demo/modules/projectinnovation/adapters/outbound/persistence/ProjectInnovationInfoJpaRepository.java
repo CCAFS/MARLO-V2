@@ -109,7 +109,7 @@ public interface ProjectInnovationInfoJpaRepository extends JpaRepository<Projec
                "AND pia_name.id_phase = pii.id_phase " +
                "AND pia_name.is_active = true " +
                "AND a.is_active = true " +
-               "AND LOWER(a.name) LIKE LOWER(CONCAT('%', :actorName, '%')) " +
+               "AND LOWER(a.name) REGEXP :actorNamePattern " +
            ")) " +
            "ORDER BY pii.project_innovation_id DESC", nativeQuery = true)
     List<ProjectInnovationInfo> findActiveInnovationsInfoWithFilters(
@@ -122,7 +122,7 @@ public interface ProjectInnovationInfoJpaRepository extends JpaRepository<Projec
             @Param("actorIds") List<Long> actorIds,
             @Param("actorIdsCount") int actorIdsCount,
             @Param("hasActorFilter") boolean hasActorFilter,
-            @Param("actorName") String actorName,
+            @Param("actorNamePattern") String actorNamePattern,
             @Param("hasActorNameFilter") boolean hasActorNameFilter);
     
     // Find innovation info by SDG relationship
@@ -154,7 +154,7 @@ public interface ProjectInnovationInfoJpaRepository extends JpaRepository<Projec
                "AND pia_name.id_phase = pii.id_phase " +
                "AND pia_name.is_active = true " +
                "AND a.is_active = true " +
-               "AND LOWER(a.name) LIKE LOWER(CONCAT('%', :actorName, '%')) " +
+               "AND LOWER(a.name) REGEXP :actorNamePattern " +
            ")) " +
            "ORDER BY pii.project_innovation_id DESC", nativeQuery = true)
     List<ProjectInnovationInfo> findActiveInnovationsInfoBySdgFilters(
@@ -167,7 +167,7 @@ public interface ProjectInnovationInfoJpaRepository extends JpaRepository<Projec
             @Param("actorIds") List<Long> actorIds,
             @Param("actorIdsCount") int actorIdsCount,
             @Param("hasActorFilter") boolean hasActorFilter,
-            @Param("actorName") String actorName,
+            @Param("actorNamePattern") String actorNamePattern,
             @Param("hasActorNameFilter") boolean hasActorNameFilter);
     
     // Find all active innovations info

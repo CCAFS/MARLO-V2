@@ -1,6 +1,7 @@
 package com.example.demo.modules.projectinnovation.adapters.rest.dto;
 
 import com.example.demo.modules.innovationtype.adapters.rest.dto.InnovationTypeResponse;
+import com.example.demo.modules.projectinnovation.adapters.rest.dto.ProjectInnovationActorsResponse;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 
@@ -52,7 +53,10 @@ public record ProjectInnovationSimpleResponse(
     List<RegionDto> regions,
     
     @Schema(description = "Associated countries")
-    List<CountryDto> countries
+    List<CountryDto> countries,
+    
+    @Schema(description = "Actors associated to the innovation in the selected phase")
+    List<ProjectInnovationActorsResponse> actors
 ) {
     
     @Schema(description = "Simple phase information")

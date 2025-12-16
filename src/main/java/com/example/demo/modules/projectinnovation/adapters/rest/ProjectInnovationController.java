@@ -550,6 +550,12 @@ public class ProjectInnovationController {
         List<SdgDto> sdgs = getSdgsForInnovation(info.getProjectInnovationId(), info.getIdPhase());
         List<RegionDto> regions = getRegionsForInnovation(info.getProjectInnovationId(), info.getIdPhase());
         List<CountryDto> countries = getCountriesForInnovation(info.getProjectInnovationId(), info.getIdPhase());
+        List<ProjectInnovationActorsResponse> actors = Collections.emptyList();
+        if (info.getProjectInnovationId() != null && info.getIdPhase() != null) {
+            List<ProjectInnovationActors> actorsEntities = actorsService.findActiveActorsByInnovationIdAndPhase(
+                    info.getProjectInnovationId(), info.getIdPhase().intValue());
+            actors = actorsMapper.toResponseList(actorsEntities);
+        }
         
         return new ProjectInnovationSimpleResponse(
             info.getId(),
@@ -567,7 +573,8 @@ public class ProjectInnovationController {
             projectInnovation != null ? projectInnovation.getIsActive() : true,
             sdgs,
             regions,
-            countries
+            countries,
+            actors
         );
     }
 

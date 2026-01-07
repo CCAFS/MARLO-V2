@@ -13,7 +13,14 @@ public class PersonalizedMessageGenerator {
     public String generate(String template, String name) {
         Objects.requireNonNull(template, "template must not be null");
         Objects.requireNonNull(name, "name must not be null");
-        logger.info("Generating message using template '{}' for name: {}", template, name);
+        String safeTemplate = sanitizeForLog(template);
+        String safeName = sanitizeForLog(name);
+        logger.info("Generating message using template '{}' for name: {}", safeTemplate, safeName);
         return String.format(template, name);
+    }
+
+    private String sanitizeForLog(String input) {
+        // Replace newline characters to avoid log forging.
+        return input.replaceAll("[\\r\\n]", "_");
     }
 }

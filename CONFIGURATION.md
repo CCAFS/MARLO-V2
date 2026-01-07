@@ -75,6 +75,42 @@ spring.datasource.username=username
 spring.datasource.password=password
 ```
 
+### Comment Moderation
+```properties
+# Master switch for the moderation pipeline (rules + AI)
+moderation.comment.enabled=true
+
+# Maximum allowed links before the comment is treated as spam
+moderation.comment.max-allowed-links=3
+
+# Maximum length for repeated characters (helps detect automated patterns)
+moderation.comment.max-repeated-characters=6
+
+# Uppercase ratio limit (0-1) before flagging the comment
+moderation.comment.max-uppercase-ratio=0.8
+
+# When true, rejected comments are logged with a hashed body
+moderation.comment.log-rejections=true
+
+# Optional AI module (OpenAI). Keep false to rely on local rules only.
+moderation.comment.openai.enabled=false
+
+# Model sent to the /v1/moderations endpoint (default omni-moderation-latest)
+moderation.comment.openai.model=omni-moderation-latest
+
+# Minimum score (0-1) to block even if the provider does not return flagged=true
+moderation.comment.openai.block-threshold=0.55
+
+# API call timeout (Spring duration format, e.g. 4s)
+moderation.comment.openai.timeout=4s
+
+# Provider API key (use environment variables in real environments)
+moderation.comment.openai.api-key=
+
+# Comma-separated list of additional banned words managed by the platform team
+moderation.comment.extra-banned-words=stupid,idiot,dumb,jerk,shit,asshole
+```
+
 ## 🛡️ Security Notes
 
 - **Local/Dev**: Use fixed credentials for development convenience

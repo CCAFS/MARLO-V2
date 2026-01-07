@@ -30,7 +30,7 @@ public interface ActorJpaRepository extends JpaRepository<Actor, Long> {
      *
      * @return List of active actors
      */
-    @Query("SELECT a FROM Actor a WHERE a.isActive = true ORDER BY a.name")
+    @Query("SELECT a FROM Actor a WHERE a.isActive = true ORDER BY a.id")
     List<Actor> findAllActive();
 
     /**

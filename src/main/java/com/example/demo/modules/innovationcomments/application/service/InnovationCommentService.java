@@ -21,9 +21,12 @@ public class InnovationCommentService implements InnovationCommentUseCase {
     
     private static final Logger logger = LoggerFactory.getLogger(InnovationCommentService.class);
     private final InnovationCommentRepository commentRepository;
-    
-    public InnovationCommentService(InnovationCommentRepository commentRepository) {
+    private final CommentModerationService commentModerationService;
+
+    public InnovationCommentService(InnovationCommentRepository commentRepository,
+                                    CommentModerationService commentModerationService) {
         this.commentRepository = commentRepository;
+        this.commentModerationService = commentModerationService;
     }
     
     @Override
@@ -69,7 +72,8 @@ public class InnovationCommentService implements InnovationCommentUseCase {
                                                 String userEmail, String commentText) {
         // Validate input parameters
         validateCommentParameters(innovationId, userName, userLastname, userEmail);
-        
+        commentModerationService.validateComment(innovationId, userEmail, commentText);
+
         try {
             // Create new comment
             InnovationCatalogComment comment = new InnovationCatalogComment(
@@ -92,6 +96,7 @@ public class InnovationCommentService implements InnovationCommentUseCase {
                                                          String userEmail, String commentText, String createdBy) {
         // Validate input parameters
         validateCommentParameters(innovationId, userName, userLastname, userEmail);
+        commentModerationService.validateComment(innovationId, userEmail, commentText);
         
         try {
             // Create new comment with audit information

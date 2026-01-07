@@ -38,6 +38,7 @@ public record ProjectInnovationSimpleSearchResponse(
         Long innovationId,
         Long sdgId,
         List<Long> countryIds,
+        List<Long> actorIds,
         String searchType  // "SDG_FILTERS", "GENERAL_FILTERS", or "ALL_ACTIVE"
     ) {}
     

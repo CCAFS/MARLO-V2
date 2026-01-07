@@ -38,7 +38,7 @@ public interface ProjectInnovationUseCase {
     List<ProjectInnovation> findAllActiveInnovationsComplete();
     
     // Advanced filtering methods that return complete ProjectInnovationInfo (only active records)
-    List<ProjectInnovationInfo> findActiveInnovationsInfoWithFilters(Long phase, Integer readinessScale, Long innovationTypeId, List<Long> countryIds);
-    List<ProjectInnovationInfo> findActiveInnovationsInfoBySdgFilters(Long innovationId, Long phase, Long sdgId, List<Long> countryIds);
+    List<ProjectInnovationInfo> findActiveInnovationsInfoWithFilters(Long phase, Integer readinessScale, Long innovationTypeId, List<Long> countryIds, List<Long> actorIds);
+    List<ProjectInnovationInfo> findActiveInnovationsInfoBySdgFilters(Long innovationId, Long phase, Long sdgId, List<Long> countryIds, List<Long> actorIds);
     List<ProjectInnovationInfo> findAllActiveInnovationsInfo();
 }

@@ -207,12 +207,12 @@ public class ProjectInnovationController {
         
         // If any SDG-related filter is provided, use SDG search
         if (sdgId != null || (innovationId != null && phase != null)) {
-            allInnovations = projectInnovationUseCase.findActiveInnovationsInfoBySdgFilters(innovationId, phase, sdgId, normalizedCountryIds, normalizedActorIds);
+            allInnovations = projectInnovationUseCase.findActiveInnovationsInfoBySdgFilters(innovationId, phase, sdgId, normalizedCountryIds, normalizedActorIds, null);
             searchType = buildSearchType(hasCountryFilter, hasActorFilter, "SDG");
         }
         // If any general filter is provided, use general search
         else if (phase != null || readinessScale != null || innovationTypeId != null || hasCountryFilter || hasActorFilter) {
-            allInnovations = projectInnovationUseCase.findActiveInnovationsInfoWithFilters(phase, readinessScale, innovationTypeId, normalizedCountryIds, normalizedActorIds);
+            allInnovations = projectInnovationUseCase.findActiveInnovationsInfoWithFilters(phase, readinessScale, innovationTypeId, normalizedCountryIds, normalizedActorIds, null);
             searchType = buildSearchType(hasCountryFilter, hasActorFilter, "GENERAL");
         }
         // If no filters provided, return all active innovations with info
@@ -290,12 +290,12 @@ public class ProjectInnovationController {
         
         // If any SDG-related filter is provided, use SDG search
         if (sdgId != null || (innovationId != null && phase != null)) {
-            allInnovations = projectInnovationUseCase.findActiveInnovationsInfoBySdgFilters(innovationId, phase, sdgId, normalizedCountryIds, normalizedActorIds);
+            allInnovations = projectInnovationUseCase.findActiveInnovationsInfoBySdgFilters(innovationId, phase, sdgId, normalizedCountryIds, normalizedActorIds, null);
             searchType = buildSearchType(hasCountryFilter, hasActorFilter, "SDG");
         }
         // If any general filter is provided, use general search
         else if (phase != null || readinessScale != null || innovationTypeId != null || hasCountryFilter || hasActorFilter) {
-            allInnovations = projectInnovationUseCase.findActiveInnovationsInfoWithFilters(phase, readinessScale, innovationTypeId, normalizedCountryIds, normalizedActorIds);
+            allInnovations = projectInnovationUseCase.findActiveInnovationsInfoWithFilters(phase, readinessScale, innovationTypeId, normalizedCountryIds, normalizedActorIds, null);
             searchType = buildSearchType(hasCountryFilter, hasActorFilter, "GENERAL");
         }
         // If no filters provided, return all active innovations with info
@@ -373,12 +373,12 @@ public class ProjectInnovationController {
         
         // If any SDG-related filter is provided, use SDG search
         if (sdgId != null || (innovationId != null && phase != null)) {
-            allInnovations = projectInnovationUseCase.findActiveInnovationsInfoBySdgFilters(innovationId, phase, sdgId, normalizedCountryIds, normalizedActorIds);
+            allInnovations = projectInnovationUseCase.findActiveInnovationsInfoBySdgFilters(innovationId, phase, sdgId, normalizedCountryIds, normalizedActorIds, null);
             searchType = buildSearchType(hasCountryFilter, hasActorFilter, "SDG");
         }
         // If any general filter is provided, use general search
         else if (phase != null || readinessScale != null || innovationTypeId != null || hasCountryFilter || hasActorFilter) {
-            allInnovations = projectInnovationUseCase.findActiveInnovationsInfoWithFilters(phase, readinessScale, innovationTypeId, normalizedCountryIds, normalizedActorIds);
+            allInnovations = projectInnovationUseCase.findActiveInnovationsInfoWithFilters(phase, readinessScale, innovationTypeId, normalizedCountryIds, normalizedActorIds, null);
             searchType = buildSearchType(hasCountryFilter, hasActorFilter, "GENERAL");
         }
         // If no filters provided, return all active innovations with info

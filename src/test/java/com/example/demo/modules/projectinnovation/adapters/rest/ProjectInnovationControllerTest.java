@@ -990,7 +990,7 @@ class ProjectInnovationControllerTest {
     void searchInnovations_WithSdgId_ShouldUseSdgSearch() {
         // Arrange
         List<ProjectInnovationInfo> innovations = Arrays.asList(testInnovationInfo);
-        when(projectInnovationUseCase.findActiveInnovationsInfoBySdgFilters(any(), any(), any(), any(), any()))
+        when(projectInnovationUseCase.findActiveInnovationsInfoBySdgFilters(any(), any(), any(), any(), any(), any()))
             .thenReturn(innovations);
 
         // Act
@@ -999,14 +999,14 @@ class ProjectInnovationControllerTest {
 
         // Assert
         assertEquals(HttpStatus.OK, result.getStatusCode());
-        verify(projectInnovationUseCase).findActiveInnovationsInfoBySdgFilters(any(), any(), eq(1L), any(), any());
+        verify(projectInnovationUseCase).findActiveInnovationsInfoBySdgFilters(any(), any(), eq(1L), any(), any(), any());
     }
 
     @Test
     void searchInnovations_WithInnovationIdAndPhase_ShouldUseSdgSearch() {
         // Arrange
         List<ProjectInnovationInfo> innovations = Arrays.asList(testInnovationInfo);
-        when(projectInnovationUseCase.findActiveInnovationsInfoBySdgFilters(any(), any(), any(), any(), any()))
+        when(projectInnovationUseCase.findActiveInnovationsInfoBySdgFilters(any(), any(), any(), any(), any(), any()))
             .thenReturn(innovations);
 
         // Act
@@ -1015,14 +1015,14 @@ class ProjectInnovationControllerTest {
 
         // Assert
         assertEquals(HttpStatus.OK, result.getStatusCode());
-        verify(projectInnovationUseCase).findActiveInnovationsInfoBySdgFilters(eq(100L), eq(1L), any(), any(), any());
+        verify(projectInnovationUseCase).findActiveInnovationsInfoBySdgFilters(eq(100L), eq(1L), any(), any(), any(), any());
     }
 
     @Test
     void searchInnovations_WithPhaseOnly_ShouldUseGeneralSearch() {
         // Arrange
         List<ProjectInnovationInfo> innovations = Arrays.asList(testInnovationInfo);
-        when(projectInnovationUseCase.findActiveInnovationsInfoWithFilters(any(), any(), any(), any(), any()))
+        when(projectInnovationUseCase.findActiveInnovationsInfoWithFilters(any(), any(), any(), any(), any(), any()))
             .thenReturn(innovations);
 
         // Act
@@ -1031,14 +1031,14 @@ class ProjectInnovationControllerTest {
 
         // Assert
         assertEquals(HttpStatus.OK, result.getStatusCode());
-        verify(projectInnovationUseCase).findActiveInnovationsInfoWithFilters(eq(1L), any(), any(), any(), any());
+        verify(projectInnovationUseCase).findActiveInnovationsInfoWithFilters(eq(1L), any(), any(), any(), any(), any());
     }
 
     @Test
     void searchInnovations_WithReadinessScale_ShouldUseGeneralSearch() {
         // Arrange
         List<ProjectInnovationInfo> innovations = Arrays.asList(testInnovationInfo);
-        when(projectInnovationUseCase.findActiveInnovationsInfoWithFilters(any(), any(), any(), any(), any()))
+        when(projectInnovationUseCase.findActiveInnovationsInfoWithFilters(any(), any(), any(), any(), any(), any()))
             .thenReturn(innovations);
 
         // Act
@@ -1047,14 +1047,14 @@ class ProjectInnovationControllerTest {
 
         // Assert
         assertEquals(HttpStatus.OK, result.getStatusCode());
-        verify(projectInnovationUseCase).findActiveInnovationsInfoWithFilters(any(), eq(5), any(), any(), any());
+        verify(projectInnovationUseCase).findActiveInnovationsInfoWithFilters(any(), eq(5), any(), any(), any(), any());
     }
 
     @Test
     void searchInnovations_WithInnovationTypeId_ShouldUseGeneralSearch() {
         // Arrange
         List<ProjectInnovationInfo> innovations = Arrays.asList(testInnovationInfo);
-        when(projectInnovationUseCase.findActiveInnovationsInfoWithFilters(any(), any(), any(), any(), any()))
+        when(projectInnovationUseCase.findActiveInnovationsInfoWithFilters(any(), any(), any(), any(), any(), any()))
             .thenReturn(innovations);
 
         // Act
@@ -1063,14 +1063,14 @@ class ProjectInnovationControllerTest {
 
         // Assert
         assertEquals(HttpStatus.OK, result.getStatusCode());
-        verify(projectInnovationUseCase).findActiveInnovationsInfoWithFilters(any(), any(), eq(2L), any(), any());
+        verify(projectInnovationUseCase).findActiveInnovationsInfoWithFilters(any(), any(), eq(2L), any(), any(), any());
     }
 
     @Test
     void searchInnovations_WithCountryIds_ShouldUseGeneralSearch() {
         // Arrange
         List<ProjectInnovationInfo> innovations = Arrays.asList(testInnovationInfo);
-        when(projectInnovationUseCase.findActiveInnovationsInfoWithFilters(any(), any(), any(), any(), any()))
+        when(projectInnovationUseCase.findActiveInnovationsInfoWithFilters(any(), any(), any(), any(), any(), any()))
             .thenReturn(innovations);
 
         // Act
@@ -1079,14 +1079,14 @@ class ProjectInnovationControllerTest {
 
         // Assert
         assertEquals(HttpStatus.OK, result.getStatusCode());
-        verify(projectInnovationUseCase).findActiveInnovationsInfoWithFilters(any(), any(), any(), any(), any());
+        verify(projectInnovationUseCase).findActiveInnovationsInfoWithFilters(any(), any(), any(), any(), any(), any());
     }
 
     @Test
     void searchInnovations_WithActorIds_ShouldUseGeneralSearch() {
         // Arrange
         List<ProjectInnovationInfo> innovations = Arrays.asList(testInnovationInfo);
-        when(projectInnovationUseCase.findActiveInnovationsInfoWithFilters(any(), any(), any(), any(), any()))
+        when(projectInnovationUseCase.findActiveInnovationsInfoWithFilters(any(), any(), any(), any(), any(), any()))
             .thenReturn(innovations);
 
         // Act
@@ -1095,7 +1095,7 @@ class ProjectInnovationControllerTest {
 
         // Assert
         assertEquals(HttpStatus.OK, result.getStatusCode());
-        verify(projectInnovationUseCase).findActiveInnovationsInfoWithFilters(any(), any(), any(), any(), any());
+        verify(projectInnovationUseCase).findActiveInnovationsInfoWithFilters(any(), any(), any(), any(), any(), any());
     }
 
     @Test
@@ -1178,7 +1178,7 @@ class ProjectInnovationControllerTest {
     void searchInnovationsSimple_WithSdgId_ShouldUseSdgSearch() {
         // Arrange
         List<ProjectInnovationInfo> innovations = Arrays.asList(testInnovationInfo);
-        when(projectInnovationUseCase.findActiveInnovationsInfoBySdgFilters(any(), any(), any(), any(), any()))
+        when(projectInnovationUseCase.findActiveInnovationsInfoBySdgFilters(any(), any(), any(), any(), any(), any()))
             .thenReturn(innovations);
 
         // Act
@@ -1187,7 +1187,7 @@ class ProjectInnovationControllerTest {
 
         // Assert
         assertEquals(HttpStatus.OK, result.getStatusCode());
-        verify(projectInnovationUseCase).findActiveInnovationsInfoBySdgFilters(any(), any(), eq(1L), any(), any());
+        verify(projectInnovationUseCase).findActiveInnovationsInfoBySdgFilters(any(), any(), eq(1L), any(), any(), any());
     }
 
     @Test
@@ -1209,7 +1209,7 @@ class ProjectInnovationControllerTest {
     void searchInnovationsComplete_WithSdgId_ShouldUseSdgSearch() {
         // Arrange
         List<ProjectInnovationInfo> innovations = Arrays.asList(testInnovationInfo);
-        when(projectInnovationUseCase.findActiveInnovationsInfoBySdgFilters(any(), any(), any(), any(), any()))
+        when(projectInnovationUseCase.findActiveInnovationsInfoBySdgFilters(any(), any(), any(), any(), any(), any()))
             .thenReturn(innovations);
 
         // Act
@@ -1218,7 +1218,7 @@ class ProjectInnovationControllerTest {
 
         // Assert
         assertEquals(HttpStatus.OK, result.getStatusCode());
-        verify(projectInnovationUseCase).findActiveInnovationsInfoBySdgFilters(any(), any(), eq(1L), any(), any());
+        verify(projectInnovationUseCase).findActiveInnovationsInfoBySdgFilters(any(), any(), eq(1L), any(), any(), any());
     }
 
     @Test
@@ -1900,7 +1900,7 @@ class ProjectInnovationControllerTest {
     void searchInnovations_WithBothCountryAndActorFilters_ShouldUseGeneralSearch() {
         // Arrange
         List<ProjectInnovationInfo> innovations = Arrays.asList(testInnovationInfo);
-        when(projectInnovationUseCase.findActiveInnovationsInfoWithFilters(any(), any(), any(), any(), any()))
+        when(projectInnovationUseCase.findActiveInnovationsInfoWithFilters(any(), any(), any(), any(), any(), any()))
             .thenReturn(innovations);
 
         // Act
@@ -1909,14 +1909,14 @@ class ProjectInnovationControllerTest {
 
         // Assert
         assertEquals(HttpStatus.OK, result.getStatusCode());
-        verify(projectInnovationUseCase).findActiveInnovationsInfoWithFilters(any(), any(), any(), any(), any());
+        verify(projectInnovationUseCase).findActiveInnovationsInfoWithFilters(any(), any(), any(), any(), any(), any());
     }
 
     @Test
     void searchInnovations_WithPhaseAndCountryFilters_ShouldUseGeneralSearch() {
         // Arrange
         List<ProjectInnovationInfo> innovations = Arrays.asList(testInnovationInfo);
-        when(projectInnovationUseCase.findActiveInnovationsInfoWithFilters(any(), any(), any(), any(), any()))
+        when(projectInnovationUseCase.findActiveInnovationsInfoWithFilters(any(), any(), any(), any(), any(), any()))
             .thenReturn(innovations);
 
         // Act
@@ -1925,14 +1925,14 @@ class ProjectInnovationControllerTest {
 
         // Assert
         assertEquals(HttpStatus.OK, result.getStatusCode());
-        verify(projectInnovationUseCase).findActiveInnovationsInfoWithFilters(eq(1L), any(), any(), any(), any());
+        verify(projectInnovationUseCase).findActiveInnovationsInfoWithFilters(eq(1L), any(), any(), any(), any(), any());
     }
 
     @Test
     void searchInnovations_WithPhaseAndActorFilters_ShouldUseGeneralSearch() {
         // Arrange
         List<ProjectInnovationInfo> innovations = Arrays.asList(testInnovationInfo);
-        when(projectInnovationUseCase.findActiveInnovationsInfoWithFilters(any(), any(), any(), any(), any()))
+        when(projectInnovationUseCase.findActiveInnovationsInfoWithFilters(any(), any(), any(), any(), any(), any()))
             .thenReturn(innovations);
 
         // Act
@@ -1941,14 +1941,14 @@ class ProjectInnovationControllerTest {
 
         // Assert
         assertEquals(HttpStatus.OK, result.getStatusCode());
-        verify(projectInnovationUseCase).findActiveInnovationsInfoWithFilters(eq(1L), any(), any(), any(), any());
+        verify(projectInnovationUseCase).findActiveInnovationsInfoWithFilters(eq(1L), any(), any(), any(), any(), any());
     }
 
     @Test
     void searchInnovations_WithSdgIdAndCountryFilters_ShouldUseSdgSearch() {
         // Arrange
         List<ProjectInnovationInfo> innovations = Arrays.asList(testInnovationInfo);
-        when(projectInnovationUseCase.findActiveInnovationsInfoBySdgFilters(any(), any(), any(), any(), any()))
+        when(projectInnovationUseCase.findActiveInnovationsInfoBySdgFilters(any(), any(), any(), any(), any(), any()))
             .thenReturn(innovations);
 
         // Act
@@ -1957,14 +1957,14 @@ class ProjectInnovationControllerTest {
 
         // Assert
         assertEquals(HttpStatus.OK, result.getStatusCode());
-        verify(projectInnovationUseCase).findActiveInnovationsInfoBySdgFilters(any(), any(), eq(1L), any(), any());
+        verify(projectInnovationUseCase).findActiveInnovationsInfoBySdgFilters(any(), any(), eq(1L), any(), any(), any());
     }
 
     @Test
     void searchInnovations_WithSdgIdAndActorFilters_ShouldUseSdgSearch() {
         // Arrange
         List<ProjectInnovationInfo> innovations = Arrays.asList(testInnovationInfo);
-        when(projectInnovationUseCase.findActiveInnovationsInfoBySdgFilters(any(), any(), any(), any(), any()))
+        when(projectInnovationUseCase.findActiveInnovationsInfoBySdgFilters(any(), any(), any(), any(), any(), any()))
             .thenReturn(innovations);
 
         // Act
@@ -1973,14 +1973,14 @@ class ProjectInnovationControllerTest {
 
         // Assert
         assertEquals(HttpStatus.OK, result.getStatusCode());
-        verify(projectInnovationUseCase).findActiveInnovationsInfoBySdgFilters(any(), any(), eq(1L), any(), any());
+        verify(projectInnovationUseCase).findActiveInnovationsInfoBySdgFilters(any(), any(), eq(1L), any(), any(), any());
     }
 
     @Test
     void searchInnovations_WithSdgIdAndBothFilters_ShouldUseSdgSearch() {
         // Arrange
         List<ProjectInnovationInfo> innovations = Arrays.asList(testInnovationInfo);
-        when(projectInnovationUseCase.findActiveInnovationsInfoBySdgFilters(any(), any(), any(), any(), any()))
+        when(projectInnovationUseCase.findActiveInnovationsInfoBySdgFilters(any(), any(), any(), any(), any(), any()))
             .thenReturn(innovations);
 
         // Act
@@ -1989,7 +1989,7 @@ class ProjectInnovationControllerTest {
 
         // Assert
         assertEquals(HttpStatus.OK, result.getStatusCode());
-        verify(projectInnovationUseCase).findActiveInnovationsInfoBySdgFilters(any(), any(), eq(1L), any(), any());
+        verify(projectInnovationUseCase).findActiveInnovationsInfoBySdgFilters(any(), any(), eq(1L), any(), any(), any());
     }
 
     @Test
@@ -2024,7 +2024,7 @@ class ProjectInnovationControllerTest {
     void searchInnovationsSimple_WithPhaseAndCountryFilters_ShouldUseGeneralSearch() {
         // Arrange
         List<ProjectInnovationInfo> innovations = Arrays.asList(testInnovationInfo);
-        when(projectInnovationUseCase.findActiveInnovationsInfoWithFilters(any(), any(), any(), any(), any()))
+        when(projectInnovationUseCase.findActiveInnovationsInfoWithFilters(any(), any(), any(), any(), any(), any()))
             .thenReturn(innovations);
 
         // Act
@@ -2033,14 +2033,14 @@ class ProjectInnovationControllerTest {
 
         // Assert
         assertEquals(HttpStatus.OK, result.getStatusCode());
-        verify(projectInnovationUseCase).findActiveInnovationsInfoWithFilters(eq(1L), any(), any(), any(), any());
+        verify(projectInnovationUseCase).findActiveInnovationsInfoWithFilters(eq(1L), any(), any(), any(), any(), any());
     }
 
     @Test
     void searchInnovationsComplete_WithPhaseAndCountryFilters_ShouldUseGeneralSearch() {
         // Arrange
         List<ProjectInnovationInfo> innovations = Arrays.asList(testInnovationInfo);
-        when(projectInnovationUseCase.findActiveInnovationsInfoWithFilters(any(), any(), any(), any(), any()))
+        when(projectInnovationUseCase.findActiveInnovationsInfoWithFilters(any(), any(), any(), any(), any(), any()))
             .thenReturn(innovations);
 
         // Act
@@ -2049,7 +2049,7 @@ class ProjectInnovationControllerTest {
 
         // Assert
         assertEquals(HttpStatus.OK, result.getStatusCode());
-        verify(projectInnovationUseCase).findActiveInnovationsInfoWithFilters(eq(1L), any(), any(), any(), any());
+        verify(projectInnovationUseCase).findActiveInnovationsInfoWithFilters(eq(1L), any(), any(), any(), any(), any());
     }
 
 
@@ -2057,7 +2057,7 @@ class ProjectInnovationControllerTest {
     void searchInnovations_WithMultipleFiltersCombined_ShouldUseGeneralSearch() {
         // Arrange
         List<ProjectInnovationInfo> innovations = Arrays.asList(testInnovationInfo);
-        when(projectInnovationUseCase.findActiveInnovationsInfoWithFilters(any(), any(), any(), any(), any()))
+        when(projectInnovationUseCase.findActiveInnovationsInfoWithFilters(any(), any(), any(), any(), any(), any()))
             .thenReturn(innovations);
 
         // Act - Combine phase, readinessScale, and innovationTypeId
@@ -2066,14 +2066,14 @@ class ProjectInnovationControllerTest {
 
         // Assert
         assertEquals(HttpStatus.OK, result.getStatusCode());
-        verify(projectInnovationUseCase).findActiveInnovationsInfoWithFilters(eq(1L), eq(5), eq(2L), any(), any());
+        verify(projectInnovationUseCase).findActiveInnovationsInfoWithFilters(eq(1L), eq(5), eq(2L), any(), any(), any());
     }
 
     @Test
     void searchInnovations_WithAllFiltersCombined_ShouldUseGeneralSearch() {
         // Arrange
         List<ProjectInnovationInfo> innovations = Arrays.asList(testInnovationInfo);
-        when(projectInnovationUseCase.findActiveInnovationsInfoWithFilters(any(), any(), any(), any(), any()))
+        when(projectInnovationUseCase.findActiveInnovationsInfoWithFilters(any(), any(), any(), any(), any(), any()))
             .thenReturn(innovations);
 
         // Act - Combine all general filters
@@ -2082,6 +2082,6 @@ class ProjectInnovationControllerTest {
 
         // Assert
         assertEquals(HttpStatus.OK, result.getStatusCode());
-        verify(projectInnovationUseCase).findActiveInnovationsInfoWithFilters(eq(1L), eq(5), eq(2L), any(), any());
+        verify(projectInnovationUseCase).findActiveInnovationsInfoWithFilters(eq(1L), eq(5), eq(2L), any(), any(), any());
     }
 }

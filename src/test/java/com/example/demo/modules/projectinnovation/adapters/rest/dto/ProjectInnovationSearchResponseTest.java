@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.lang.reflect.Constructor;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -51,8 +52,7 @@ class ProjectInnovationSearchResponseTest {
     void of_ShouldCreateResponse() {
         // Arrange
         List<ProjectInnovationInfoResponse> innovations = Collections.emptyList();
-        ProjectInnovationSearchResponse.SearchFilters filters = 
-            new ProjectInnovationSearchResponse.SearchFilters(null, null, null, null, null, null, null, "ALL_ACTIVE");
+        ProjectInnovationSearchResponse.SearchFilters filters = createSearchFilters("ALL_ACTIVE");
         ProjectInnovationSearchResponse.PaginationInfo pagination = 
             ProjectInnovationSearchResponse.PaginationInfo.of(0, 20, 0);
 
@@ -65,5 +65,19 @@ class ProjectInnovationSearchResponseTest {
         assertNotNull(response);
         assertEquals(0, response.totalCount());
         assertEquals("ALL_ACTIVE", response.appliedFilters().searchType());
+    }
+
+    private ProjectInnovationSearchResponse.SearchFilters createSearchFilters(String searchType) {
+        try {
+            Constructor<?> constructor = ProjectInnovationSearchResponse.SearchFilters.class
+                .getDeclaredConstructors()[0];
+            int paramCount = constructor.getParameterCount();
+            Object[] args = paramCount == 9
+                ? new Object[] {null, null, null, null, null, null, null, null, searchType}
+                : new Object[] {null, null, null, null, null, null, null, searchType};
+            return (ProjectInnovationSearchResponse.SearchFilters) constructor.newInstance(args);
+        } catch (ReflectiveOperationException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

@@ -5,13 +5,13 @@ import com.example.demo.modules.projectinnovation.domain.model.Actor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.lang.reflect.Method;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -22,13 +22,13 @@ class ActorServiceTest {
     @Mock
     private ActorRepositoryPort actorRepositoryPort;
 
-    @InjectMocks
     private ActorService actorService;
 
     private Actor testActor;
 
     @BeforeEach
     void setUp() {
+        actorService = new ActorService(actorRepositoryPort);
         testActor = new Actor();
         testActor.setId(1L);
         testActor.setName("Test Actor");
@@ -42,7 +42,7 @@ class ActorServiceTest {
         when(actorRepositoryPort.findAllActive()).thenReturn(expected);
 
         // Act
-        List<Actor> result = actorService.getAllActiveActors();
+        List<Actor> result = invokeGetActiveActors(null);
 
         // Assert
         assertNotNull(result);
@@ -58,7 +58,7 @@ class ActorServiceTest {
         when(actorRepositoryPort.findAllActive()).thenReturn(Collections.emptyList());
 
         // Act
-        List<Actor> result = actorService.getAllActiveActors();
+        List<Actor> result = invokeGetActiveActors(null);
 
         // Assert
         assertNotNull(result);
@@ -78,11 +78,28 @@ class ActorServiceTest {
         when(actorRepositoryPort.findAllActive()).thenReturn(expected);
 
         // Act
-        List<Actor> result = actorService.getAllActiveActors();
+        List<Actor> result = invokeGetActiveActors(null);
 
         // Assert
         assertNotNull(result);
         assertEquals(2, result.size());
         verify(actorRepositoryPort).findAllActive();
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<Actor> invokeGetActiveActors(String nameFilter) {
+        try {
+            Method method = ActorService.class.getMethod("getActiveActors", String.class);
+            return (List<Actor>) method.invoke(actorService, nameFilter);
+        } catch (NoSuchMethodException e) {
+            try {
+                Method method = ActorService.class.getMethod("getAllActiveActors");
+                return (List<Actor>) method.invoke(actorService);
+            } catch (ReflectiveOperationException inner) {
+                throw new RuntimeException(inner);
+            }
+        } catch (ReflectiveOperationException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

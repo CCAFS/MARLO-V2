@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
 import java.util.List;
+import java.lang.reflect.Constructor;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -28,8 +29,7 @@ class ProjectInnovationCompleteSearchResponseTest {
     void of_WithFourParams_ShouldCreateResponse() {
         // Arrange
         List<InnovationInfo> innovations = Collections.emptyList();
-        ProjectInnovationCompleteSearchResponse.SearchFilters filters = 
-            new ProjectInnovationCompleteSearchResponse.SearchFilters(null, null, null, null, null, null, null, "ALL_ACTIVE");
+        ProjectInnovationCompleteSearchResponse.SearchFilters filters = createSearchFilters("ALL_ACTIVE");
         ProjectInnovationCompleteSearchResponse.PaginationInfo pagination = 
             ProjectInnovationCompleteSearchResponse.PaginationInfo.of(0, 20, 0);
 
@@ -48,8 +48,7 @@ class ProjectInnovationCompleteSearchResponseTest {
     void of_WithTwoParams_ShouldCreateResponse() {
         // Arrange
         List<InnovationInfo> innovations = Collections.emptyList();
-        ProjectInnovationCompleteSearchResponse.SearchFilters filters = 
-            new ProjectInnovationCompleteSearchResponse.SearchFilters(null, null, null, null, null, null, null, "ALL_ACTIVE");
+        ProjectInnovationCompleteSearchResponse.SearchFilters filters = createSearchFilters("ALL_ACTIVE");
 
         // Act
         ProjectInnovationCompleteSearchResponse response = ProjectInnovationCompleteSearchResponse.of(
@@ -75,5 +74,19 @@ class ProjectInnovationCompleteSearchResponseTest {
         assertEquals(0, response.totalCount());
         assertNull(response.appliedFilters());
         assertNull(response.pagination());
+    }
+
+    private ProjectInnovationCompleteSearchResponse.SearchFilters createSearchFilters(String searchType) {
+        try {
+            Constructor<?> constructor = ProjectInnovationCompleteSearchResponse.SearchFilters.class
+                .getDeclaredConstructors()[0];
+            int paramCount = constructor.getParameterCount();
+            Object[] args = paramCount == 9
+                ? new Object[] {null, null, null, null, null, null, null, null, searchType}
+                : new Object[] {null, null, null, null, null, null, null, searchType};
+            return (ProjectInnovationCompleteSearchResponse.SearchFilters) constructor.newInstance(args);
+        } catch (ReflectiveOperationException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

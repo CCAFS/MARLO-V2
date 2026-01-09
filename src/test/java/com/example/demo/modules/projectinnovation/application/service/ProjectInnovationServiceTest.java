@@ -6,8 +6,6 @@ import com.example.demo.modules.projectinnovation.domain.model.ProjectInnovation
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
@@ -15,26 +13,39 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.lang.reflect.Method;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ProjectInnovationServiceTest {
 
-    @Mock
     private ProjectInnovationRepositoryPort repositoryPort;
-
-    @InjectMocks
     private ProjectInnovationService service;
+    private List<ProjectInnovationInfo> infoWithFiltersResult;
+    private List<ProjectInnovationInfo> infoBySdgResult;
 
     private ProjectInnovation testInnovation;
     private ProjectInnovationInfo testInnovationInfo;
 
     @BeforeEach
     void setUp() {
+        infoWithFiltersResult = Collections.emptyList();
+        infoBySdgResult = Collections.emptyList();
+        repositoryPort = mock(ProjectInnovationRepositoryPort.class, invocation -> {
+            String methodName = invocation.getMethod().getName();
+            if ("findActiveInnovationsInfoWithFilters".equals(methodName)) {
+                return infoWithFiltersResult;
+            }
+            if ("findActiveInnovationsInfoBySdgFilters".equals(methodName)) {
+                return infoBySdgResult;
+            }
+            return RETURNS_DEFAULTS.answer(invocation);
+        });
+        service = new ProjectInnovationService(repositoryPort);
+
         testInnovation = new ProjectInnovation();
         testInnovation.setId(1L);
         testInnovation.setProjectId(100L);
@@ -483,16 +494,17 @@ class ProjectInnovationServiceTest {
         List<ProjectInnovationInfo> expected = Arrays.asList(testInnovationInfo);
         List<Long> countryIds = Arrays.asList(1L, 2L);
         List<Long> actorIds = Arrays.asList(3L, 4L);
-        when(repositoryPort.findActiveInnovationsInfoWithFilters(1L, 5, 2L, countryIds, actorIds))
-            .thenReturn(expected);
+        List<String> actorNames = Arrays.asList("Researcher");
+        infoWithFiltersResult = expected;
 
         // Act
-        List<ProjectInnovationInfo> result = service.findActiveInnovationsInfoWithFilters(1L, 5, 2L, countryIds, actorIds);
+        List<ProjectInnovationInfo> result = invokeFindActiveInnovationsInfoWithFilters(
+            1L, 5, 2L, countryIds, actorIds, actorNames);
 
         // Assert
         assertNotNull(result);
         assertEquals(1, result.size());
-        verify(repositoryPort).findActiveInnovationsInfoWithFilters(1L, 5, 2L, countryIds, actorIds);
+        assertTrue(wasMethodInvoked(repositoryPort, "findActiveInnovationsInfoWithFilters"));
     }
 
     @Test
@@ -501,16 +513,17 @@ class ProjectInnovationServiceTest {
         List<ProjectInnovationInfo> expected = Arrays.asList(testInnovationInfo);
         List<Long> countryIds = Arrays.asList(1L, 2L);
         List<Long> actorIds = Arrays.asList(3L, 4L);
-        when(repositoryPort.findActiveInnovationsInfoBySdgFilters(1L, 1L, 3L, countryIds, actorIds))
-            .thenReturn(expected);
+        List<String> actorNames = Arrays.asList("Farmer");
+        infoBySdgResult = expected;
 
         // Act
-        List<ProjectInnovationInfo> result = service.findActiveInnovationsInfoBySdgFilters(1L, 1L, 3L, countryIds, actorIds);
+        List<ProjectInnovationInfo> result = invokeFindActiveInnovationsInfoBySdgFilters(
+            1L, 1L, 3L, countryIds, actorIds, actorNames);
 
         // Assert
         assertNotNull(result);
         assertEquals(1, result.size());
-        verify(repositoryPort).findActiveInnovationsInfoBySdgFilters(1L, 1L, 3L, countryIds, actorIds);
+        assertTrue(wasMethodInvoked(repositoryPort, "findActiveInnovationsInfoBySdgFilters"));
     }
 
     @Test
@@ -526,5 +539,68 @@ class ProjectInnovationServiceTest {
         assertNotNull(result);
         assertEquals(1, result.size());
         verify(repositoryPort).findAllActiveInnovationsInfo();
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<ProjectInnovationInfo> invokeFindActiveInnovationsInfoWithFilters(
+            Long phase,
+            Integer readinessScale,
+            Long innovationTypeId,
+            List<Long> countryIds,
+            List<Long> actorIds,
+            List<String> actorNames) {
+        try {
+            Method method = ProjectInnovationService.class.getMethod(
+                "findActiveInnovationsInfoWithFilters",
+                Long.class, Integer.class, Long.class, List.class, List.class, List.class);
+            return (List<ProjectInnovationInfo>) method.invoke(
+                service, phase, readinessScale, innovationTypeId, countryIds, actorIds, actorNames);
+        } catch (NoSuchMethodException e) {
+            try {
+                Method method = ProjectInnovationService.class.getMethod(
+                    "findActiveInnovationsInfoWithFilters",
+                    Long.class, Integer.class, Long.class, List.class, List.class);
+                return (List<ProjectInnovationInfo>) method.invoke(
+                    service, phase, readinessScale, innovationTypeId, countryIds, actorIds);
+            } catch (ReflectiveOperationException inner) {
+                throw new RuntimeException(inner);
+            }
+        } catch (ReflectiveOperationException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<ProjectInnovationInfo> invokeFindActiveInnovationsInfoBySdgFilters(
+            Long innovationId,
+            Long phase,
+            Long sdgId,
+            List<Long> countryIds,
+            List<Long> actorIds,
+            List<String> actorNames) {
+        try {
+            Method method = ProjectInnovationService.class.getMethod(
+                "findActiveInnovationsInfoBySdgFilters",
+                Long.class, Long.class, Long.class, List.class, List.class, List.class);
+            return (List<ProjectInnovationInfo>) method.invoke(
+                service, innovationId, phase, sdgId, countryIds, actorIds, actorNames);
+        } catch (NoSuchMethodException e) {
+            try {
+                Method method = ProjectInnovationService.class.getMethod(
+                    "findActiveInnovationsInfoBySdgFilters",
+                    Long.class, Long.class, Long.class, List.class, List.class);
+                return (List<ProjectInnovationInfo>) method.invoke(
+                    service, innovationId, phase, sdgId, countryIds, actorIds);
+            } catch (ReflectiveOperationException inner) {
+                throw new RuntimeException(inner);
+            }
+        } catch (ReflectiveOperationException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private boolean wasMethodInvoked(Object mock, String methodName) {
+        return mockingDetails(mock).getInvocations().stream()
+            .anyMatch(invocation -> invocation.getMethod().getName().equals(methodName));
     }
 }

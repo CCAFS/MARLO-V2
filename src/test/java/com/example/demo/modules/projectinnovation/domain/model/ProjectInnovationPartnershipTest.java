@@ -98,4 +98,152 @@ class ProjectInnovationPartnershipTest {
         assertEquals(modifiedBy, projectInnovationPartnership.getModifiedBy());
         assertEquals(modificationJustification, projectInnovationPartnership.getModificationJustification());
     }
+
+    @Test
+    void equals_WithSameId_ShouldReturnTrue() {
+        // Arrange
+        ProjectInnovationPartnership p1 = new ProjectInnovationPartnership();
+        ProjectInnovationPartnership p2 = new ProjectInnovationPartnership();
+        p1.setId(1L);
+        p2.setId(1L);
+
+        // Act & Assert
+        assertEquals(p1, p2);
+    }
+
+    @Test
+    void equals_WithDifferentIds_ShouldReturnFalse() {
+        // Arrange
+        ProjectInnovationPartnership p1 = new ProjectInnovationPartnership();
+        ProjectInnovationPartnership p2 = new ProjectInnovationPartnership();
+        p1.setId(1L);
+        p2.setId(2L);
+
+        // Act & Assert
+        assertNotEquals(p1, p2);
+    }
+
+    @Test
+    void equals_WithNull_ShouldReturnFalse() {
+        // Act & Assert
+        assertNotEquals(projectInnovationPartnership, null);
+    }
+
+    @Test
+    void equals_WithDifferentClass_ShouldReturnFalse() {
+        // Act & Assert
+        assertNotEquals(projectInnovationPartnership, "not a partnership");
+    }
+
+    @Test
+    void equals_WithSameInstance_ShouldReturnTrue() {
+        // Act & Assert
+        assertEquals(projectInnovationPartnership, projectInnovationPartnership);
+    }
+
+    @Test
+    void equals_WithAllFieldsSame_ShouldReturnTrue() {
+        // Arrange
+        Long id = 1L;
+        Long projectInnovationId = 100L;
+        Long institutionId = 200L;
+        Long idPhase = 1L;
+        Long innovationPartnerTypeId = 300L;
+        Boolean isActive = true;
+        LocalDateTime activeSince = LocalDateTime.now();
+        Long createdBy = 10L;
+        Long modifiedBy = 20L;
+        String modificationJustification = "Justification";
+
+        ProjectInnovationPartnership p1 = new ProjectInnovationPartnership(id, projectInnovationId, institutionId, idPhase, innovationPartnerTypeId, isActive, activeSince, createdBy, modifiedBy, modificationJustification);
+        ProjectInnovationPartnership p2 = new ProjectInnovationPartnership(id, projectInnovationId, institutionId, idPhase, innovationPartnerTypeId, isActive, activeSince, createdBy, modifiedBy, modificationJustification);
+
+        // Act & Assert
+        assertEquals(p1, p2);
+    }
+
+    @Test
+    void equals_WithDifferentFields_ShouldReturnFalse() {
+        // Arrange
+        ProjectInnovationPartnership p1 = new ProjectInnovationPartnership();
+        ProjectInnovationPartnership p2 = new ProjectInnovationPartnership();
+        p1.setId(1L);
+        p1.setInstitutionId(100L);
+        p2.setId(1L);
+        p2.setInstitutionId(200L);
+
+        // Act & Assert
+        assertNotEquals(p1, p2);
+    }
+
+    @Test
+    void hashCode_WithSameFields_ShouldReturnSameHashCode() {
+        // Arrange
+        ProjectInnovationPartnership p1 = new ProjectInnovationPartnership();
+        ProjectInnovationPartnership p2 = new ProjectInnovationPartnership();
+        p1.setId(1L);
+        p1.setInstitutionId(100L);
+        p2.setId(1L);
+        p2.setInstitutionId(100L);
+
+        // Act & Assert
+        assertEquals(p1.hashCode(), p2.hashCode());
+    }
+
+    @Test
+    void hashCode_WithDifferentFields_ShouldReturnDifferentHashCode() {
+        // Arrange
+        ProjectInnovationPartnership p1 = new ProjectInnovationPartnership();
+        ProjectInnovationPartnership p2 = new ProjectInnovationPartnership();
+        p1.setId(1L);
+        p1.setInstitutionId(100L);
+        p2.setId(2L);
+        p2.setInstitutionId(200L);
+
+        // Act & Assert
+        assertNotEquals(p1.hashCode(), p2.hashCode());
+    }
+
+    @Test
+    void hashCode_WithNullFields_ShouldNotThrowException() {
+        // Act & Assert
+        assertDoesNotThrow(() -> projectInnovationPartnership.hashCode());
+    }
+
+    @Test
+    void toString_ShouldContainClassName() {
+        // Act
+        String toString = projectInnovationPartnership.toString();
+
+        // Assert
+        assertTrue(toString.contains("ProjectInnovationPartnership"));
+    }
+
+    @Test
+    void equals_WithNullFields_ShouldHandleNulls() {
+        // Arrange
+        ProjectInnovationPartnership p1 = new ProjectInnovationPartnership();
+        ProjectInnovationPartnership p2 = new ProjectInnovationPartnership();
+        p1.setId(null);
+        p1.setInstitutionId(null);
+        p2.setId(null);
+        p2.setInstitutionId(null);
+
+        // Act & Assert
+        assertEquals(p1, p2);
+    }
+
+    @Test
+    void equals_WithOneNullField_ShouldReturnFalse() {
+        // Arrange
+        ProjectInnovationPartnership p1 = new ProjectInnovationPartnership();
+        ProjectInnovationPartnership p2 = new ProjectInnovationPartnership();
+        p1.setId(1L);
+        p1.setInstitutionId(100L);
+        p2.setId(1L);
+        p2.setInstitutionId(null);
+
+        // Act & Assert
+        assertNotEquals(p1, p2);
+    }
 }

@@ -115,4 +115,155 @@ class ProjectInnovationAllianceOrganizationTest {
         assertEquals(institutionId, projectInnovationAllianceOrganization.getInstitutionId());
         assertEquals(number, projectInnovationAllianceOrganization.getNumber());
     }
+
+    @Test
+    void equals_WithSameId_ShouldReturnTrue() {
+        // Arrange
+        ProjectInnovationAllianceOrganization org1 = new ProjectInnovationAllianceOrganization();
+        ProjectInnovationAllianceOrganization org2 = new ProjectInnovationAllianceOrganization();
+        org1.setId(1L);
+        org2.setId(1L);
+
+        // Act & Assert
+        assertEquals(org1, org2);
+    }
+
+    @Test
+    void equals_WithDifferentIds_ShouldReturnFalse() {
+        // Arrange
+        ProjectInnovationAllianceOrganization org1 = new ProjectInnovationAllianceOrganization();
+        ProjectInnovationAllianceOrganization org2 = new ProjectInnovationAllianceOrganization();
+        org1.setId(1L);
+        org2.setId(2L);
+
+        // Act & Assert
+        assertNotEquals(org1, org2);
+    }
+
+    @Test
+    void equals_WithNull_ShouldReturnFalse() {
+        // Act & Assert
+        assertNotEquals(projectInnovationAllianceOrganization, null);
+    }
+
+    @Test
+    void equals_WithDifferentClass_ShouldReturnFalse() {
+        // Act & Assert
+        assertNotEquals(projectInnovationAllianceOrganization, "not an org");
+    }
+
+    @Test
+    void equals_WithSameInstance_ShouldReturnTrue() {
+        // Act & Assert
+        assertEquals(projectInnovationAllianceOrganization, projectInnovationAllianceOrganization);
+    }
+
+    @Test
+    void equals_WithAllFieldsSame_ShouldReturnTrue() {
+        // Arrange
+        Long id = 1L;
+        Long projectInnovationId = 100L;
+        Long idPhase = 1L;
+        Long institutionTypeId = 200L;
+        String organizationName = "Org Name";
+        Boolean isScalingPartner = true;
+        Boolean isActive = true;
+        LocalDateTime activeSince = LocalDateTime.now();
+        Long createdBy = 10L;
+        Long modifiedBy = 20L;
+        String modificationJustification = "Justification";
+        Long institutionId = 300L;
+        Integer number = 1;
+
+        ProjectInnovationAllianceOrganization org1 = new ProjectInnovationAllianceOrganization(id, projectInnovationId, idPhase, institutionTypeId, organizationName, isScalingPartner, isActive, activeSince, createdBy, modifiedBy, modificationJustification, institutionId, number);
+        ProjectInnovationAllianceOrganization org2 = new ProjectInnovationAllianceOrganization(id, projectInnovationId, idPhase, institutionTypeId, organizationName, isScalingPartner, isActive, activeSince, createdBy, modifiedBy, modificationJustification, institutionId, number);
+
+        // Act & Assert
+        assertEquals(org1, org2);
+    }
+
+    @Test
+    void equals_WithDifferentFields_ShouldReturnFalse() {
+        // Arrange
+        ProjectInnovationAllianceOrganization org1 = new ProjectInnovationAllianceOrganization();
+        ProjectInnovationAllianceOrganization org2 = new ProjectInnovationAllianceOrganization();
+        org1.setId(1L);
+        org1.setOrganizationName("Name 1");
+        org2.setId(1L);
+        org2.setOrganizationName("Name 2");
+
+        // Act & Assert
+        assertNotEquals(org1, org2);
+    }
+
+    @Test
+    void hashCode_WithSameFields_ShouldReturnSameHashCode() {
+        // Arrange
+        ProjectInnovationAllianceOrganization org1 = new ProjectInnovationAllianceOrganization();
+        ProjectInnovationAllianceOrganization org2 = new ProjectInnovationAllianceOrganization();
+        org1.setId(1L);
+        org1.setOrganizationName("Name");
+        org2.setId(1L);
+        org2.setOrganizationName("Name");
+
+        // Act & Assert
+        assertEquals(org1.hashCode(), org2.hashCode());
+    }
+
+    @Test
+    void hashCode_WithDifferentFields_ShouldReturnDifferentHashCode() {
+        // Arrange
+        ProjectInnovationAllianceOrganization org1 = new ProjectInnovationAllianceOrganization();
+        ProjectInnovationAllianceOrganization org2 = new ProjectInnovationAllianceOrganization();
+        org1.setId(1L);
+        org1.setOrganizationName("Name 1");
+        org2.setId(2L);
+        org2.setOrganizationName("Name 2");
+
+        // Act & Assert
+        assertNotEquals(org1.hashCode(), org2.hashCode());
+    }
+
+    @Test
+    void hashCode_WithNullFields_ShouldNotThrowException() {
+        // Act & Assert
+        assertDoesNotThrow(() -> projectInnovationAllianceOrganization.hashCode());
+    }
+
+    @Test
+    void toString_ShouldContainClassName() {
+        // Act
+        String toString = projectInnovationAllianceOrganization.toString();
+
+        // Assert
+        assertTrue(toString.contains("ProjectInnovationAllianceOrganization"));
+    }
+
+    @Test
+    void equals_WithNullFields_ShouldHandleNulls() {
+        // Arrange
+        ProjectInnovationAllianceOrganization org1 = new ProjectInnovationAllianceOrganization();
+        ProjectInnovationAllianceOrganization org2 = new ProjectInnovationAllianceOrganization();
+        org1.setId(null);
+        org1.setOrganizationName(null);
+        org2.setId(null);
+        org2.setOrganizationName(null);
+
+        // Act & Assert
+        assertEquals(org1, org2);
+    }
+
+    @Test
+    void equals_WithOneNullField_ShouldReturnFalse() {
+        // Arrange
+        ProjectInnovationAllianceOrganization org1 = new ProjectInnovationAllianceOrganization();
+        ProjectInnovationAllianceOrganization org2 = new ProjectInnovationAllianceOrganization();
+        org1.setId(1L);
+        org1.setOrganizationName("Name");
+        org2.setId(1L);
+        org2.setOrganizationName(null);
+
+        // Act & Assert
+        assertNotEquals(org1, org2);
+    }
 }

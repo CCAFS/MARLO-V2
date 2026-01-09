@@ -103,4 +103,148 @@ class InnovationTypeTest {
         // Assert
         assertNull(innovationType.getIsOldType());
     }
+
+    @Test
+    void equals_WithSameId_ShouldReturnTrue() {
+        // Arrange
+        InnovationType t1 = new InnovationType();
+        InnovationType t2 = new InnovationType();
+        t1.setId(1L);
+        t2.setId(1L);
+
+        // Act & Assert
+        assertEquals(t1, t2);
+    }
+
+    @Test
+    void equals_WithDifferentIds_ShouldReturnFalse() {
+        // Arrange
+        InnovationType t1 = new InnovationType();
+        InnovationType t2 = new InnovationType();
+        t1.setId(1L);
+        t2.setId(2L);
+
+        // Act & Assert
+        assertNotEquals(t1, t2);
+    }
+
+    @Test
+    void equals_WithNull_ShouldReturnFalse() {
+        // Act & Assert
+        assertNotEquals(innovationType, null);
+    }
+
+    @Test
+    void equals_WithDifferentClass_ShouldReturnFalse() {
+        // Act & Assert
+        assertNotEquals(innovationType, "not a type");
+    }
+
+    @Test
+    void equals_WithSameInstance_ShouldReturnTrue() {
+        // Act & Assert
+        assertEquals(innovationType, innovationType);
+    }
+
+    @Test
+    void equals_WithAllFieldsSame_ShouldReturnTrue() {
+        // Arrange
+        Long id = 1L;
+        String name = "Name";
+        String definition = "Definition";
+        Boolean isOldType = false;
+        Long prmsIdEquivalent = 100L;
+        String prmsNameEquivalent = "PRMS Name";
+
+        InnovationType t1 = new InnovationType(id, name, definition, isOldType, prmsIdEquivalent, prmsNameEquivalent);
+        InnovationType t2 = new InnovationType(id, name, definition, isOldType, prmsIdEquivalent, prmsNameEquivalent);
+
+        // Act & Assert
+        assertEquals(t1, t2);
+    }
+
+    @Test
+    void equals_WithDifferentFields_ShouldReturnFalse() {
+        // Arrange
+        InnovationType t1 = new InnovationType();
+        InnovationType t2 = new InnovationType();
+        t1.setId(1L);
+        t1.setName("Name 1");
+        t2.setId(1L);
+        t2.setName("Name 2");
+
+        // Act & Assert
+        assertNotEquals(t1, t2);
+    }
+
+    @Test
+    void hashCode_WithSameFields_ShouldReturnSameHashCode() {
+        // Arrange
+        InnovationType t1 = new InnovationType();
+        InnovationType t2 = new InnovationType();
+        t1.setId(1L);
+        t1.setName("Name");
+        t2.setId(1L);
+        t2.setName("Name");
+
+        // Act & Assert
+        assertEquals(t1.hashCode(), t2.hashCode());
+    }
+
+    @Test
+    void hashCode_WithDifferentFields_ShouldReturnDifferentHashCode() {
+        // Arrange
+        InnovationType t1 = new InnovationType();
+        InnovationType t2 = new InnovationType();
+        t1.setId(1L);
+        t1.setName("Name 1");
+        t2.setId(2L);
+        t2.setName("Name 2");
+
+        // Act & Assert
+        assertNotEquals(t1.hashCode(), t2.hashCode());
+    }
+
+    @Test
+    void hashCode_WithNullFields_ShouldNotThrowException() {
+        // Act & Assert
+        assertDoesNotThrow(() -> innovationType.hashCode());
+    }
+
+    @Test
+    void toString_ShouldContainClassName() {
+        // Act
+        String toString = innovationType.toString();
+
+        // Assert
+        assertTrue(toString.contains("InnovationType"));
+    }
+
+    @Test
+    void equals_WithNullFields_ShouldHandleNulls() {
+        // Arrange
+        InnovationType t1 = new InnovationType();
+        InnovationType t2 = new InnovationType();
+        t1.setId(null);
+        t1.setName(null);
+        t2.setId(null);
+        t2.setName(null);
+
+        // Act & Assert
+        assertEquals(t1, t2);
+    }
+
+    @Test
+    void equals_WithOneNullField_ShouldReturnFalse() {
+        // Arrange
+        InnovationType t1 = new InnovationType();
+        InnovationType t2 = new InnovationType();
+        t1.setId(1L);
+        t1.setName("Name");
+        t2.setId(1L);
+        t2.setName(null);
+
+        // Act & Assert
+        assertNotEquals(t1, t2);
+    }
 }

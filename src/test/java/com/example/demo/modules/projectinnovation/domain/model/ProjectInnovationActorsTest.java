@@ -234,4 +234,151 @@ class ProjectInnovationActorsTest {
         assertNotEquals(firstDate, secondDate);
         assertNotEquals(secondDate, thirdDate);
     }
+
+    @Test
+    void equals_WithSameId_ShouldReturnTrue() {
+        // Arrange
+        ProjectInnovationActors pia1 = new ProjectInnovationActors();
+        ProjectInnovationActors pia2 = new ProjectInnovationActors();
+        pia1.setId(1L);
+        pia2.setId(1L);
+
+        // Act & Assert
+        assertEquals(pia1, pia2);
+    }
+
+    @Test
+    void equals_WithDifferentIds_ShouldReturnFalse() {
+        // Arrange
+        ProjectInnovationActors pia1 = new ProjectInnovationActors();
+        ProjectInnovationActors pia2 = new ProjectInnovationActors();
+        pia1.setId(1L);
+        pia2.setId(2L);
+
+        // Act & Assert
+        assertNotEquals(pia1, pia2);
+    }
+
+    @Test
+    void equals_WithNull_ShouldReturnFalse() {
+        // Act & Assert
+        assertNotEquals(projectInnovationActors, null);
+    }
+
+    @Test
+    void equals_WithDifferentClass_ShouldReturnFalse() {
+        // Act & Assert
+        assertNotEquals(projectInnovationActors, "not an actor");
+    }
+
+    @Test
+    void equals_WithSameInstance_ShouldReturnTrue() {
+        // Act & Assert
+        assertEquals(projectInnovationActors, projectInnovationActors);
+    }
+
+    @Test
+    void equals_WithAllFieldsSame_ShouldReturnTrue() {
+        // Arrange
+        Long id = 1L;
+        Long innovationId = 100L;
+        Long actorId = 200L;
+        Boolean isActive = true;
+        LocalDateTime activeSince = LocalDateTime.now();
+        Long createdBy = 10L;
+        Long modifiedBy = 20L;
+        String modificationJustification = "Justification";
+        Long idPhase = 1L;
+
+        ProjectInnovationActors pia1 = new ProjectInnovationActors(id, innovationId, actorId, null, isActive, activeSince, createdBy, modifiedBy, modificationJustification, idPhase, false, false, false, false, false, false, false, null, null, null, null, null, null);
+        ProjectInnovationActors pia2 = new ProjectInnovationActors(id, innovationId, actorId, null, isActive, activeSince, createdBy, modifiedBy, modificationJustification, idPhase, false, false, false, false, false, false, false, null, null, null, null, null, null);
+
+        // Act & Assert
+        assertEquals(pia1, pia2);
+    }
+
+    @Test
+    void equals_WithDifferentFields_ShouldReturnFalse() {
+        // Arrange
+        ProjectInnovationActors pia1 = new ProjectInnovationActors();
+        ProjectInnovationActors pia2 = new ProjectInnovationActors();
+        pia1.setId(1L);
+        pia1.setInnovationId(100L);
+        pia2.setId(1L);
+        pia2.setInnovationId(200L);
+
+        // Act & Assert
+        assertNotEquals(pia1, pia2);
+    }
+
+    @Test
+    void hashCode_WithSameFields_ShouldReturnSameHashCode() {
+        // Arrange
+        ProjectInnovationActors pia1 = new ProjectInnovationActors();
+        ProjectInnovationActors pia2 = new ProjectInnovationActors();
+        pia1.setId(1L);
+        pia1.setInnovationId(100L);
+        pia2.setId(1L);
+        pia2.setInnovationId(100L);
+
+        // Act & Assert
+        assertEquals(pia1.hashCode(), pia2.hashCode());
+    }
+
+    @Test
+    void hashCode_WithDifferentFields_ShouldReturnDifferentHashCode() {
+        // Arrange
+        ProjectInnovationActors pia1 = new ProjectInnovationActors();
+        ProjectInnovationActors pia2 = new ProjectInnovationActors();
+        pia1.setId(1L);
+        pia1.setInnovationId(100L);
+        pia2.setId(2L);
+        pia2.setInnovationId(200L);
+
+        // Act & Assert
+        assertNotEquals(pia1.hashCode(), pia2.hashCode());
+    }
+
+    @Test
+    void hashCode_WithNullFields_ShouldNotThrowException() {
+        // Act & Assert
+        assertDoesNotThrow(() -> projectInnovationActors.hashCode());
+    }
+
+    @Test
+    void toString_ShouldContainClassName() {
+        // Act
+        String toString = projectInnovationActors.toString();
+
+        // Assert
+        assertTrue(toString.contains("ProjectInnovationActors"));
+    }
+
+    @Test
+    void equals_WithNullFields_ShouldHandleNulls() {
+        // Arrange
+        ProjectInnovationActors pia1 = new ProjectInnovationActors();
+        ProjectInnovationActors pia2 = new ProjectInnovationActors();
+        pia1.setId(null);
+        pia1.setInnovationId(null);
+        pia2.setId(null);
+        pia2.setInnovationId(null);
+
+        // Act & Assert
+        assertEquals(pia1, pia2);
+    }
+
+    @Test
+    void equals_WithOneNullField_ShouldReturnFalse() {
+        // Arrange
+        ProjectInnovationActors pia1 = new ProjectInnovationActors();
+        ProjectInnovationActors pia2 = new ProjectInnovationActors();
+        pia1.setId(1L);
+        pia1.setInnovationId(100L);
+        pia2.setId(1L);
+        pia2.setInnovationId(null);
+
+        // Act & Assert
+        assertNotEquals(pia1, pia2);
+    }
 }

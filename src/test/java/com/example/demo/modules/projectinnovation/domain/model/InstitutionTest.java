@@ -136,4 +136,156 @@ class InstitutionTest {
         // Assert
         assertNull(institution.getIsActive());
     }
+
+    @Test
+    void equals_WithSameId_ShouldReturnTrue() {
+        // Arrange
+        Institution inst1 = new Institution();
+        Institution inst2 = new Institution();
+        inst1.setId(1L);
+        inst2.setId(1L);
+
+        // Act & Assert
+        assertEquals(inst1, inst2);
+    }
+
+    @Test
+    void equals_WithDifferentIds_ShouldReturnFalse() {
+        // Arrange
+        Institution inst1 = new Institution();
+        Institution inst2 = new Institution();
+        inst1.setId(1L);
+        inst2.setId(2L);
+
+        // Act & Assert
+        assertNotEquals(inst1, inst2);
+    }
+
+    @Test
+    void equals_WithNull_ShouldReturnFalse() {
+        // Act & Assert
+        assertNotEquals(institution, null);
+    }
+
+    @Test
+    void equals_WithDifferentClass_ShouldReturnFalse() {
+        // Act & Assert
+        assertNotEquals(institution, "not an institution");
+    }
+
+    @Test
+    void equals_WithSameInstance_ShouldReturnTrue() {
+        // Act & Assert
+        assertEquals(institution, institution);
+    }
+
+    @Test
+    void equals_WithAllFieldsSame_ShouldReturnTrue() {
+        // Arrange
+        Long id = 1L;
+        String name = "Institution Name";
+        String acronym = "IN";
+        String websiteLink = "https://institution.com";
+        Long programId = 10L;
+        Long institutionTypeId = 20L;
+        LocalDateTime added = LocalDateTime.now();
+        Long parentId = 30L;
+        LocalDateTime createdAt = LocalDateTime.now();
+        LocalDateTime updatedAt = LocalDateTime.now();
+        Boolean isActive = true;
+        Long createdBy = 100L;
+        Long updatedBy = 200L;
+        String modificationJustification = "Justification";
+
+        Institution inst1 = new Institution(id, name, acronym, websiteLink, programId, institutionTypeId, added, parentId, createdAt, updatedAt, isActive, createdBy, updatedBy, modificationJustification);
+        Institution inst2 = new Institution(id, name, acronym, websiteLink, programId, institutionTypeId, added, parentId, createdAt, updatedAt, isActive, createdBy, updatedBy, modificationJustification);
+
+        // Act & Assert
+        assertEquals(inst1, inst2);
+    }
+
+    @Test
+    void equals_WithDifferentFields_ShouldReturnFalse() {
+        // Arrange
+        Institution inst1 = new Institution();
+        Institution inst2 = new Institution();
+        inst1.setId(1L);
+        inst1.setName("Name 1");
+        inst2.setId(1L);
+        inst2.setName("Name 2");
+
+        // Act & Assert
+        assertNotEquals(inst1, inst2);
+    }
+
+    @Test
+    void hashCode_WithSameFields_ShouldReturnSameHashCode() {
+        // Arrange
+        Institution inst1 = new Institution();
+        Institution inst2 = new Institution();
+        inst1.setId(1L);
+        inst1.setName("Name");
+        inst2.setId(1L);
+        inst2.setName("Name");
+
+        // Act & Assert
+        assertEquals(inst1.hashCode(), inst2.hashCode());
+    }
+
+    @Test
+    void hashCode_WithDifferentFields_ShouldReturnDifferentHashCode() {
+        // Arrange
+        Institution inst1 = new Institution();
+        Institution inst2 = new Institution();
+        inst1.setId(1L);
+        inst1.setName("Name 1");
+        inst2.setId(2L);
+        inst2.setName("Name 2");
+
+        // Act & Assert
+        assertNotEquals(inst1.hashCode(), inst2.hashCode());
+    }
+
+    @Test
+    void hashCode_WithNullFields_ShouldNotThrowException() {
+        // Act & Assert
+        assertDoesNotThrow(() -> institution.hashCode());
+    }
+
+    @Test
+    void toString_ShouldContainClassName() {
+        // Act
+        String toString = institution.toString();
+
+        // Assert
+        assertTrue(toString.contains("Institution"));
+    }
+
+    @Test
+    void equals_WithNullFields_ShouldHandleNulls() {
+        // Arrange
+        Institution inst1 = new Institution();
+        Institution inst2 = new Institution();
+        inst1.setId(null);
+        inst1.setName(null);
+        inst2.setId(null);
+        inst2.setName(null);
+
+        // Act & Assert
+        assertEquals(inst1, inst2);
+    }
+
+    @Test
+    void equals_WithOneNullField_ShouldReturnFalse() {
+        // Arrange
+        Institution inst1 = new Institution();
+        Institution inst2 = new Institution();
+        inst1.setId(1L);
+        inst1.setName("Name");
+        inst2.setId(1L);
+        inst2.setName(null);
+
+        // Act & Assert
+        assertNotEquals(inst1, inst2);
+    }
 }

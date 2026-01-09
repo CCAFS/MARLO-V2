@@ -95,4 +95,142 @@ class LocElementTest {
         assertEquals(isoNumeric, locElement.getIsoNumeric());
         assertEquals(isoAlpha3, locElement.getIsoAlpha3());
     }
+
+    @Test
+    void equals_WithSameId_ShouldReturnTrue() {
+        // Arrange
+        LocElement loc1 = new LocElement();
+        LocElement loc2 = new LocElement();
+        loc1.setId(1L);
+        loc2.setId(1L);
+
+        // Act & Assert
+        assertEquals(loc1, loc2);
+    }
+
+    @Test
+    void equals_WithDifferentIds_ShouldReturnFalse() {
+        // Arrange
+        LocElement loc1 = new LocElement();
+        LocElement loc2 = new LocElement();
+        loc1.setId(1L);
+        loc2.setId(2L);
+
+        // Act & Assert
+        assertNotEquals(loc1, loc2);
+    }
+
+    @Test
+    void equals_WithNull_ShouldReturnFalse() {
+        // Act & Assert
+        assertNotEquals(locElement, null);
+    }
+
+    @Test
+    void equals_WithDifferentClass_ShouldReturnFalse() {
+        // Act & Assert
+        assertNotEquals(locElement, "not a LocElement");
+    }
+
+    @Test
+    void equals_WithSameInstance_ShouldReturnTrue() {
+        // Act & Assert
+        assertEquals(locElement, locElement);
+    }
+
+    @Test
+    void equals_WithAllFieldsSame_ShouldReturnTrue() {
+        // Arrange
+        LocalDateTime activeSince = LocalDateTime.now();
+        LocElement loc1 = new LocElement(1L, "Name", "US", 840L, 10L, 20L, 30L, true, true, 100L, activeSince, 200L, "Justification", 300L, 400L, "USA");
+        LocElement loc2 = new LocElement(1L, "Name", "US", 840L, 10L, 20L, 30L, true, true, 100L, activeSince, 200L, "Justification", 300L, 400L, "USA");
+
+        // Act & Assert
+        assertEquals(loc1, loc2);
+    }
+
+    @Test
+    void equals_WithDifferentFields_ShouldReturnFalse() {
+        // Arrange
+        LocElement loc1 = new LocElement();
+        LocElement loc2 = new LocElement();
+        loc1.setId(1L);
+        loc1.setName("Name 1");
+        loc2.setId(1L);
+        loc2.setName("Name 2");
+
+        // Act & Assert
+        assertNotEquals(loc1, loc2);
+    }
+
+    @Test
+    void hashCode_WithSameFields_ShouldReturnSameHashCode() {
+        // Arrange
+        LocElement loc1 = new LocElement();
+        LocElement loc2 = new LocElement();
+        loc1.setId(1L);
+        loc1.setName("Name");
+        loc2.setId(1L);
+        loc2.setName("Name");
+
+        // Act & Assert
+        assertEquals(loc1.hashCode(), loc2.hashCode());
+    }
+
+    @Test
+    void hashCode_WithDifferentFields_ShouldReturnDifferentHashCode() {
+        // Arrange
+        LocElement loc1 = new LocElement();
+        LocElement loc2 = new LocElement();
+        loc1.setId(1L);
+        loc1.setName("Name 1");
+        loc2.setId(2L);
+        loc2.setName("Name 2");
+
+        // Act & Assert
+        assertNotEquals(loc1.hashCode(), loc2.hashCode());
+    }
+
+    @Test
+    void hashCode_WithNullFields_ShouldNotThrowException() {
+        // Act & Assert
+        assertDoesNotThrow(() -> locElement.hashCode());
+    }
+
+    @Test
+    void toString_ShouldContainClassName() {
+        // Act
+        String toString = locElement.toString();
+
+        // Assert
+        assertTrue(toString.contains("LocElement"));
+    }
+
+    @Test
+    void equals_WithNullFields_ShouldHandleNulls() {
+        // Arrange
+        LocElement loc1 = new LocElement();
+        LocElement loc2 = new LocElement();
+        loc1.setId(null);
+        loc1.setName(null);
+        loc2.setId(null);
+        loc2.setName(null);
+
+        // Act & Assert
+        assertEquals(loc1, loc2);
+    }
+
+    @Test
+    void equals_WithOneNullField_ShouldReturnFalse() {
+        // Arrange
+        LocElement loc1 = new LocElement();
+        LocElement loc2 = new LocElement();
+        loc1.setId(1L);
+        loc1.setName("Name");
+        loc2.setId(1L);
+        loc2.setName(null);
+
+        // Act & Assert
+        assertNotEquals(loc1, loc2);
+    }
 }

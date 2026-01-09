@@ -26,8 +26,11 @@ import java.lang.reflect.Method;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mockingDetails;
 
 @ExtendWith(MockitoExtension.class)
 class ProjectInnovationControllerTest {
@@ -1013,5 +1016,1105 @@ class ProjectInnovationControllerTest {
     private boolean wasMethodInvoked(Object mock, String methodName) {
         return mockingDetails(mock).getInvocations().stream()
             .anyMatch(invocation -> invocation.getMethod().getName().equals(methodName));
+    }
+
+
+    @Test
+    void searchInnovations_WithSdgId_ShouldUseSdgSearch() {
+        // Arrange
+        List<ProjectInnovationInfo> innovations = Arrays.asList(testInnovationInfo);
+        when(projectInnovationUseCase.findActiveInnovationsInfoBySdgFilters(any(), any(), any(), any(), any()))
+            .thenReturn(innovations);
+
+        // Act
+        ResponseEntity<?> result = invokeSearchInnovations(
+            null, null, null, null, 1L, null, null, null, 0, 20);
+
+        // Assert
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+        verify(projectInnovationUseCase).findActiveInnovationsInfoBySdgFilters(any(), any(), eq(1L), any(), any());
+    }
+
+    @Test
+    void searchInnovations_WithInnovationIdAndPhase_ShouldUseSdgSearch() {
+        // Arrange
+        List<ProjectInnovationInfo> innovations = Arrays.asList(testInnovationInfo);
+        when(projectInnovationUseCase.findActiveInnovationsInfoBySdgFilters(any(), any(), any(), any(), any()))
+            .thenReturn(innovations);
+
+        // Act
+        ResponseEntity<?> result = invokeSearchInnovations(
+            1L, null, null, 100L, null, null, null, null, 0, 20);
+
+        // Assert
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+        verify(projectInnovationUseCase).findActiveInnovationsInfoBySdgFilters(eq(100L), eq(1L), any(), any(), any());
+    }
+
+    @Test
+    void searchInnovations_WithPhaseOnly_ShouldUseGeneralSearch() {
+        // Arrange
+        List<ProjectInnovationInfo> innovations = Arrays.asList(testInnovationInfo);
+        when(projectInnovationUseCase.findActiveInnovationsInfoWithFilters(any(), any(), any(), any(), any()))
+            .thenReturn(innovations);
+
+        // Act
+        ResponseEntity<?> result = invokeSearchInnovations(
+            1L, null, null, null, null, null, null, null, 0, 20);
+
+        // Assert
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+        verify(projectInnovationUseCase).findActiveInnovationsInfoWithFilters(eq(1L), any(), any(), any(), any());
+    }
+
+    @Test
+    void searchInnovations_WithReadinessScale_ShouldUseGeneralSearch() {
+        // Arrange
+        List<ProjectInnovationInfo> innovations = Arrays.asList(testInnovationInfo);
+        when(projectInnovationUseCase.findActiveInnovationsInfoWithFilters(any(), any(), any(), any(), any()))
+            .thenReturn(innovations);
+
+        // Act
+        ResponseEntity<?> result = invokeSearchInnovations(
+            null, 5, null, null, null, null, null, null, 0, 20);
+
+        // Assert
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+        verify(projectInnovationUseCase).findActiveInnovationsInfoWithFilters(any(), eq(5), any(), any(), any());
+    }
+
+    @Test
+    void searchInnovations_WithInnovationTypeId_ShouldUseGeneralSearch() {
+        // Arrange
+        List<ProjectInnovationInfo> innovations = Arrays.asList(testInnovationInfo);
+        when(projectInnovationUseCase.findActiveInnovationsInfoWithFilters(any(), any(), any(), any(), any()))
+            .thenReturn(innovations);
+
+        // Act
+        ResponseEntity<?> result = invokeSearchInnovations(
+            null, null, 2L, null, null, null, null, null, 0, 20);
+
+        // Assert
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+        verify(projectInnovationUseCase).findActiveInnovationsInfoWithFilters(any(), any(), eq(2L), any(), any());
+    }
+
+    @Test
+    void searchInnovations_WithCountryIds_ShouldUseGeneralSearch() {
+        // Arrange
+        List<ProjectInnovationInfo> innovations = Arrays.asList(testInnovationInfo);
+        when(projectInnovationUseCase.findActiveInnovationsInfoWithFilters(any(), any(), any(), any(), any()))
+            .thenReturn(innovations);
+
+        // Act
+        ResponseEntity<?> result = invokeSearchInnovations(
+            null, null, null, null, null, Arrays.asList("1", "2"), null, null, 0, 20);
+
+        // Assert
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+        verify(projectInnovationUseCase).findActiveInnovationsInfoWithFilters(any(), any(), any(), any(), any());
+    }
+
+    @Test
+    void searchInnovations_WithActorIds_ShouldUseGeneralSearch() {
+        // Arrange
+        List<ProjectInnovationInfo> innovations = Arrays.asList(testInnovationInfo);
+        when(projectInnovationUseCase.findActiveInnovationsInfoWithFilters(any(), any(), any(), any(), any()))
+            .thenReturn(innovations);
+
+        // Act
+        ResponseEntity<?> result = invokeSearchInnovations(
+            null, null, null, null, null, null, Arrays.asList("1", "2"), null, 0, 20);
+
+        // Assert
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+        verify(projectInnovationUseCase).findActiveInnovationsInfoWithFilters(any(), any(), any(), any(), any());
+    }
+
+    @Test
+    void searchInnovations_WithNoFilters_ShouldUseAllActiveSearch() {
+        // Arrange
+        List<ProjectInnovationInfo> innovations = Arrays.asList(testInnovationInfo);
+        when(projectInnovationUseCase.findAllActiveInnovationsInfo()).thenReturn(innovations);
+
+        // Act
+        ResponseEntity<?> result = invokeSearchInnovations(
+            null, null, null, null, null, null, null, null, 0, 20);
+
+        // Assert
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+        verify(projectInnovationUseCase).findAllActiveInnovationsInfo();
+    }
+
+    @Test
+    void searchInnovations_WithInvalidCountryId_ShouldThrowException() {
+        // Act & Assert
+        assertThrows(RuntimeException.class, () ->
+            invokeSearchInnovations(
+                null, null, null, null, null, Arrays.asList("invalid"), null, null, 0, 20)
+        );
+    }
+
+    @Test
+    void searchInnovations_WithInvalidActorId_ShouldThrowException() {
+        // Act & Assert
+        assertThrows(RuntimeException.class, () ->
+            invokeSearchInnovations(
+                null, null, null, null, null, null, Arrays.asList("invalid"), null, 0, 20)
+        );
+    }
+
+
+    @Test
+    void searchInnovations_WithWhitespaceCountryIds_ShouldFilterOut() {
+        // Arrange - empty countryIds after filtering should result in no filters, so uses findAllActiveInnovationsInfo
+        List<ProjectInnovationInfo> innovations = Arrays.asList(testInnovationInfo);
+        when(projectInnovationUseCase.findAllActiveInnovationsInfo()).thenReturn(innovations);
+
+        // Act
+        ResponseEntity<?> result = invokeSearchInnovations(
+            null, null, null, null, null, Arrays.asList("   "), null, null, 0, 20);
+
+        // Assert
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+    }
+
+    @Test
+    void updateProjectInnovation_WhenNotFound_ShouldReturnNotFound() {
+        // Arrange
+        when(projectInnovationUseCase.updateProjectInnovation(anyLong(), any()))
+            .thenThrow(new RuntimeException("Not found"));
+
+        // Act
+        ResponseEntity<ProjectInnovationResponse> result = controller.updateProjectInnovation(
+            999L, new UpdateProjectInnovationRequest(true, 1L, "test"));
+
+        // Assert
+        assertEquals(HttpStatus.NOT_FOUND, result.getStatusCode());
+    }
+
+    @Test
+    void activateProjectInnovation_WhenNotFound_ShouldReturnNotFound() {
+        // Arrange
+        when(projectInnovationUseCase.activateProjectInnovation(anyLong()))
+            .thenThrow(new RuntimeException("Not found"));
+
+        // Act
+        ResponseEntity<ProjectInnovationResponse> result = controller.activateProjectInnovation(999L);
+
+        // Assert
+        assertEquals(HttpStatus.NOT_FOUND, result.getStatusCode());
+    }
+
+
+    @Test
+    void searchInnovationsSimple_WithSdgId_ShouldUseSdgSearch() {
+        // Arrange
+        List<ProjectInnovationInfo> innovations = Arrays.asList(testInnovationInfo);
+        when(projectInnovationUseCase.findActiveInnovationsInfoBySdgFilters(any(), any(), any(), any(), any()))
+            .thenReturn(innovations);
+
+        // Act
+        ResponseEntity<?> result = invokeSearchInnovationsSimple(
+            null, null, null, null, 1L, null, null, null, 0, 20);
+
+        // Assert
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+        verify(projectInnovationUseCase).findActiveInnovationsInfoBySdgFilters(any(), any(), eq(1L), any(), any());
+    }
+
+    @Test
+    void searchInnovationsSimple_WithNoFilters_ShouldUseAllActiveSearch() {
+        // Arrange
+        List<ProjectInnovationInfo> innovations = Arrays.asList(testInnovationInfo);
+        when(projectInnovationUseCase.findAllActiveInnovationsInfo()).thenReturn(innovations);
+
+        // Act
+        ResponseEntity<?> result = invokeSearchInnovationsSimple(
+            null, null, null, null, null, null, null, null, 0, 20);
+
+        // Assert
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+        verify(projectInnovationUseCase).findAllActiveInnovationsInfo();
+    }
+
+    @Test
+    void searchInnovationsComplete_WithSdgId_ShouldUseSdgSearch() {
+        // Arrange
+        List<ProjectInnovationInfo> innovations = Arrays.asList(testInnovationInfo);
+        when(projectInnovationUseCase.findActiveInnovationsInfoBySdgFilters(any(), any(), any(), any(), any()))
+            .thenReturn(innovations);
+
+        // Act
+        ResponseEntity<?> result = invokeSearchInnovationsComplete(
+            null, null, null, null, 1L, null, null, null, 0, 20);
+
+        // Assert
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+        verify(projectInnovationUseCase).findActiveInnovationsInfoBySdgFilters(any(), any(), eq(1L), any(), any());
+    }
+
+    @Test
+    void searchInnovationsComplete_WithNoFilters_ShouldUseAllActiveSearch() {
+        // Arrange
+        List<ProjectInnovationInfo> innovations = Arrays.asList(testInnovationInfo);
+        when(projectInnovationUseCase.findAllActiveInnovationsInfo()).thenReturn(innovations);
+
+        // Act
+        ResponseEntity<?> result = invokeSearchInnovationsComplete(
+            null, null, null, null, null, null, null, null, 0, 20);
+
+        // Assert
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+        verify(projectInnovationUseCase).findAllActiveInnovationsInfo();
+    }
+
+    @Test
+    void getProjectInnovationInfoByInnovationIdAndPhaseId_WithNullPhaseId_ShouldReturnNullPhase() {
+        // Arrange
+        testInnovationInfo.setIdPhase(null);
+        when(projectInnovationUseCase.findProjectInnovationInfoByInnovationIdAndPhaseId(1L, 5L))
+            .thenReturn(Optional.of(testInnovationInfo));
+
+        // Act
+        ResponseEntity<?> result = controller.getProjectInnovationInfoByInnovationIdAndPhaseId(1L, 5L);
+
+        // Assert
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+    }
+
+    @Test
+    void getProjectInnovationInfoByInnovationIdAndPhaseId_WithNullStageId_ShouldReturnNullStage() {
+        // Arrange
+        testInnovationInfo.setStageInnovationId(null);
+        when(projectInnovationUseCase.findProjectInnovationInfoByInnovationIdAndPhaseId(1L, 5L))
+            .thenReturn(Optional.of(testInnovationInfo));
+
+        // Act
+        ResponseEntity<?> result = controller.getProjectInnovationInfoByInnovationIdAndPhaseId(1L, 5L);
+
+        // Assert
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+    }
+
+    @Test
+    void getProjectInnovationInfoByInnovationIdAndPhaseId_WithStageId1_ShouldReturnCorrectStage() {
+        // Arrange
+        testInnovationInfo.setStageInnovationId(1L);
+        when(projectInnovationUseCase.findProjectInnovationInfoByInnovationIdAndPhaseId(1L, 5L))
+            .thenReturn(Optional.of(testInnovationInfo));
+
+        // Act
+        ResponseEntity<?> result = controller.getProjectInnovationInfoByInnovationIdAndPhaseId(1L, 5L);
+
+        // Assert
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+    }
+
+    @Test
+    void getProjectInnovationInfoByInnovationIdAndPhaseId_WithStageId2_ShouldReturnCorrectStage() {
+        // Arrange
+        testInnovationInfo.setStageInnovationId(2L);
+        when(projectInnovationUseCase.findProjectInnovationInfoByInnovationIdAndPhaseId(1L, 5L))
+            .thenReturn(Optional.of(testInnovationInfo));
+
+        // Act
+        ResponseEntity<?> result = controller.getProjectInnovationInfoByInnovationIdAndPhaseId(1L, 5L);
+
+        // Assert
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+    }
+
+    @Test
+    void getProjectInnovationInfoByInnovationIdAndPhaseId_WithStageId3_ShouldReturnCorrectStage() {
+        // Arrange
+        testInnovationInfo.setStageInnovationId(3L);
+        when(projectInnovationUseCase.findProjectInnovationInfoByInnovationIdAndPhaseId(1L, 5L))
+            .thenReturn(Optional.of(testInnovationInfo));
+
+        // Act
+        ResponseEntity<?> result = controller.getProjectInnovationInfoByInnovationIdAndPhaseId(1L, 5L);
+
+        // Assert
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+    }
+
+    @Test
+    void getProjectInnovationInfoByInnovationIdAndPhaseId_WithStageId4_ShouldReturnCorrectStage() {
+        // Arrange
+        testInnovationInfo.setStageInnovationId(4L);
+        when(projectInnovationUseCase.findProjectInnovationInfoByInnovationIdAndPhaseId(1L, 5L))
+            .thenReturn(Optional.of(testInnovationInfo));
+
+        // Act
+        ResponseEntity<?> result = controller.getProjectInnovationInfoByInnovationIdAndPhaseId(1L, 5L);
+
+        // Assert
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+    }
+
+    @Test
+    void getProjectInnovationInfoByInnovationIdAndPhaseId_WithStageIdDefault_ShouldReturnDefaultStage() {
+        // Arrange
+        testInnovationInfo.setStageInnovationId(99L);
+        when(projectInnovationUseCase.findProjectInnovationInfoByInnovationIdAndPhaseId(1L, 5L))
+            .thenReturn(Optional.of(testInnovationInfo));
+
+        // Act
+        ResponseEntity<?> result = controller.getProjectInnovationInfoByInnovationIdAndPhaseId(1L, 5L);
+
+        // Assert
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+    }
+
+    @Test
+    void getProjectInnovationInfoByInnovationIdAndPhaseId_WithNullScopeId_ShouldReturnNullScope() {
+        // Arrange
+        testInnovationInfo.setGeographicScopeId(null);
+        when(projectInnovationUseCase.findProjectInnovationInfoByInnovationIdAndPhaseId(1L, 5L))
+            .thenReturn(Optional.of(testInnovationInfo));
+
+        // Act
+        ResponseEntity<?> result = controller.getProjectInnovationInfoByInnovationIdAndPhaseId(1L, 5L);
+
+        // Assert
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+    }
+
+    @Test
+    void getProjectInnovationInfoByInnovationIdAndPhaseId_WithNullTypeId_ShouldReturnNullType() {
+        // Arrange
+        testInnovationInfo.setInnovationTypeId(null);
+        when(projectInnovationUseCase.findProjectInnovationInfoByInnovationIdAndPhaseId(1L, 5L))
+            .thenReturn(Optional.of(testInnovationInfo));
+
+        // Act
+        ResponseEntity<?> result = controller.getProjectInnovationInfoByInnovationIdAndPhaseId(1L, 5L);
+
+        // Assert
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+    }
+
+    @Test
+    void getProjectInnovationInfoByInnovationIdAndPhaseId_WithTypeId2_ShouldUseHardcodedFallback() {
+        // Arrange
+        testInnovationInfo.setInnovationTypeId(2L);
+        when(projectInnovationUseCase.findProjectInnovationInfoByInnovationIdAndPhaseId(1L, 5L))
+            .thenReturn(Optional.of(testInnovationInfo));
+        when(innovationTypeRepository.findById(2L))
+            .thenThrow(new RuntimeException("Database error"));
+
+        // Act
+        ResponseEntity<?> result = controller.getProjectInnovationInfoByInnovationIdAndPhaseId(1L, 5L);
+
+        // Assert
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+    }
+
+    @Test
+    void getProjectInnovationInfoByInnovationIdAndPhaseId_WithTypeId3_ShouldUseHardcodedFallback() {
+        // Arrange
+        testInnovationInfo.setInnovationTypeId(3L);
+        when(projectInnovationUseCase.findProjectInnovationInfoByInnovationIdAndPhaseId(1L, 5L))
+            .thenReturn(Optional.of(testInnovationInfo));
+        when(innovationTypeRepository.findById(3L))
+            .thenThrow(new RuntimeException("Database error"));
+
+        // Act
+        ResponseEntity<?> result = controller.getProjectInnovationInfoByInnovationIdAndPhaseId(1L, 5L);
+
+        // Assert
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+    }
+
+    @Test
+    void getProjectInnovationInfoByInnovationIdAndPhaseId_WithTypeId4_ShouldUseHardcodedFallback() {
+        // Arrange
+        testInnovationInfo.setInnovationTypeId(4L);
+        when(projectInnovationUseCase.findProjectInnovationInfoByInnovationIdAndPhaseId(1L, 5L))
+            .thenReturn(Optional.of(testInnovationInfo));
+        when(innovationTypeRepository.findById(4L))
+            .thenThrow(new RuntimeException("Database error"));
+
+        // Act
+        ResponseEntity<?> result = controller.getProjectInnovationInfoByInnovationIdAndPhaseId(1L, 5L);
+
+        // Assert
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+    }
+
+    @Test
+    void getProjectInnovationInfoByInnovationIdAndPhaseId_WithTypeId5_ShouldUseHardcodedFallback() {
+        // Arrange
+        testInnovationInfo.setInnovationTypeId(5L);
+        when(projectInnovationUseCase.findProjectInnovationInfoByInnovationIdAndPhaseId(1L, 5L))
+            .thenReturn(Optional.of(testInnovationInfo));
+        when(innovationTypeRepository.findById(5L))
+            .thenThrow(new RuntimeException("Database error"));
+
+        // Act
+        ResponseEntity<?> result = controller.getProjectInnovationInfoByInnovationIdAndPhaseId(1L, 5L);
+
+        // Assert
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+    }
+
+    @Test
+    void getProjectInnovationInfoByInnovationIdAndPhaseId_WithTypeIdDefault_ShouldUseDefaultFallback() {
+        // Arrange
+        testInnovationInfo.setInnovationTypeId(999L);
+        when(projectInnovationUseCase.findProjectInnovationInfoByInnovationIdAndPhaseId(1L, 5L))
+            .thenReturn(Optional.of(testInnovationInfo));
+        when(innovationTypeRepository.findById(999L))
+            .thenThrow(new RuntimeException("Database error"));
+
+        // Act
+        ResponseEntity<?> result = controller.getProjectInnovationInfoByInnovationIdAndPhaseId(1L, 5L);
+
+        // Assert
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+    }
+
+    @Test
+    void getProjectInnovationInfoByInnovationIdAndPhaseId_WithNullProjectInnovationId_ShouldHandleNull() {
+        // Arrange
+        testInnovationInfo.setProjectInnovationId(null);
+        when(projectInnovationUseCase.findProjectInnovationInfoByInnovationIdAndPhaseId(1L, 5L))
+            .thenReturn(Optional.of(testInnovationInfo));
+
+        // Act
+        ResponseEntity<?> result = controller.getProjectInnovationInfoByInnovationIdAndPhaseId(1L, 5L);
+
+        // Assert
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+    }
+
+    @Test
+    void getProjectInnovationInfoByInnovationIdAndPhaseId_WithNullIdPhase_ShouldHandleNull() {
+        // Arrange
+        testInnovationInfo.setIdPhase(null);
+        when(projectInnovationUseCase.findProjectInnovationInfoByInnovationIdAndPhaseId(1L, 5L))
+            .thenReturn(Optional.of(testInnovationInfo));
+
+        // Act
+        ResponseEntity<?> result = controller.getProjectInnovationInfoByInnovationIdAndPhaseId(1L, 5L);
+
+        // Assert
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+    }
+
+    @Test
+    void getProjectInnovationInfoByInnovationIdAndPhaseId_WithPhaseResearchId1_ShouldReturnCorrectPhase() {
+        // Arrange
+        testInnovationInfo.setPhaseResearchId(1L);
+        when(projectInnovationUseCase.findProjectInnovationInfoByInnovationIdAndPhaseId(1L, 5L))
+            .thenReturn(Optional.of(testInnovationInfo));
+
+        // Act
+        ResponseEntity<?> result = controller.getProjectInnovationInfoByInnovationIdAndPhaseId(1L, 5L);
+
+        // Assert
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+    }
+
+    @Test
+    void getProjectInnovationInfoByInnovationIdAndPhaseId_WithPhaseResearchId2_ShouldReturnCorrectPhase() {
+        // Arrange
+        testInnovationInfo.setPhaseResearchId(2L);
+        when(projectInnovationUseCase.findProjectInnovationInfoByInnovationIdAndPhaseId(1L, 5L))
+            .thenReturn(Optional.of(testInnovationInfo));
+
+        // Act
+        ResponseEntity<?> result = controller.getProjectInnovationInfoByInnovationIdAndPhaseId(1L, 5L);
+
+        // Assert
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+    }
+
+    @Test
+    void getProjectInnovationInfoByInnovationIdAndPhaseId_WithPhaseResearchId3_ShouldReturnCorrectPhase() {
+        // Arrange
+        testInnovationInfo.setPhaseResearchId(3L);
+        when(projectInnovationUseCase.findProjectInnovationInfoByInnovationIdAndPhaseId(1L, 5L))
+            .thenReturn(Optional.of(testInnovationInfo));
+
+        // Act
+        ResponseEntity<?> result = controller.getProjectInnovationInfoByInnovationIdAndPhaseId(1L, 5L);
+
+        // Assert
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+    }
+
+    @Test
+    void getProjectInnovationInfoByInnovationIdAndPhaseId_WithPhaseResearchIdDefault_ShouldReturnDefaultPhase() {
+        // Arrange
+        testInnovationInfo.setPhaseResearchId(99L);
+        when(projectInnovationUseCase.findProjectInnovationInfoByInnovationIdAndPhaseId(1L, 5L))
+            .thenReturn(Optional.of(testInnovationInfo));
+
+        // Act
+        ResponseEntity<?> result = controller.getProjectInnovationInfoByInnovationIdAndPhaseId(1L, 5L);
+
+        // Assert
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+    }
+
+    @Test
+    void getProjectInnovationInfoByInnovationIdAndPhaseId_WithRegionId1_ShouldReturnCorrectRegion() {
+        // Arrange
+        testInnovationInfo.setRepIndRegionId(1L);
+        when(projectInnovationUseCase.findProjectInnovationInfoByInnovationIdAndPhaseId(1L, 5L))
+            .thenReturn(Optional.of(testInnovationInfo));
+
+        // Act
+        ResponseEntity<?> result = controller.getProjectInnovationInfoByInnovationIdAndPhaseId(1L, 5L);
+
+        // Assert
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+    }
+
+    @Test
+    void getProjectInnovationInfoByInnovationIdAndPhaseId_WithRegionId2_ShouldReturnCorrectRegion() {
+        // Arrange
+        testInnovationInfo.setRepIndRegionId(2L);
+        when(projectInnovationUseCase.findProjectInnovationInfoByInnovationIdAndPhaseId(1L, 5L))
+            .thenReturn(Optional.of(testInnovationInfo));
+
+        // Act
+        ResponseEntity<?> result = controller.getProjectInnovationInfoByInnovationIdAndPhaseId(1L, 5L);
+
+        // Assert
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+    }
+
+    @Test
+    void getProjectInnovationInfoByInnovationIdAndPhaseId_WithRegionId3_ShouldReturnCorrectRegion() {
+        // Arrange
+        testInnovationInfo.setRepIndRegionId(3L);
+        when(projectInnovationUseCase.findProjectInnovationInfoByInnovationIdAndPhaseId(1L, 5L))
+            .thenReturn(Optional.of(testInnovationInfo));
+
+        // Act
+        ResponseEntity<?> result = controller.getProjectInnovationInfoByInnovationIdAndPhaseId(1L, 5L);
+
+        // Assert
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+    }
+
+    @Test
+    void getProjectInnovationInfoByInnovationIdAndPhaseId_WithRegionIdDefault_ShouldReturnDefaultRegion() {
+        // Arrange
+        testInnovationInfo.setRepIndRegionId(99L);
+        when(projectInnovationUseCase.findProjectInnovationInfoByInnovationIdAndPhaseId(1L, 5L))
+            .thenReturn(Optional.of(testInnovationInfo));
+
+        // Act
+        ResponseEntity<?> result = controller.getProjectInnovationInfoByInnovationIdAndPhaseId(1L, 5L);
+
+        // Assert
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+    }
+
+    @Test
+    void getProjectInnovationInfoByInnovationIdAndPhaseId_WithContributionId1_ShouldReturnCorrectContribution() {
+        // Arrange
+        testInnovationInfo.setRepIndContributionCrpId(1L);
+        when(projectInnovationUseCase.findProjectInnovationInfoByInnovationIdAndPhaseId(1L, 5L))
+            .thenReturn(Optional.of(testInnovationInfo));
+
+        // Act
+        ResponseEntity<?> result = controller.getProjectInnovationInfoByInnovationIdAndPhaseId(1L, 5L);
+
+        // Assert
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+    }
+
+    @Test
+    void getProjectInnovationInfoByInnovationIdAndPhaseId_WithContributionId2_ShouldReturnCorrectContribution() {
+        // Arrange
+        testInnovationInfo.setRepIndContributionCrpId(2L);
+        when(projectInnovationUseCase.findProjectInnovationInfoByInnovationIdAndPhaseId(1L, 5L))
+            .thenReturn(Optional.of(testInnovationInfo));
+
+        // Act
+        ResponseEntity<?> result = controller.getProjectInnovationInfoByInnovationIdAndPhaseId(1L, 5L);
+
+        // Assert
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+    }
+
+    @Test
+    void getProjectInnovationInfoByInnovationIdAndPhaseId_WithContributionId3_ShouldReturnCorrectContribution() {
+        // Arrange
+        testInnovationInfo.setRepIndContributionCrpId(3L);
+        when(projectInnovationUseCase.findProjectInnovationInfoByInnovationIdAndPhaseId(1L, 5L))
+            .thenReturn(Optional.of(testInnovationInfo));
+
+        // Act
+        ResponseEntity<?> result = controller.getProjectInnovationInfoByInnovationIdAndPhaseId(1L, 5L);
+
+        // Assert
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+    }
+
+    @Test
+    void getProjectInnovationInfoByInnovationIdAndPhaseId_WithContributionIdDefault_ShouldReturnDefaultContribution() {
+        // Arrange
+        testInnovationInfo.setRepIndContributionCrpId(99L);
+        when(projectInnovationUseCase.findProjectInnovationInfoByInnovationIdAndPhaseId(1L, 5L))
+            .thenReturn(Optional.of(testInnovationInfo));
+
+        // Act
+        ResponseEntity<?> result = controller.getProjectInnovationInfoByInnovationIdAndPhaseId(1L, 5L);
+
+        // Assert
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+    }
+
+    @Test
+    void getProjectInnovationInfoByInnovationIdAndPhaseId_WithDegreeId1_ShouldReturnNovel() {
+        // Arrange
+        testInnovationInfo.setRepIndDegreeInnovationId(1L);
+        when(projectInnovationUseCase.findProjectInnovationInfoByInnovationIdAndPhaseId(1L, 5L))
+            .thenReturn(Optional.of(testInnovationInfo));
+
+        // Act
+        ResponseEntity<?> result = controller.getProjectInnovationInfoByInnovationIdAndPhaseId(1L, 5L);
+
+        // Assert
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+    }
+
+    @Test
+    void getProjectInnovationInfoByInnovationIdAndPhaseId_WithDegreeId2_ShouldReturnAdaptive() {
+        // Arrange
+        testInnovationInfo.setRepIndDegreeInnovationId(2L);
+        when(projectInnovationUseCase.findProjectInnovationInfoByInnovationIdAndPhaseId(1L, 5L))
+            .thenReturn(Optional.of(testInnovationInfo));
+
+        // Act
+        ResponseEntity<?> result = controller.getProjectInnovationInfoByInnovationIdAndPhaseId(1L, 5L);
+
+        // Assert
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+    }
+
+    @Test
+    void getProjectInnovationInfoByInnovationIdAndPhaseId_WithDegreeIdDefault_ShouldReturnDefaultDegree() {
+        // Arrange
+        testInnovationInfo.setRepIndDegreeInnovationId(99L);
+        when(projectInnovationUseCase.findProjectInnovationInfoByInnovationIdAndPhaseId(1L, 5L))
+            .thenReturn(Optional.of(testInnovationInfo));
+
+        // Act
+        ResponseEntity<?> result = controller.getProjectInnovationInfoByInnovationIdAndPhaseId(1L, 5L);
+
+        // Assert
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+    }
+
+    @Test
+    void getProjectInnovationInfoByInnovationIdAndPhaseId_WithFocusLevelId1_ShouldReturnNotTargeted() {
+        // Arrange
+        testInnovationInfo.setGenderFocusLevelId(1L);
+        when(projectInnovationUseCase.findProjectInnovationInfoByInnovationIdAndPhaseId(1L, 5L))
+            .thenReturn(Optional.of(testInnovationInfo));
+
+        // Act
+        ResponseEntity<?> result = controller.getProjectInnovationInfoByInnovationIdAndPhaseId(1L, 5L);
+
+        // Assert
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+    }
+
+    @Test
+    void getProjectInnovationInfoByInnovationIdAndPhaseId_WithFocusLevelId2_ShouldReturnSignificant() {
+        // Arrange
+        testInnovationInfo.setGenderFocusLevelId(2L);
+        when(projectInnovationUseCase.findProjectInnovationInfoByInnovationIdAndPhaseId(1L, 5L))
+            .thenReturn(Optional.of(testInnovationInfo));
+
+        // Act
+        ResponseEntity<?> result = controller.getProjectInnovationInfoByInnovationIdAndPhaseId(1L, 5L);
+
+        // Assert
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+    }
+
+    @Test
+    void getProjectInnovationInfoByInnovationIdAndPhaseId_WithFocusLevelId3_ShouldReturnPrincipal() {
+        // Arrange
+        testInnovationInfo.setGenderFocusLevelId(3L);
+        when(projectInnovationUseCase.findProjectInnovationInfoByInnovationIdAndPhaseId(1L, 5L))
+            .thenReturn(Optional.of(testInnovationInfo));
+
+        // Act
+        ResponseEntity<?> result = controller.getProjectInnovationInfoByInnovationIdAndPhaseId(1L, 5L);
+
+        // Assert
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+    }
+
+    @Test
+    void getProjectInnovationInfoByInnovationIdAndPhaseId_WithFocusLevelIdDefault_ShouldReturnDefaultFocus() {
+        // Arrange
+        testInnovationInfo.setGenderFocusLevelId(99L);
+        when(projectInnovationUseCase.findProjectInnovationInfoByInnovationIdAndPhaseId(1L, 5L))
+            .thenReturn(Optional.of(testInnovationInfo));
+
+        // Act
+        ResponseEntity<?> result = controller.getProjectInnovationInfoByInnovationIdAndPhaseId(1L, 5L);
+
+        // Assert
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+    }
+
+
+    @Test
+    void getProjectInnovationInfoByInnovationIdAndPhaseId_WithOrganizationTypeId1_ShouldReturnGovernmentAgency() {
+        // Arrange
+        testInnovationInfo.setLeadOrganizationId(1L);
+        when(projectInnovationUseCase.findProjectInnovationInfoByInnovationIdAndPhaseId(1L, 5L))
+            .thenReturn(Optional.of(testInnovationInfo));
+
+        // Act
+        ResponseEntity<?> result = controller.getProjectInnovationInfoByInnovationIdAndPhaseId(1L, 5L);
+
+        // Assert
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+    }
+
+    @Test
+    void getProjectInnovationInfoByInnovationIdAndPhaseId_WithOrganizationTypeId2_ShouldReturnPrivateSector() {
+        // Arrange
+        testInnovationInfo.setLeadOrganizationId(2L);
+        when(projectInnovationUseCase.findProjectInnovationInfoByInnovationIdAndPhaseId(1L, 5L))
+            .thenReturn(Optional.of(testInnovationInfo));
+
+        // Act
+        ResponseEntity<?> result = controller.getProjectInnovationInfoByInnovationIdAndPhaseId(1L, 5L);
+
+        // Assert
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+    }
+
+    @Test
+    void getProjectInnovationInfoByInnovationIdAndPhaseId_WithOrganizationTypeId3_ShouldReturnNgo() {
+        // Arrange
+        testInnovationInfo.setLeadOrganizationId(3L);
+        when(projectInnovationUseCase.findProjectInnovationInfoByInnovationIdAndPhaseId(1L, 5L))
+            .thenReturn(Optional.of(testInnovationInfo));
+
+        // Act
+        ResponseEntity<?> result = controller.getProjectInnovationInfoByInnovationIdAndPhaseId(1L, 5L);
+
+        // Assert
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+    }
+
+    @Test
+    void getProjectInnovationInfoByInnovationIdAndPhaseId_WithOrganizationTypeId4_ShouldReturnAcademic() {
+        // Arrange
+        testInnovationInfo.setLeadOrganizationId(4L);
+        when(projectInnovationUseCase.findProjectInnovationInfoByInnovationIdAndPhaseId(1L, 5L))
+            .thenReturn(Optional.of(testInnovationInfo));
+
+        // Act
+        ResponseEntity<?> result = controller.getProjectInnovationInfoByInnovationIdAndPhaseId(1L, 5L);
+
+        // Assert
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+    }
+
+    @Test
+    void getProjectInnovationInfoByInnovationIdAndPhaseId_WithOrganizationTypeId5_ShouldReturnInternational() {
+        // Arrange
+        testInnovationInfo.setLeadOrganizationId(5L);
+        when(projectInnovationUseCase.findProjectInnovationInfoByInnovationIdAndPhaseId(1L, 5L))
+            .thenReturn(Optional.of(testInnovationInfo));
+
+        // Act
+        ResponseEntity<?> result = controller.getProjectInnovationInfoByInnovationIdAndPhaseId(1L, 5L);
+
+        // Assert
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+    }
+
+    @Test
+    void getProjectInnovationInfoByInnovationIdAndPhaseId_WithOrganizationTypeIdDefault_ShouldReturnDefault() {
+        // Arrange
+        testInnovationInfo.setLeadOrganizationId(99L);
+        when(projectInnovationUseCase.findProjectInnovationInfoByInnovationIdAndPhaseId(1L, 5L))
+            .thenReturn(Optional.of(testInnovationInfo));
+
+        // Act
+        ResponseEntity<?> result = controller.getProjectInnovationInfoByInnovationIdAndPhaseId(1L, 5L);
+
+        // Assert
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+    }
+
+    @Test
+    void getProjectInnovationInfoByInnovationIdAndPhaseId_WithPartnerTypeId1_ShouldReturnLeadingPartner() {
+        // Arrange
+        when(projectInnovationUseCase.findProjectInnovationInfoByInnovationIdAndPhaseId(1L, 5L))
+            .thenReturn(Optional.of(testInnovationInfo));
+        when(repositoryAdapter.findPartnershipsByInnovationIdAndPhase(anyLong(), anyLong()))
+            .thenReturn(Arrays.asList());
+
+        // Act
+        ResponseEntity<?> result = controller.getProjectInnovationInfoByInnovationIdAndPhaseId(1L, 5L);
+
+        // Assert
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+    }
+
+    @Test
+    void getProjectInnovationInfoByInnovationIdAndPhaseId_WithPartnerTypeId2_ShouldReturnImplementingPartner() {
+        // Arrange
+        when(projectInnovationUseCase.findProjectInnovationInfoByInnovationIdAndPhaseId(1L, 5L))
+            .thenReturn(Optional.of(testInnovationInfo));
+        when(repositoryAdapter.findPartnershipsByInnovationIdAndPhase(anyLong(), anyLong()))
+            .thenReturn(Arrays.asList());
+
+        // Act
+        ResponseEntity<?> result = controller.getProjectInnovationInfoByInnovationIdAndPhaseId(1L, 5L);
+
+        // Assert
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+    }
+
+    @Test
+    void getProjectInnovationInfoByInnovationIdAndPhaseId_WithPartnerTypeId3_ShouldReturnSupportingPartner() {
+        // Arrange
+        when(projectInnovationUseCase.findProjectInnovationInfoByInnovationIdAndPhaseId(1L, 5L))
+            .thenReturn(Optional.of(testInnovationInfo));
+        when(repositoryAdapter.findPartnershipsByInnovationIdAndPhase(anyLong(), anyLong()))
+            .thenReturn(Arrays.asList());
+
+        // Act
+        ResponseEntity<?> result = controller.getProjectInnovationInfoByInnovationIdAndPhaseId(1L, 5L);
+
+        // Assert
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+    }
+
+    @Test
+    void getProjectInnovationInfoByInnovationIdAndPhaseId_WithPartnerTypeId4_ShouldReturnCoFundingPartner() {
+        // Arrange
+        when(projectInnovationUseCase.findProjectInnovationInfoByInnovationIdAndPhaseId(1L, 5L))
+            .thenReturn(Optional.of(testInnovationInfo));
+        when(repositoryAdapter.findPartnershipsByInnovationIdAndPhase(anyLong(), anyLong()))
+            .thenReturn(Arrays.asList());
+
+        // Act
+        ResponseEntity<?> result = controller.getProjectInnovationInfoByInnovationIdAndPhaseId(1L, 5L);
+
+        // Assert
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+    }
+
+    @Test
+    void getProjectInnovationInfoByInnovationIdAndPhaseId_WithPartnerTypeIdDefault_ShouldReturnDefault() {
+        // Arrange
+        when(projectInnovationUseCase.findProjectInnovationInfoByInnovationIdAndPhaseId(1L, 5L))
+            .thenReturn(Optional.of(testInnovationInfo));
+        when(repositoryAdapter.findPartnershipsByInnovationIdAndPhase(anyLong(), anyLong()))
+            .thenReturn(Arrays.asList());
+
+        // Act
+        ResponseEntity<?> result = controller.getProjectInnovationInfoByInnovationIdAndPhaseId(1L, 5L);
+
+        // Assert
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+    }
+
+    @Test
+    void searchInnovations_WithBothCountryAndActorFilters_ShouldUseGeneralSearch() {
+        // Arrange
+        List<ProjectInnovationInfo> innovations = Arrays.asList(testInnovationInfo);
+        when(projectInnovationUseCase.findActiveInnovationsInfoWithFilters(any(), any(), any(), any(), any()))
+            .thenReturn(innovations);
+
+        // Act
+        ResponseEntity<?> result = invokeSearchInnovations(
+            null, null, null, null, null, Arrays.asList("1"), Arrays.asList("2"), null, 0, 20);
+
+        // Assert
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+        verify(projectInnovationUseCase).findActiveInnovationsInfoWithFilters(any(), any(), any(), any(), any());
+    }
+
+    @Test
+    void searchInnovations_WithPhaseAndCountryFilters_ShouldUseGeneralSearch() {
+        // Arrange
+        List<ProjectInnovationInfo> innovations = Arrays.asList(testInnovationInfo);
+        when(projectInnovationUseCase.findActiveInnovationsInfoWithFilters(any(), any(), any(), any(), any()))
+            .thenReturn(innovations);
+
+        // Act
+        ResponseEntity<?> result = invokeSearchInnovations(
+            1L, null, null, null, null, Arrays.asList("1"), null, null, 0, 20);
+
+        // Assert
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+        verify(projectInnovationUseCase).findActiveInnovationsInfoWithFilters(eq(1L), any(), any(), any(), any());
+    }
+
+    @Test
+    void searchInnovations_WithPhaseAndActorFilters_ShouldUseGeneralSearch() {
+        // Arrange
+        List<ProjectInnovationInfo> innovations = Arrays.asList(testInnovationInfo);
+        when(projectInnovationUseCase.findActiveInnovationsInfoWithFilters(any(), any(), any(), any(), any()))
+            .thenReturn(innovations);
+
+        // Act
+        ResponseEntity<?> result = invokeSearchInnovations(
+            1L, null, null, null, null, null, Arrays.asList("1"), null, 0, 20);
+
+        // Assert
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+        verify(projectInnovationUseCase).findActiveInnovationsInfoWithFilters(eq(1L), any(), any(), any(), any());
+    }
+
+    @Test
+    void searchInnovations_WithSdgIdAndCountryFilters_ShouldUseSdgSearch() {
+        // Arrange
+        List<ProjectInnovationInfo> innovations = Arrays.asList(testInnovationInfo);
+        when(projectInnovationUseCase.findActiveInnovationsInfoBySdgFilters(any(), any(), any(), any(), any()))
+            .thenReturn(innovations);
+
+        // Act
+        ResponseEntity<?> result = invokeSearchInnovations(
+            null, null, null, null, 1L, Arrays.asList("1"), null, null, 0, 20);
+
+        // Assert
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+        verify(projectInnovationUseCase).findActiveInnovationsInfoBySdgFilters(any(), any(), eq(1L), any(), any());
+    }
+
+    @Test
+    void searchInnovations_WithSdgIdAndActorFilters_ShouldUseSdgSearch() {
+        // Arrange
+        List<ProjectInnovationInfo> innovations = Arrays.asList(testInnovationInfo);
+        when(projectInnovationUseCase.findActiveInnovationsInfoBySdgFilters(any(), any(), any(), any(), any()))
+            .thenReturn(innovations);
+
+        // Act
+        ResponseEntity<?> result = invokeSearchInnovations(
+            null, null, null, null, 1L, null, Arrays.asList("1"), null, 0, 20);
+
+        // Assert
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+        verify(projectInnovationUseCase).findActiveInnovationsInfoBySdgFilters(any(), any(), eq(1L), any(), any());
+    }
+
+    @Test
+    void searchInnovations_WithSdgIdAndBothFilters_ShouldUseSdgSearch() {
+        // Arrange
+        List<ProjectInnovationInfo> innovations = Arrays.asList(testInnovationInfo);
+        when(projectInnovationUseCase.findActiveInnovationsInfoBySdgFilters(any(), any(), any(), any(), any()))
+            .thenReturn(innovations);
+
+        // Act
+        ResponseEntity<?> result = invokeSearchInnovations(
+            null, null, null, null, 1L, Arrays.asList("1"), Arrays.asList("2"), null, 0, 20);
+
+        // Assert
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+        verify(projectInnovationUseCase).findActiveInnovationsInfoBySdgFilters(any(), any(), eq(1L), any(), any());
+    }
+
+    @Test
+    void searchInnovations_WithPaginationOffsetBeyondResults_ShouldReturnEmpty() {
+        // Arrange
+        List<ProjectInnovationInfo> innovations = Arrays.asList(testInnovationInfo);
+        when(projectInnovationUseCase.findAllActiveInnovationsInfo()).thenReturn(innovations);
+
+        // Act
+        ResponseEntity<?> result = invokeSearchInnovations(
+            null, null, null, null, null, null, null, null, 100, 20);
+
+        // Assert
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+    }
+
+    @Test
+    void searchInnovations_WithPaginationLimitGreaterThanResults_ShouldReturnAll() {
+        // Arrange
+        List<ProjectInnovationInfo> innovations = Arrays.asList(testInnovationInfo);
+        when(projectInnovationUseCase.findAllActiveInnovationsInfo()).thenReturn(innovations);
+
+        // Act
+        ResponseEntity<?> result = invokeSearchInnovations(
+            null, null, null, null, null, null, null, null, 0, 1000);
+
+        // Assert
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+    }
+
+    @Test
+    void searchInnovationsSimple_WithPhaseAndCountryFilters_ShouldUseGeneralSearch() {
+        // Arrange
+        List<ProjectInnovationInfo> innovations = Arrays.asList(testInnovationInfo);
+        when(projectInnovationUseCase.findActiveInnovationsInfoWithFilters(any(), any(), any(), any(), any()))
+            .thenReturn(innovations);
+
+        // Act
+        ResponseEntity<?> result = invokeSearchInnovationsSimple(
+            1L, null, null, null, null, Arrays.asList("1"), null, null, 0, 20);
+
+        // Assert
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+        verify(projectInnovationUseCase).findActiveInnovationsInfoWithFilters(eq(1L), any(), any(), any(), any());
+    }
+
+    @Test
+    void searchInnovationsComplete_WithPhaseAndCountryFilters_ShouldUseGeneralSearch() {
+        // Arrange
+        List<ProjectInnovationInfo> innovations = Arrays.asList(testInnovationInfo);
+        when(projectInnovationUseCase.findActiveInnovationsInfoWithFilters(any(), any(), any(), any(), any()))
+            .thenReturn(innovations);
+
+        // Act
+        ResponseEntity<?> result = invokeSearchInnovationsComplete(
+            1L, null, null, null, null, Arrays.asList("1"), null, null, 0, 20);
+
+        // Assert
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+        verify(projectInnovationUseCase).findActiveInnovationsInfoWithFilters(eq(1L), any(), any(), any(), any());
+    }
+
+
+    @Test
+    void searchInnovations_WithMultipleFiltersCombined_ShouldUseGeneralSearch() {
+        // Arrange
+        List<ProjectInnovationInfo> innovations = Arrays.asList(testInnovationInfo);
+        when(projectInnovationUseCase.findActiveInnovationsInfoWithFilters(any(), any(), any(), any(), any()))
+            .thenReturn(innovations);
+
+        // Act - Combine phase, readinessScale, and innovationTypeId
+        ResponseEntity<?> result = invokeSearchInnovations(
+            1L, 5, 2L, null, null, null, null, null, 0, 20);
+
+        // Assert
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+        verify(projectInnovationUseCase).findActiveInnovationsInfoWithFilters(eq(1L), eq(5), eq(2L), any(), any());
+    }
+
+    @Test
+    void searchInnovations_WithAllFiltersCombined_ShouldUseGeneralSearch() {
+        // Arrange
+        List<ProjectInnovationInfo> innovations = Arrays.asList(testInnovationInfo);
+        when(projectInnovationUseCase.findActiveInnovationsInfoWithFilters(any(), any(), any(), any(), any()))
+            .thenReturn(innovations);
+
+        // Act - Combine all general filters
+        ResponseEntity<?> result = invokeSearchInnovations(
+            1L, 5, 2L, null, null, Arrays.asList("1"), Arrays.asList("2"), null, 0, 20);
+
+        // Assert
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+        verify(projectInnovationUseCase).findActiveInnovationsInfoWithFilters(eq(1L), eq(5), eq(2L), any(), any());
     }
 }

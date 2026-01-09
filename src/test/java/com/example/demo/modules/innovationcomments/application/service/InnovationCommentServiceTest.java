@@ -360,4 +360,241 @@ class InnovationCommentServiceTest {
         assertFalse(result);
         verify(commentRepository, never()).existsActiveComment(any());
     }
+
+    @Test
+    void getAllComments_WithNegativeOffset_ShouldUseZero() {
+        // Arrange
+        List<InnovationCatalogComment> expectedComments = Arrays.asList(testCommentEntity);
+        when(commentRepository.findAllCommentsOrderByActiveSinceDesc(eq(0), isNull())).thenReturn(expectedComments);
+        
+        // Act
+        List<InnovationCatalogComment> result = commentService.getAllComments(-5, null);
+        
+        // Assert
+        assertNotNull(result);
+        verify(commentRepository, times(1)).findAllCommentsOrderByActiveSinceDesc(eq(0), isNull());
+    }
+
+    @Test
+    void getAllComments_WithPositiveOffset_ShouldUseOffset() {
+        // Arrange
+        List<InnovationCatalogComment> expectedComments = Arrays.asList(testCommentEntity);
+        when(commentRepository.findAllCommentsOrderByActiveSinceDesc(eq(10), isNull())).thenReturn(expectedComments);
+        
+        // Act
+        List<InnovationCatalogComment> result = commentService.getAllComments(10, null);
+        
+        // Assert
+        assertNotNull(result);
+        verify(commentRepository, times(1)).findAllCommentsOrderByActiveSinceDesc(eq(10), isNull());
+    }
+
+    @Test
+    void getAllComments_WithZeroOffset_ShouldUseZero() {
+        // Arrange
+        List<InnovationCatalogComment> expectedComments = Arrays.asList(testCommentEntity);
+        when(commentRepository.findAllCommentsOrderByActiveSinceDesc(eq(0), eq(5))).thenReturn(expectedComments);
+        
+        // Act
+        List<InnovationCatalogComment> result = commentService.getAllComments(0, 5);
+        
+        // Assert
+        assertNotNull(result);
+        verify(commentRepository, times(1)).findAllCommentsOrderByActiveSinceDesc(eq(0), eq(5));
+    }
+
+    @Test
+    void getAllComments_WithNegativeLimit_ThrowsException() {
+        // Act & Assert
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> commentService.getAllComments(null, -1));
+        
+        assertEquals("Limit must be greater than zero", exception.getMessage());
+        verify(commentRepository, never()).findAllCommentsOrderByActiveSinceDesc(any(), any());
+    }
+
+    @Test
+    void createComment_WithEmptyEmail_ThrowsException() {
+        // Act & Assert
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, 
+            () -> commentService.createComment(testInnovationId, testUserName, testUserLastname, "", testCommentText));
+        
+        assertEquals("User email cannot be null or empty", exception.getMessage());
+        verify(commentRepository, never()).save(any());
+    }
+
+    @Test
+    void createComment_WithWhitespaceEmail_ThrowsException() {
+        // Act & Assert
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, 
+            () -> commentService.createComment(testInnovationId, testUserName, testUserLastname, "   ", testCommentText));
+        
+        assertEquals("User email cannot be null or empty", exception.getMessage());
+        verify(commentRepository, never()).save(any());
+    }
+
+    @Test
+    void createComment_WithWhitespaceUserName_ThrowsException() {
+        // Act & Assert
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, 
+            () -> commentService.createComment(testInnovationId, "   ", testUserLastname, testUserEmail, testCommentText));
+        
+        assertEquals("User name cannot be null or empty", exception.getMessage());
+        verify(commentRepository, never()).save(any());
+    }
+
+    @Test
+    void createComment_WithEmailMissingAt_ThrowsException() {
+        // Act & Assert
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, 
+            () -> commentService.createComment(testInnovationId, testUserName, testUserLastname, "invalidemail.com", testCommentText));
+        
+        assertEquals("Invalid email format", exception.getMessage());
+        verify(commentRepository, never()).save(any());
+    }
+
+    @Test
+    void createComment_WithEmailMissingDot_ThrowsException() {
+        // Act & Assert
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, 
+            () -> commentService.createComment(testInnovationId, testUserName, testUserLastname, "invalid@emailcom", testCommentText));
+        
+        assertEquals("Invalid email format", exception.getMessage());
+        verify(commentRepository, never()).save(any());
+    }
+
+    @Test
+    void createComment_WithEmailTooShort_ThrowsException() {
+        // Act & Assert - email length <= 5
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, 
+            () -> commentService.createComment(testInnovationId, testUserName, testUserLastname, "a@b.c", testCommentText));
+        
+        assertEquals("Invalid email format", exception.getMessage());
+        verify(commentRepository, never()).save(any());
+    }
+
+    @Test
+    void createComment_WithNullEmail_ThrowsException() {
+        // Act & Assert
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, 
+            () -> commentService.createComment(testInnovationId, testUserName, testUserLastname, null, testCommentText));
+        
+        assertEquals("User email cannot be null or empty", exception.getMessage());
+        verify(commentRepository, never()).save(any());
+    }
+
+    @Test
+    void getActiveCommentsByUserEmail_WithEmptyEmail_ThrowsException() {
+        // Act & Assert
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, 
+            () -> commentService.getActiveCommentsByUserEmail(""));
+        
+        assertEquals("User email cannot be null or empty", exception.getMessage());
+        verify(commentRepository, never()).findActiveCommentsByUserEmail(any());
+    }
+
+    @Test
+    void getActiveCommentsByUserEmail_WithWhitespaceEmail_ThrowsException() {
+        // Act & Assert
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, 
+            () -> commentService.getActiveCommentsByUserEmail("   "));
+        
+        assertEquals("User email cannot be null or empty", exception.getMessage());
+        verify(commentRepository, never()).findActiveCommentsByUserEmail(any());
+    }
+
+    @Test
+    void deactivateComment_WhenSoftDeleteReturnsZero_ShouldReturnFalse() {
+        // Arrange
+        Long commentId = 1L;
+        when(commentRepository.existsActiveComment(commentId)).thenReturn(true);
+        when(commentRepository.softDeleteComment(commentId)).thenReturn(0); // No rows updated
+        
+        // Act
+        boolean result = commentService.deactivateComment(commentId);
+        
+        // Assert
+        assertFalse(result);
+        verify(commentRepository).existsActiveComment(commentId);
+        verify(commentRepository).softDeleteComment(commentId);
+    }
+
+    @Test
+    void createComment_WithValidEmailVariations_ShouldPass() {
+        // Arrange
+        when(commentRepository.save(any(InnovationCatalogComment.class))).thenReturn(testCommentEntity);
+        
+        // Act & Assert - Different valid email formats
+        assertDoesNotThrow(() ->
+            commentService.createComment(testInnovationId, testUserName, testUserLastname, "user@example.com", testCommentText)
+        );
+        assertDoesNotThrow(() ->
+            commentService.createComment(testInnovationId, testUserName, testUserLastname, "user.name@example.co.uk", testCommentText)
+        );
+        assertDoesNotThrow(() ->
+            commentService.createComment(testInnovationId, testUserName, testUserLastname, "user+tag@example.com", testCommentText)
+        );
+    }
+
+    @Test
+    void createComment_WithEmailExactlyFiveChars_ShouldReject() {
+        // Act & Assert - email length exactly 5 (needs > 5)
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, 
+            () -> commentService.createComment(testInnovationId, testUserName, testUserLastname, "a@b.c", testCommentText));
+        
+        assertEquals("Invalid email format", exception.getMessage());
+    }
+
+    @Test
+    void createComment_WithEmailSixChars_ShouldPass() {
+        // Arrange
+        when(commentRepository.save(any(InnovationCatalogComment.class))).thenReturn(testCommentEntity);
+        
+        // Act & Assert - email length 6 (> 5)
+        assertDoesNotThrow(() ->
+            commentService.createComment(testInnovationId, testUserName, testUserLastname, "a@b.co", testCommentText)
+        );
+    }
+
+    @Test
+    void getAllComments_WithOffsetZero_ShouldUseZero() {
+        // Arrange
+        List<InnovationCatalogComment> expectedComments = Arrays.asList(testCommentEntity);
+        when(commentRepository.findAllCommentsOrderByActiveSinceDesc(eq(0), eq(10))).thenReturn(expectedComments);
+        
+        // Act
+        List<InnovationCatalogComment> result = commentService.getAllComments(0, 10);
+        
+        // Assert
+        assertNotNull(result);
+        verify(commentRepository, times(1)).findAllCommentsOrderByActiveSinceDesc(eq(0), eq(10));
+    }
+
+    @Test
+    void getAllComments_WithOffsetPositive_ShouldUseOffset() {
+        // Arrange
+        List<InnovationCatalogComment> expectedComments = Arrays.asList(testCommentEntity);
+        when(commentRepository.findAllCommentsOrderByActiveSinceDesc(eq(20), eq(10))).thenReturn(expectedComments);
+        
+        // Act
+        List<InnovationCatalogComment> result = commentService.getAllComments(20, 10);
+        
+        // Assert
+        assertNotNull(result);
+        verify(commentRepository, times(1)).findAllCommentsOrderByActiveSinceDesc(eq(20), eq(10));
+    }
+
+    @Test
+    void getAllComments_WithOffsetNull_ShouldUseZero() {
+        // Arrange
+        List<InnovationCatalogComment> expectedComments = Arrays.asList(testCommentEntity);
+        when(commentRepository.findAllCommentsOrderByActiveSinceDesc(eq(0), eq(10))).thenReturn(expectedComments);
+        
+        // Act
+        List<InnovationCatalogComment> result = commentService.getAllComments(null, 10);
+        
+        // Assert
+        assertNotNull(result);
+        verify(commentRepository, times(1)).findAllCommentsOrderByActiveSinceDesc(eq(0), eq(10));
+    }
 }

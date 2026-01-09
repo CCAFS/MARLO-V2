@@ -17,18 +17,19 @@ class ActorTest {
     }
 
     @Test
-    void constructor_WithNoArgsConstructor_ShouldCreateEmpty() {
+    void constructor_NoArgsConstructor_ShouldCreateEmptyActor() {
         // Act
         Actor newActor = new Actor();
 
         // Assert
-        assertNotNull(newActor);
         assertNull(newActor.getId());
         assertNull(newActor.getName());
+        assertNull(newActor.getDescription());
+        assertTrue(newActor.getIsActive()); // Default value is true
     }
 
     @Test
-    void constructor_WithEssentialFields_ShouldSetValues() {
+    void constructor_WithEssentialFields_ShouldSetFields() {
         // Act
         Actor newActor = new Actor("Test Actor", "Test Description", true);
 
@@ -39,34 +40,64 @@ class ActorTest {
     }
 
     @Test
-    void settersAndGetters_ShouldWorkCorrectly() {
+    void gettersAndSetters_ShouldWorkCorrectly() {
+        // Arrange
+        Long id = 1L;
+        String name = "Actor Name";
+        String description = "Actor Description";
+        Boolean isActive = true;
+        LocalDateTime activeSince = LocalDateTime.now();
+        Long createdBy = 10L;
+        Long modifiedBy = 20L;
+        String modificationJustification = "Test justification";
+        Long prmsIdEquivalent = 100L;
+        String prmsNameEquivalent = "PRMS Name";
+
         // Act
-        actor.setId(1L);
-        actor.setName("Actor Name");
-        actor.setDescription("Actor Description");
-        actor.setIsActive(true);
-        actor.setActiveSince(LocalDateTime.now());
-        actor.setCreatedBy(1L);
-        actor.setModifiedBy(2L);
-        actor.setModificationJustification("Justification");
-        actor.setPrmsIdEquivalent(100L);
-        actor.setPrmsNameEquivalent("PRMS Name");
+        actor.setId(id);
+        actor.setName(name);
+        actor.setDescription(description);
+        actor.setIsActive(isActive);
+        actor.setActiveSince(activeSince);
+        actor.setCreatedBy(createdBy);
+        actor.setModifiedBy(modifiedBy);
+        actor.setModificationJustification(modificationJustification);
+        actor.setPrmsIdEquivalent(prmsIdEquivalent);
+        actor.setPrmsNameEquivalent(prmsNameEquivalent);
 
         // Assert
-        assertEquals(1L, actor.getId());
-        assertEquals("Actor Name", actor.getName());
-        assertEquals("Actor Description", actor.getDescription());
-        assertTrue(actor.getIsActive());
-        assertNotNull(actor.getActiveSince());
-        assertEquals(1L, actor.getCreatedBy());
-        assertEquals(2L, actor.getModifiedBy());
-        assertEquals("Justification", actor.getModificationJustification());
-        assertEquals(100L, actor.getPrmsIdEquivalent());
-        assertEquals("PRMS Name", actor.getPrmsNameEquivalent());
+        assertEquals(id, actor.getId());
+        assertEquals(name, actor.getName());
+        assertEquals(description, actor.getDescription());
+        assertEquals(isActive, actor.getIsActive());
+        assertEquals(activeSince, actor.getActiveSince());
+        assertEquals(createdBy, actor.getCreatedBy());
+        assertEquals(modifiedBy, actor.getModifiedBy());
+        assertEquals(modificationJustification, actor.getModificationJustification());
+        assertEquals(prmsIdEquivalent, actor.getPrmsIdEquivalent());
+        assertEquals(prmsNameEquivalent, actor.getPrmsNameEquivalent());
     }
 
     @Test
-    void toString_ShouldReturnStringRepresentation() {
+    void setIsActive_WithFalse_ShouldSetToFalse() {
+        // Act
+        actor.setIsActive(false);
+
+        // Assert
+        assertFalse(actor.getIsActive());
+    }
+
+    @Test
+    void setIsActive_WithNull_ShouldSetToNull() {
+        // Act
+        actor.setIsActive(null);
+
+        // Assert
+        assertNull(actor.getIsActive());
+    }
+
+    @Test
+    void toString_ShouldContainKeyFields() {
         // Arrange
         actor.setId(1L);
         actor.setName("Test Actor");
@@ -79,7 +110,15 @@ class ActorTest {
         // Assert
         assertNotNull(result);
         assertTrue(result.contains("Actor"));
-        assertTrue(result.contains("1"));
-        assertTrue(result.contains("Test Actor"));
+        assertTrue(result.contains("id=1"));
+        assertTrue(result.contains("name='Test Actor'"));
+        assertTrue(result.contains("description='Test Description'"));
+        assertTrue(result.contains("isActive=true"));
+    }
+
+    @Test
+    void defaultIsActive_ShouldBeTrue() {
+        // Assert - Default value is true
+        assertTrue(actor.getIsActive());
     }
 }

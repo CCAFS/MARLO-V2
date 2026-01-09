@@ -101,4 +101,57 @@ class ProjectInnovationTest {
         assertTrue(innovation.getIsActive());
         assertNull(innovation.getActiveSince());
     }
+
+    @Test
+    void onCreate_WhenActiveSinceIsSetButIsActiveIsNull_ShouldSetIsActiveToTrue() {
+        // Arrange
+        LocalDateTime customDate = LocalDateTime.of(2024, 1, 1, 12, 0);
+        projectInnovation.setActiveSince(customDate);
+        projectInnovation.setIsActive(null);
+
+        // Act
+        projectInnovation.onCreate();
+
+        // Assert
+        assertEquals(customDate, projectInnovation.getActiveSince());
+        assertTrue(projectInnovation.getIsActive());
+    }
+
+    @Test
+    void onCreate_WhenIsActiveIsSetButActiveSinceIsNull_ShouldSetActiveSince() {
+        // Arrange
+        projectInnovation.setActiveSince(null);
+        projectInnovation.setIsActive(false);
+
+        // Act
+        projectInnovation.onCreate();
+
+        // Assert
+        assertNotNull(projectInnovation.getActiveSince());
+        assertFalse(projectInnovation.getIsActive());
+    }
+
+    @Test
+    void onUpdate_WhenCalledMultipleTimes_ShouldUpdateEachTime() {
+        // Arrange
+        LocalDateTime firstDate = LocalDateTime.of(2024, 1, 1, 12, 0);
+        projectInnovation.setActiveSince(firstDate);
+
+        // Act
+        projectInnovation.onUpdate();
+        LocalDateTime secondDate = projectInnovation.getActiveSince();
+        try {
+            Thread.sleep(10); // Small delay to ensure different timestamps
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+        projectInnovation.onUpdate();
+        LocalDateTime thirdDate = projectInnovation.getActiveSince();
+
+        // Assert
+        assertNotNull(secondDate);
+        assertNotNull(thirdDate);
+        assertNotEquals(firstDate, secondDate);
+        assertNotEquals(secondDate, thirdDate);
+    }
 }

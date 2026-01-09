@@ -110,7 +110,7 @@ class EnvironmentPropertyServiceTest {
     }
 
     @Test
-    void printAllMarloProperties_ShouldNotThrowException() {
+    void printAllMarloProperties_WhenPdfUrlExists_ShouldPrintIt() {
         // Arrange
         when(environment.getProperty("marlo.innovation.pdf-generator.url"))
             .thenReturn("http://test-url.com");
@@ -118,6 +118,48 @@ class EnvironmentPropertyServiceTest {
             .thenReturn(null);
         when(environment.getProperty("marlo.innovation.retry-attempts"))
             .thenReturn(null);
+
+        // Act & Assert
+        assertDoesNotThrow(() -> service.printAllMarloProperties());
+        verify(environment, atLeastOnce()).getProperty("marlo.innovation.pdf-generator.url");
+    }
+
+    @Test
+    void printAllMarloProperties_WhenPdfUrlIsNull_ShouldNotPrintIt() {
+        // Arrange
+        when(environment.getProperty("marlo.innovation.pdf-generator.url"))
+            .thenReturn(null);
+        when(environment.getProperty("marlo.innovation.timeout"))
+            .thenReturn("30");
+        when(environment.getProperty("marlo.innovation.retry-attempts"))
+            .thenReturn("3");
+
+        // Act & Assert
+        assertDoesNotThrow(() -> service.printAllMarloProperties());
+        verify(environment, atLeastOnce()).getProperty("marlo.innovation.pdf-generator.url");
+    }
+
+    @Test
+    void printAllMarloProperties_WhenAllPropertiesExist_ShouldPrintAll() {
+        // Arrange
+        when(environment.getProperty("marlo.innovation.pdf-generator.url"))
+            .thenReturn("http://test-url.com");
+        when(environment.getProperty("marlo.innovation.timeout"))
+            .thenReturn("30");
+        when(environment.getProperty("marlo.innovation.retry-attempts"))
+            .thenReturn("3");
+
+        // Act & Assert
+        assertDoesNotThrow(() -> service.printAllMarloProperties());
+        verify(environment, atLeastOnce()).getProperty("marlo.innovation.pdf-generator.url");
+        verify(environment).getProperty("marlo.innovation.timeout");
+        verify(environment).getProperty("marlo.innovation.retry-attempts");
+    }
+
+    @Test
+    void printAllMarloProperties_WhenAllPropertiesAreNull_ShouldNotThrowException() {
+        // Arrange
+        when(environment.getProperty(anyString())).thenReturn(null);
 
         // Act & Assert
         assertDoesNotThrow(() -> service.printAllMarloProperties());

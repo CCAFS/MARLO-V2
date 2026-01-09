@@ -179,6 +179,43 @@ class InnovationPdfReportServiceTest {
         // Act & Assert
         assertFalse(service.validateParameters(100L, "Reporting", null));
         assertFalse(service.validateParameters(100L, "Reporting", 2019));
-        assertFalse(service.validateParameters(100L, "Reporting", 2031));
+        assertFalse(service.validateParameters(100L, "Reporting", 2020)); // Edge case: exactly 2020 (excluded, needs > 2020)
+        assertFalse(service.validateParameters(100L, "Reporting", 2031)); // Above maximum
+    }
+
+    @Test
+    void validateParameters_WithBoundaryValues_ShouldReturnCorrectResults() {
+        // Act & Assert - Valid boundary values (year > 2020 && year <= 2030)
+        assertTrue(service.validateParameters(1L, "Reporting", 2021)); // Minimum valid year (> 2020)
+        assertTrue(service.validateParameters(1L, "Reporting", 2025)); // Middle year
+        assertTrue(service.validateParameters(1L, "Reporting", 2030)); // Maximum valid year (<= 2030)
+        
+        // Invalid boundary values
+        assertFalse(service.validateParameters(1L, "Reporting", 2020)); // Exactly 2020 (excluded, needs > 2020)
+        assertFalse(service.validateParameters(1L, "Reporting", 2031)); // Above 2030
+    }
+
+    @Test
+    void validateParameters_WithCombinedInvalidConditions_ShouldReturnFalse() {
+        // Act & Assert - Multiple invalid conditions
+        assertFalse(service.validateParameters(null, null, null));
+        assertFalse(service.validateParameters(null, "Reporting", 2025));
+        assertFalse(service.validateParameters(100L, null, 2025));
+        assertFalse(service.validateParameters(100L, "Reporting", null));
+        assertFalse(service.validateParameters(null, null, 2025));
+        assertFalse(service.validateParameters(100L, null, null));
+        assertFalse(service.validateParameters(null, "Reporting", null));
+    }
+
+    @Test
+    void validateParameters_WithYear2030_ShouldReturnTrue() {
+        // Act & Assert - 2030 is valid (year <= 2030)
+        assertTrue(service.validateParameters(100L, "Reporting", 2030));
+    }
+
+    @Test
+    void validateParameters_WithYear2021_ShouldReturnTrue() {
+        // Act & Assert - 2021 is valid (year > 2020)
+        assertTrue(service.validateParameters(100L, "Reporting", 2021));
     }
 }

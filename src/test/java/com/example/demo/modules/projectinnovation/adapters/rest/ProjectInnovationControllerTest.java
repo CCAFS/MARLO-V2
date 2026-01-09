@@ -916,26 +916,15 @@ class ProjectInnovationControllerTest {
             List<String> actorNames,
             Integer offset,
             Integer limit) {
+        // The actual method signature doesn't include actorNames, so we ignore it
         try {
             Method method = ProjectInnovationController.class.getMethod(
                 "searchInnovations",
                 Long.class, Integer.class, Long.class, Long.class, Long.class,
-                List.class, List.class, List.class, Integer.class, Integer.class);
+                List.class, List.class, Integer.class, Integer.class);
             return (ResponseEntity<?>) method.invoke(
                 controller, phase, readinessScale, innovationTypeId, innovationId, sdgId,
-                countryIds, actorIds, actorNames, offset, limit);
-        } catch (NoSuchMethodException e) {
-            try {
-                Method method = ProjectInnovationController.class.getMethod(
-                    "searchInnovations",
-                    Long.class, Integer.class, Long.class, Long.class, Long.class,
-                    List.class, List.class, Integer.class, Integer.class);
-                return (ResponseEntity<?>) method.invoke(
-                    controller, phase, readinessScale, innovationTypeId, innovationId, sdgId,
-                    countryIds, actorIds, offset, limit);
-            } catch (ReflectiveOperationException inner) {
-                throw new RuntimeException(inner);
-            }
+                countryIds, actorIds, offset, limit);
         } catch (ReflectiveOperationException e) {
             throw new RuntimeException(e);
         }
@@ -952,26 +941,15 @@ class ProjectInnovationControllerTest {
             List<String> actorNames,
             Integer offset,
             Integer limit) {
+        // The actual method signature doesn't include actorNames, so we ignore it
         try {
             Method method = ProjectInnovationController.class.getMethod(
                 "searchInnovationsSimple",
                 Long.class, Integer.class, Long.class, Long.class, Long.class,
-                List.class, List.class, List.class, Integer.class, Integer.class);
+                List.class, List.class, Integer.class, Integer.class);
             return (ResponseEntity<?>) method.invoke(
                 controller, phase, readinessScale, innovationTypeId, innovationId, sdgId,
-                countryIds, actorIds, actorNames, offset, limit);
-        } catch (NoSuchMethodException e) {
-            try {
-                Method method = ProjectInnovationController.class.getMethod(
-                    "searchInnovationsSimple",
-                    Long.class, Integer.class, Long.class, Long.class, Long.class,
-                    List.class, List.class, Integer.class, Integer.class);
-                return (ResponseEntity<?>) method.invoke(
-                    controller, phase, readinessScale, innovationTypeId, innovationId, sdgId,
-                    countryIds, actorIds, offset, limit);
-            } catch (ReflectiveOperationException inner) {
-                throw new RuntimeException(inner);
-            }
+                countryIds, actorIds, offset, limit);
         } catch (ReflectiveOperationException e) {
             throw new RuntimeException(e);
         }
@@ -988,26 +966,15 @@ class ProjectInnovationControllerTest {
             List<String> actorNames,
             Integer offset,
             Integer limit) {
+        // The actual method signature doesn't include actorNames, so we ignore it
         try {
             Method method = ProjectInnovationController.class.getMethod(
                 "searchInnovationsComplete",
                 Long.class, Integer.class, Long.class, Long.class, Long.class,
-                List.class, List.class, List.class, Integer.class, Integer.class);
+                List.class, List.class, Integer.class, Integer.class);
             return (ResponseEntity<?>) method.invoke(
                 controller, phase, readinessScale, innovationTypeId, innovationId, sdgId,
-                countryIds, actorIds, actorNames, offset, limit);
-        } catch (NoSuchMethodException e) {
-            try {
-                Method method = ProjectInnovationController.class.getMethod(
-                    "searchInnovationsComplete",
-                    Long.class, Integer.class, Long.class, Long.class, Long.class,
-                    List.class, List.class, Integer.class, Integer.class);
-                return (ResponseEntity<?>) method.invoke(
-                    controller, phase, readinessScale, innovationTypeId, innovationId, sdgId,
-                    countryIds, actorIds, offset, limit);
-            } catch (ReflectiveOperationException inner) {
-                throw new RuntimeException(inner);
-            }
+                countryIds, actorIds, offset, limit);
         } catch (ReflectiveOperationException e) {
             throw new RuntimeException(e);
         }

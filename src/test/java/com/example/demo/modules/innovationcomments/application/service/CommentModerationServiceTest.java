@@ -243,6 +243,30 @@ class CommentModerationServiceTest {
     }
 
     @Test
+    void validateComment_WithAiRejection_ShouldPrefixUserMessage() {
+        // Arrange
+        CommentAiModerationClient aiClient = mock(CommentAiModerationClient.class);
+        when(aiClientProvider.getIfAvailable()).thenReturn(aiClient);
+
+        CommentModerationProperties.OpenAiProperties openAiProps = mock(CommentModerationProperties.OpenAiProperties.class);
+        when(openAiProps.isEnabled()).thenReturn(true);
+        when(openAiProps.getBlockThreshold()).thenReturn(0.5);
+        when(properties.getOpenAi()).thenReturn(openAiProps);
+
+        ModerationVerdict verdict = new ModerationVerdict(true, "hate", 0.8, "openai");
+        when(aiClient.classify(anyString())).thenReturn(Optional.of(verdict));
+
+        CommentModerationService newService = new CommentModerationService(properties, aiClientProvider);
+
+        // Act & Assert
+        CommentRejectedException exception = assertThrows(CommentRejectedException.class, () ->
+            newService.validateComment(1L, "test@example.com", "test comment")
+        );
+        assertEquals("TYPE: HATE COMMENT. The comment was rejected because it violates the platform guidelines.",
+                exception.getUserMessage());
+    }
+
+    @Test
     void validateComment_WithAiModerationNotFlagged_ShouldPass() {
         // Arrange
         CommentAiModerationClient aiClient = mock(CommentAiModerationClient.class);

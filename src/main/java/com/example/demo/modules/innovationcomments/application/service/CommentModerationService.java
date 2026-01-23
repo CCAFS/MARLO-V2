@@ -217,12 +217,23 @@ public class CommentModerationService {
 
     private void reject(String userMessage, String reasonCode, String logMessage,
                         Long innovationId, String userEmail, String commentText) {
+        String finalUserMessage = userMessage;
+        if (reasonCode != null && reasonCode.startsWith("AI")) {
+            String normalized = reasonCode
+                    .replace("AI", "")
+                    .replace("BLOCK", "")
+                    .replace("_", "")
+                    .trim();
+            if (!normalized.isEmpty()) {
+                finalUserMessage = "TYPE: " + normalized + " COMMENT. " + userMessage;
+            }
+        }
         if (properties.isLogRejections()) {
             logger.warn("Comment rejected | innovation={} | user={} | reason={} | hash={}",
                     innovationId, userEmail, reasonCode, hashComment(commentText));
             logger.debug("Moderation details: {}", logMessage);
         }
-        throw new CommentRejectedException(userMessage, reasonCode, logMessage);
+        throw new CommentRejectedException(finalUserMessage, reasonCode, logMessage);
     }
 
     private String hashComment(String text) {

@@ -27,6 +27,7 @@ class CommentModerationServiceTest {
         when(properties.isEnabled()).thenReturn(true);
         when(properties.getMaxAllowedLinks()).thenReturn(3);
         when(properties.getMaxRepeatedCharacters()).thenReturn(5);
+        when(properties.getMaxRepeatedWords()).thenReturn(3);
         when(properties.getMaxUppercaseRatio()).thenReturn(0.8);
         when(properties.getExtraBannedWords()).thenReturn(Collections.emptyList());
         when(properties.isLogRejections()).thenReturn(true);
@@ -99,6 +100,31 @@ class CommentModerationServiceTest {
     }
 
     @Test
+    void validateComment_WithAiEnabled_ShouldStillApplyLocalRules() {
+        // Arrange
+        CommentAiModerationClient aiClient = mock(CommentAiModerationClient.class);
+        when(aiClientProvider.getIfAvailable()).thenReturn(aiClient);
+
+        CommentModerationProperties.OpenAiProperties openAiProps = mock(CommentModerationProperties.OpenAiProperties.class);
+        when(openAiProps.isEnabled()).thenReturn(true);
+        when(openAiProps.getBlockThreshold()).thenReturn(0.9);
+        when(properties.getOpenAi()).thenReturn(openAiProps);
+        when(properties.getExtraBannedWords()).thenReturn(List.of("spam"));
+
+        ModerationVerdict verdict = new ModerationVerdict(false, "hate", 0.1, "openai");
+        when(aiClient.classify(anyString())).thenReturn(Optional.of(verdict));
+
+        CommentModerationService newService = new CommentModerationService(properties, aiClientProvider);
+
+        // Act & Assert
+        CommentRejectedException exception = assertThrows(CommentRejectedException.class, () ->
+            newService.validateComment(1L, "test@example.com", "spam")
+        );
+        assertEquals("CUSTOM_BANNED_WORD", exception.getReasonCode());
+        verify(aiClient).classify(anyString());
+    }
+
+    @Test
     void validateComment_WithExcessiveLinks_ShouldReject() {
         // Arrange
         String commentWithLinks = "Check http://link1.com and https://link2.com and www.link3.com and http://link4.com";
@@ -137,6 +163,31 @@ class CommentModerationServiceTest {
     void validateComment_WithAllowedRepeatedCharacters_ShouldPass() {
         // Arrange
         String commentWithRepeats = "This is aaaa test";
+
+        // Act & Assert
+        assertDoesNotThrow(() ->
+            service.validateComment(1L, "test@example.com", commentWithRepeats)
+        );
+    }
+
+    @Test
+    void validateComment_WithExcessiveRepeatedWords_ShouldReject() {
+        // Arrange
+        String commentWithRepeats = "spam spam spam";
+        when(properties.getMaxRepeatedWords()).thenReturn(2);
+
+        // Act & Assert
+        CommentRejectedException exception = assertThrows(CommentRejectedException.class, () ->
+            service.validateComment(1L, "test@example.com", commentWithRepeats)
+        );
+        assertEquals("REPEATED_WORDS", exception.getReasonCode());
+    }
+
+    @Test
+    void validateComment_WithRepeatedWordsAtLimit_ShouldPass() {
+        // Arrange
+        String commentWithRepeats = "spam spam";
+        when(properties.getMaxRepeatedWords()).thenReturn(2);
 
         // Act & Assert
         assertDoesNotThrow(() ->

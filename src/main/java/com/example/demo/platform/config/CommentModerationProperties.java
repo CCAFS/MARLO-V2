@@ -12,6 +12,7 @@ public class CommentModerationProperties {
     private boolean enabled = true;
     private int maxAllowedLinks = 3;
     private int maxRepeatedCharacters = 6;
+    private int maxRepeatedWords = 3;
     private double maxUppercaseRatio = 0.8;
     private boolean logRejections = true;
     private OpenAiProperties openAi = new OpenAiProperties();
@@ -39,6 +40,14 @@ public class CommentModerationProperties {
 
     public void setMaxRepeatedCharacters(int maxRepeatedCharacters) {
         this.maxRepeatedCharacters = maxRepeatedCharacters;
+    }
+
+    public int getMaxRepeatedWords() {
+        return maxRepeatedWords;
+    }
+
+    public void setMaxRepeatedWords(int maxRepeatedWords) {
+        this.maxRepeatedWords = maxRepeatedWords;
     }
 
     public double getMaxUppercaseRatio() {

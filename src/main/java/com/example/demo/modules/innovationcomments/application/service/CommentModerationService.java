@@ -26,6 +26,7 @@ public class CommentModerationService {
 
     private static final Logger logger = LoggerFactory.getLogger(CommentModerationService.class);
     private static final Pattern LINK_PATTERN = Pattern.compile("(https?://|www\\.)\\S+", Pattern.CASE_INSENSITIVE);
+    private static final Pattern WORD_PATTERN = Pattern.compile("[\\p{L}\\p{N}]+");
 
     private final CommentModerationProperties properties;
     private final SensitiveWordBs sensitiveWordBs;
@@ -63,6 +64,23 @@ public class CommentModerationService {
 
         String sanitized = commentText.trim();
 
+        CommentModerationProperties.OpenAiProperties openAiProps = properties.getOpenAi();
+        if (aiModerationClient != null && openAiProps != null && openAiProps.isEnabled()) {
+            Optional<ModerationVerdict> verdictOptional = aiModerationClient.classify(sanitized);
+            if (verdictOptional.isPresent()) {
+                ModerationVerdict verdict = verdictOptional.get();
+                boolean block = verdict.isFlagged() || verdict.getScore() >= openAiProps.getBlockThreshold();
+                if (block) {
+                    String reasonCode = "AI_BLOCK_" + verdict.getCategory().toUpperCase(Locale.ROOT);
+                    reject("The comment was rejected because it violates the platform guidelines.",
+                            reasonCode,
+                            String.format("AI provider %s flagged category %s with score %.3f",
+                                    verdict.getProvider(), verdict.getCategory(), verdict.getScore()),
+                            innovationId, userEmail, sanitized);
+                }
+            }
+        }
+
         Optional<String> customWord = findCustomBannedWord(sanitized);
         if (customWord.isPresent()) {
             reject("The comment contains offensive language that is not allowed on the platform.",
@@ -88,26 +106,14 @@ public class CommentModerationService {
                     "REPEATED_CHARACTERS", "Detected high repetition pattern", innovationId, userEmail, sanitized);
         }
 
+        if (hasExcessiveWordRepetition(sanitized, properties.getMaxRepeatedWords())) {
+            reject("Please avoid repeating the same word many times.",
+                    "REPEATED_WORDS", "Detected excessive word repetition", innovationId, userEmail, sanitized);
+        }
+
         if (uppercaseRatio(sanitized) > properties.getMaxUppercaseRatio()) {
             reject("Please avoid writing the entire comment in uppercase.",
                     "UPPERCASE_RATIO", "Uppercase ratio limit exceeded", innovationId, userEmail, sanitized);
-        }
-
-        CommentModerationProperties.OpenAiProperties openAiProps = properties.getOpenAi();
-        if (aiModerationClient != null && openAiProps != null && openAiProps.isEnabled()) {
-            Optional<ModerationVerdict> verdictOptional = aiModerationClient.classify(sanitized);
-            if (verdictOptional.isPresent()) {
-                ModerationVerdict verdict = verdictOptional.get();
-                boolean block = verdict.isFlagged() || verdict.getScore() >= openAiProps.getBlockThreshold();
-                if (block) {
-                    String reasonCode = "AI_BLOCK_" + verdict.getCategory().toUpperCase(Locale.ROOT);
-                    reject("The comment was rejected because it violates the platform guidelines.",
-                            reasonCode,
-                            String.format("AI provider %s flagged category %s with score %.3f",
-                                    verdict.getProvider(), verdict.getCategory(), verdict.getScore()),
-                            innovationId, userEmail, sanitized);
-                }
-            }
         }
     }
 
@@ -185,6 +191,28 @@ public class CommentModerationService {
             return 0;
         }
         return (double) uppercase / letters;
+    }
+
+    private boolean hasExcessiveWordRepetition(String text, int threshold) {
+        if (threshold <= 0) {
+            return false;
+        }
+        Matcher matcher = WORD_PATTERN.matcher(text);
+        String previous = null;
+        int currentRun = 0;
+        while (matcher.find()) {
+            String word = matcher.group().toLowerCase(Locale.ROOT);
+            if (word.equals(previous)) {
+                currentRun++;
+                if (currentRun > threshold) {
+                    return true;
+                }
+            } else {
+                previous = word;
+                currentRun = 1;
+            }
+        }
+        return false;
     }
 
     private void reject(String userMessage, String reasonCode, String logMessage,

@@ -206,7 +206,7 @@ public class ProjectInnovationController {
         List<Long> normalizedActorIds = normalizeActorIds(actorIds);
         boolean hasActorFilter = normalizedActorIds != null;
         
-        SearchResult searchResult = resolveSearchResult(
+        SearchResult searchResult = resolveSearchResult(new SearchCriteria(
                 phase,
                 readinessScale,
                 innovationTypeId,
@@ -216,7 +216,7 @@ public class ProjectInnovationController {
                 normalizedActorIds,
                 hasCountryFilter,
                 hasActorFilter
-        );
+        ));
         List<ProjectInnovationInfo> allInnovations = searchResult.innovations();
         String searchType = searchResult.searchType();
         
@@ -283,7 +283,7 @@ public class ProjectInnovationController {
         List<Long> normalizedActorIds = normalizeActorIds(actorIds);
         boolean hasActorFilter = normalizedActorIds != null;
         
-        SearchResult searchResult = resolveSearchResult(
+        SearchResult searchResult = resolveSearchResult(new SearchCriteria(
                 phase,
                 readinessScale,
                 innovationTypeId,
@@ -293,7 +293,7 @@ public class ProjectInnovationController {
                 normalizedActorIds,
                 hasCountryFilter,
                 hasActorFilter
-        );
+        ));
         List<ProjectInnovationInfo> allInnovations = searchResult.innovations();
         String searchType = searchResult.searchType();
         
@@ -360,7 +360,7 @@ public class ProjectInnovationController {
         List<Long> normalizedActorIds = normalizeActorIds(actorIds);
         boolean hasActorFilter = normalizedActorIds != null;
         
-        SearchResult searchResult = resolveSearchResult(
+        SearchResult searchResult = resolveSearchResult(new SearchCriteria(
                 phase,
                 readinessScale,
                 innovationTypeId,
@@ -370,7 +370,7 @@ public class ProjectInnovationController {
                 normalizedActorIds,
                 hasCountryFilter,
                 hasActorFilter
-        );
+        ));
         List<ProjectInnovationInfo> allInnovations = searchResult.innovations();
         String searchType = searchResult.searchType();
         
@@ -1481,7 +1481,41 @@ public class ProjectInnovationController {
         }
     }
 
-    private SearchResult resolveSearchResult(
+    private SearchResult resolveSearchResult(SearchCriteria criteria) {
+        if (criteria.sdgId() != null || (criteria.innovationId() != null && criteria.phase() != null)) {
+            List<ProjectInnovationInfo> innovations = projectInnovationUseCase
+                    .findActiveInnovationsInfoBySdgFilters(
+                            criteria.innovationId(),
+                            criteria.phase(),
+                            criteria.sdgId(),
+                            criteria.normalizedCountryIds(),
+                            criteria.normalizedActorIds(),
+                            null);
+            return new SearchResult(innovations,
+                    buildSearchType(criteria.hasCountryFilter(), criteria.hasActorFilter(), SEARCH_TYPE_SDG));
+        }
+        if (criteria.phase() != null
+                || criteria.readinessScale() != null
+                || criteria.innovationTypeId() != null
+                || criteria.hasCountryFilter()
+                || criteria.hasActorFilter()) {
+            List<ProjectInnovationInfo> innovations = projectInnovationUseCase
+                    .findActiveInnovationsInfoWithFilters(
+                            criteria.phase(),
+                            criteria.readinessScale(),
+                            criteria.innovationTypeId(),
+                            criteria.normalizedCountryIds(),
+                            criteria.normalizedActorIds(),
+                            null);
+            return new SearchResult(innovations,
+                    buildSearchType(criteria.hasCountryFilter(), criteria.hasActorFilter(), SEARCH_TYPE_GENERAL));
+        }
+        return new SearchResult(projectInnovationUseCase.findAllActiveInnovationsInfo(), SEARCH_TYPE_ALL_ACTIVE);
+    }
+
+    private record SearchResult(List<ProjectInnovationInfo> innovations, String searchType) {}
+
+    private record SearchCriteria(
             Long phase,
             Integer readinessScale,
             Long innovationTypeId,
@@ -1490,19 +1524,5 @@ public class ProjectInnovationController {
             List<Long> normalizedCountryIds,
             List<Long> normalizedActorIds,
             boolean hasCountryFilter,
-            boolean hasActorFilter) {
-        if (sdgId != null || (innovationId != null && phase != null)) {
-            List<ProjectInnovationInfo> innovations = projectInnovationUseCase
-                    .findActiveInnovationsInfoBySdgFilters(innovationId, phase, sdgId, normalizedCountryIds, normalizedActorIds, null);
-            return new SearchResult(innovations, buildSearchType(hasCountryFilter, hasActorFilter, SEARCH_TYPE_SDG));
-        }
-        if (phase != null || readinessScale != null || innovationTypeId != null || hasCountryFilter || hasActorFilter) {
-            List<ProjectInnovationInfo> innovations = projectInnovationUseCase
-                    .findActiveInnovationsInfoWithFilters(phase, readinessScale, innovationTypeId, normalizedCountryIds, normalizedActorIds, null);
-            return new SearchResult(innovations, buildSearchType(hasCountryFilter, hasActorFilter, SEARCH_TYPE_GENERAL));
-        }
-        return new SearchResult(projectInnovationUseCase.findAllActiveInnovationsInfo(), SEARCH_TYPE_ALL_ACTIVE);
-    }
-
-    private record SearchResult(List<ProjectInnovationInfo> innovations, String searchType) {}
+            boolean hasActorFilter) {}
 }

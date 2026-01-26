@@ -1,5 +1,6 @@
 package com.example.demo.modules.innovationcomments.application.service;
 
+import com.example.demo.modules.innovationcomments.application.exception.CommentDataAccessException;
 import com.example.demo.modules.innovationcomments.domain.model.InnovationCatalogComment;
 import com.example.demo.modules.innovationcomments.domain.port.in.InnovationCommentUseCase;
 import com.example.demo.modules.innovationcomments.domain.port.out.InnovationCommentRepository;
@@ -44,9 +45,9 @@ public class InnovationCommentService implements InnovationCommentUseCase {
             logger.error("Database error while fetching comments for innovation {}: {}", innovationId, e.getMessage());
             if (isTableNotExistsError(e)) {
                 logger.warn("Table 'innovation_catalog_comments' does not exist in database");
-                throw new RuntimeException(COMMENTS_TABLE_MISSING_MESSAGE, e);
+                throw new CommentDataAccessException(COMMENTS_TABLE_MISSING_MESSAGE, e);
             }
-            throw new RuntimeException("Database error occurred while fetching comments", e);
+            throw new CommentDataAccessException("Database error occurred while fetching comments", e);
         }
     }
     
@@ -63,9 +64,9 @@ public class InnovationCommentService implements InnovationCommentUseCase {
             logger.error("Database error while fetching comments for innovation {}: {}", innovationId, e.getMessage());
             if (isTableNotExistsError(e)) {
                 logger.warn("Table 'innovation_catalog_comments' does not exist in database");
-                throw new RuntimeException(COMMENTS_TABLE_MISSING_MESSAGE, e);
+                throw new CommentDataAccessException(COMMENTS_TABLE_MISSING_MESSAGE, e);
             }
-            throw new RuntimeException("Database error occurred while fetching comments", e);
+            throw new CommentDataAccessException("Database error occurred while fetching comments", e);
         }
     }
     
@@ -87,9 +88,9 @@ public class InnovationCommentService implements InnovationCommentUseCase {
             logger.error("Database error while creating comment for innovation {}: {}", innovationId, e.getMessage());
             if (isTableNotExistsError(e)) {
                 logger.warn("Table 'innovation_catalog_comments' does not exist in database");
-                throw new RuntimeException(COMMENTS_TABLE_MISSING_MESSAGE, e);
+                throw new CommentDataAccessException(COMMENTS_TABLE_MISSING_MESSAGE, e);
             }
-            throw new RuntimeException("Database error occurred while creating comment", e);
+            throw new CommentDataAccessException("Database error occurred while creating comment", e);
         }
     }
     
@@ -112,9 +113,9 @@ public class InnovationCommentService implements InnovationCommentUseCase {
             logger.error("Database error while creating comment with audit for innovation {}: {}", innovationId, e.getMessage());
             if (isTableNotExistsError(e)) {
                 logger.warn("Table 'innovation_catalog_comments' does not exist in database");
-                throw new RuntimeException(COMMENTS_TABLE_MISSING_MESSAGE, e);
+                throw new CommentDataAccessException(COMMENTS_TABLE_MISSING_MESSAGE, e);
             }
-            throw new RuntimeException("Database error occurred while creating comment", e);
+            throw new CommentDataAccessException("Database error occurred while creating comment", e);
         }
     }
     
@@ -131,9 +132,9 @@ public class InnovationCommentService implements InnovationCommentUseCase {
             logger.error("Database error while counting comments for innovation {}: {}", innovationId, e.getMessage());
             if (isTableNotExistsError(e)) {
                 logger.warn("Table 'innovation_catalog_comments' does not exist in database");
-                throw new RuntimeException(COMMENTS_TABLE_MISSING_MESSAGE, e);
+                throw new CommentDataAccessException(COMMENTS_TABLE_MISSING_MESSAGE, e);
             }
-            throw new RuntimeException("Database error occurred while counting comments", e);
+            throw new CommentDataAccessException("Database error occurred while counting comments", e);
         }
     }
     
@@ -150,9 +151,9 @@ public class InnovationCommentService implements InnovationCommentUseCase {
             logger.error("Database error while fetching comments for user {}: {}", userEmail, e.getMessage());
             if (isTableNotExistsError(e)) {
                 logger.warn("Table 'innovation_catalog_comments' does not exist in database");
-                throw new RuntimeException(COMMENTS_TABLE_MISSING_MESSAGE, e);
+                throw new CommentDataAccessException(COMMENTS_TABLE_MISSING_MESSAGE, e);
             }
-            throw new RuntimeException("Database error occurred while fetching user comments", e);
+            throw new CommentDataAccessException("Database error occurred while fetching user comments", e);
         }
     }
     
@@ -175,9 +176,9 @@ public class InnovationCommentService implements InnovationCommentUseCase {
             logger.error("Database error while fetching comments: {}", e.getMessage());
             if (isTableNotExistsError(e)) {
                 logger.warn("Table 'innovation_catalog_comments' does not exist in database");
-                throw new RuntimeException(COMMENTS_TABLE_MISSING_MESSAGE, e);
+                throw new CommentDataAccessException(COMMENTS_TABLE_MISSING_MESSAGE, e);
             }
-            throw new RuntimeException("Database error occurred while fetching comments", e);
+            throw new CommentDataAccessException("Database error occurred while fetching comments", e);
         }
     }
     
@@ -194,9 +195,9 @@ public class InnovationCommentService implements InnovationCommentUseCase {
             logger.error("Database error while fetching recent comments for innovation {}: {}", innovationId, e.getMessage());
             if (isTableNotExistsError(e)) {
                 logger.warn("Table 'innovation_catalog_comments' does not exist in database");
-                throw new RuntimeException(COMMENTS_TABLE_MISSING_MESSAGE, e);
+                throw new CommentDataAccessException(COMMENTS_TABLE_MISSING_MESSAGE, e);
             }
-            throw new RuntimeException("Database error occurred while fetching recent comments", e);
+            throw new CommentDataAccessException("Database error occurred while fetching recent comments", e);
         }
     }
     
@@ -218,9 +219,9 @@ public class InnovationCommentService implements InnovationCommentUseCase {
             logger.error("Database error while deactivating comment {}: {}", commentId, e.getMessage());
             if (isTableNotExistsError(e)) {
                 logger.warn("Table 'innovation_catalog_comments' does not exist in database");
-                throw new RuntimeException(COMMENTS_TABLE_MISSING_MESSAGE, e);
+                throw new CommentDataAccessException(COMMENTS_TABLE_MISSING_MESSAGE, e);
             }
-            throw new RuntimeException("Database error occurred while deactivating comment", e);
+            throw new CommentDataAccessException("Database error occurred while deactivating comment", e);
         }
     }
     
@@ -237,9 +238,9 @@ public class InnovationCommentService implements InnovationCommentUseCase {
             logger.error("Database error while checking comment {} status: {}", commentId, e.getMessage());
             if (isTableNotExistsError(e)) {
                 logger.warn("Table 'innovation_catalog_comments' does not exist in database");
-                throw new RuntimeException(COMMENTS_TABLE_MISSING_MESSAGE, e);
+                throw new CommentDataAccessException(COMMENTS_TABLE_MISSING_MESSAGE, e);
             }
-            throw new RuntimeException("Database error occurred while checking comment status", e);
+            throw new CommentDataAccessException("Database error occurred while checking comment status", e);
         }
     }
     

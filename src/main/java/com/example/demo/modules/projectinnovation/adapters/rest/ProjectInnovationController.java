@@ -570,7 +570,7 @@ public class ProjectInnovationController {
         if (countryIds == null) {
             return List.of();
         }
-        List<Long> filtered = countryIds.stream()
+        return countryIds.stream()
                 .filter(Objects::nonNull)
                 .flatMap(value -> Arrays.stream(value.split(",")))
                 .map(String::trim)
@@ -587,14 +587,13 @@ public class ProjectInnovationController {
                 })
                 .distinct()
                 .toList();
-        return filtered;
     }
     
     private List<Long> normalizeActorIds(List<String> actorIds) {
         if (actorIds == null) {
             return List.of();
         }
-        List<Long> filtered = actorIds.stream()
+        return actorIds.stream()
                 .filter(Objects::nonNull)
                 .flatMap(value -> Arrays.stream(value.split(",")))
                 .map(String::trim)
@@ -611,7 +610,6 @@ public class ProjectInnovationController {
                 })
                 .distinct()
                 .toList();
-        return filtered;
     }
 
     private List<ProjectInnovationInfo> paginateInnovations(

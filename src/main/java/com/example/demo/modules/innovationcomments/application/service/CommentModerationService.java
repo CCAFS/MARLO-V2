@@ -64,23 +64,32 @@ public class CommentModerationService {
 
         String sanitized = commentText.trim();
 
-        CommentModerationProperties.OpenAiProperties openAiProps = properties.getOpenAi();
-        if (aiModerationClient != null && openAiProps != null && openAiProps.isEnabled()) {
-            Optional<ModerationVerdict> verdictOptional = aiModerationClient.classify(sanitized);
-            if (verdictOptional.isPresent()) {
-                ModerationVerdict verdict = verdictOptional.get();
-                boolean block = verdict.isFlagged() || verdict.getScore() >= openAiProps.getBlockThreshold();
-                if (block) {
-                    String reasonCode = "AI_BLOCK_" + verdict.getCategory().toUpperCase(Locale.ROOT);
-                    reject("The comment was rejected because it violates the platform guidelines.",
-                            reasonCode,
-                            String.format("AI provider %s flagged category %s with score %.3f",
-                                    verdict.getProvider(), verdict.getCategory(), verdict.getScore()),
-                            innovationId, userEmail, sanitized);
-                }
-            }
-        }
+        validateAiModeration(sanitized, innovationId, userEmail);
+        validateLocalRules(sanitized, innovationId, userEmail);
+    }
 
+    private void validateAiModeration(String sanitized, Long innovationId, String userEmail) {
+        CommentModerationProperties.OpenAiProperties openAiProps = properties.getOpenAi();
+        if (aiModerationClient == null || openAiProps == null || !openAiProps.isEnabled()) {
+            return;
+        }
+        Optional<ModerationVerdict> verdictOptional = aiModerationClient.classify(sanitized);
+        if (verdictOptional.isEmpty()) {
+            return;
+        }
+        ModerationVerdict verdict = verdictOptional.get();
+        boolean block = verdict.isFlagged() || verdict.getScore() >= openAiProps.getBlockThreshold();
+        if (block) {
+            String reasonCode = "AI_BLOCK_" + verdict.getCategory().toUpperCase(Locale.ROOT);
+            reject("The comment was rejected because it violates the platform guidelines.",
+                    reasonCode,
+                    String.format("AI provider %s flagged category %s with score %.3f",
+                            verdict.getProvider(), verdict.getCategory(), verdict.getScore()),
+                    innovationId, userEmail, sanitized);
+        }
+    }
+
+    private void validateLocalRules(String sanitized, Long innovationId, String userEmail) {
         Optional<String> customWord = findCustomBannedWord(sanitized);
         if (customWord.isPresent()) {
             reject("The comment contains offensive language that is not allowed on the platform.",

@@ -36,6 +36,7 @@ public class ProjectInnovationController {
     
     private static final int DEFAULT_PAGINATION_LIMIT = 20;
     private static final String SEARCH_TYPE_GENERAL = "GENERAL";
+    private static final String INNOVATION_TYPE_PREFIX = "Innovation Type ";
     
     private final ProjectInnovationUseCase projectInnovationUseCase;
     private final ProjectInnovationActorsService actorsService;
@@ -666,7 +667,7 @@ public class ProjectInnovationController {
                 ))
                 .orElse(new InnovationTypeDto(
                     typeId, 
-                    "Innovation Type " + typeId,
+                    INNOVATION_TYPE_PREFIX + typeId,
                     null, 
                     null, 
                     null, 
@@ -680,7 +681,7 @@ public class ProjectInnovationController {
                 case 3 -> "Social Science";
                 case 4 -> "Biophysical Research";
                 case 5 -> "Research and Communication Methodologies and Tools";
-                default -> "Innovation Type " + typeId;
+                default -> INNOVATION_TYPE_PREFIX + typeId;
             };
             return new InnovationTypeDto(typeId, typeName, null, null, null, null);
         }
@@ -693,7 +694,7 @@ public class ProjectInnovationController {
             // Get innovation type from rep_ind_innovation_types table
             return innovationTypeRepository.findById(typeId)
                 .map(com.example.demo.modules.innovationtype.domain.model.InnovationType::getName)
-                .orElse("Innovation Type " + typeId);
+                .orElse(INNOVATION_TYPE_PREFIX + typeId);
         } catch (Exception e) {
             // Fallback to hardcoded values if database query fails
             return switch (typeId.intValue()) {
@@ -702,7 +703,7 @@ public class ProjectInnovationController {
                 case 3 -> "Social Science";
                 case 4 -> "Biophysical Research";
                 case 5 -> "Research and Communication Methodologies and Tools";
-                default -> "Innovation Type " + typeId;
+                default -> INNOVATION_TYPE_PREFIX + typeId;
             };
         }
     }

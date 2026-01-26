@@ -31,15 +31,15 @@ public class InnovationTypeController {
         description = "Returns innovation types from the catalog. If ID is provided, returns specific type; otherwise returns all types ordered by name"
     )
     @GetMapping
-    public ResponseEntity<?> getInnovationTypes(
+    public ResponseEntity<Object> getInnovationTypes(
             @Parameter(description = "Innovation type ID (optional)", example = "1")
             @RequestParam(required = false) Long id) {
         
         if (id != null) {
             // Return specific innovation type
             return innovationTypeUseCase.findInnovationTypeById(id)
-                    .map(innovationType -> ResponseEntity.ok(toResponse(innovationType)))
-                    .orElse(ResponseEntity.notFound().build());
+                    .map(innovationType -> ResponseEntity.<Object>ok(toResponse(innovationType)))
+                    .orElse(ResponseEntity.status(404).body(null));
         } else {
             // Return all innovation types
             List<InnovationType> innovationTypes = innovationTypeUseCase.findAllInnovationTypes();

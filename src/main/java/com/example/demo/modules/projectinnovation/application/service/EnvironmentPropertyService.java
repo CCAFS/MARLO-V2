@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class EnvironmentPropertyService {
     
+    private static final String PDF_GENERATOR_URL_PROPERTY = "marlo.innovation.pdf-generator.url";
     private final Environment environment;
     
     public EnvironmentPropertyService(Environment environment) {
@@ -16,29 +17,29 @@ public class EnvironmentPropertyService {
     }
     
     public String getPdfGeneratorUrl() {
-        return environment.getProperty("marlo.innovation.pdf-generator.url");
+        return environment.getProperty(PDF_GENERATOR_URL_PROPERTY);
     }
     
     public String getPdfGeneratorUrlWithDefault() {
-        return environment.getProperty("marlo.innovation.pdf-generator.url", "http://default-service.com");
+        return environment.getProperty(PDF_GENERATOR_URL_PROPERTY, "http://default-service.com");
     }
     
     public boolean hasPdfGeneratorProperty() {
-        return environment.containsProperty("marlo.innovation.pdf-generator.url");
+        return environment.containsProperty(PDF_GENERATOR_URL_PROPERTY);
     }
     
     public void printAllMarloProperties() {
         System.out.println("🔍 All MARLO properties:");
         
         // This is a simple way to check if property exists
-        String pdfUrl = environment.getProperty("marlo.innovation.pdf-generator.url");
+        String pdfUrl = environment.getProperty(PDF_GENERATOR_URL_PROPERTY);
         if (pdfUrl != null) {
-            System.out.println("marlo.innovation.pdf-generator.url = " + pdfUrl);
+            System.out.println(PDF_GENERATOR_URL_PROPERTY + " = " + pdfUrl);
         }
         
         // You can add more properties as needed
         String[] propertiesToCheck = {
-            "marlo.innovation.pdf-generator.url",
+            PDF_GENERATOR_URL_PROPERTY,
             "marlo.innovation.timeout",
             "marlo.innovation.retry-attempts"
         };

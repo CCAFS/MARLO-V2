@@ -8,7 +8,6 @@ import com.example.demo.modules.innovationcomments.application.exception.Comment
 import com.example.demo.modules.innovationcomments.domain.model.InnovationCatalogComment;
 import com.example.demo.modules.innovationcomments.domain.port.in.InnovationCommentUseCase;
 import com.example.demo.modules.projectinnovation.adapters.outbound.persistence.ProjectInnovationInfoJpaRepository;
-import com.example.demo.modules.projectinnovation.adapters.outbound.persistence.ProjectInnovationJpaRepository;
 import com.example.demo.modules.projectinnovation.domain.model.ProjectInnovationInfo;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -39,16 +38,13 @@ public class InnovationCommentController {
     private final InnovationCommentUseCase commentUseCase;
     private final InnovationCommentMapper commentMapper;
     private final ProjectInnovationInfoJpaRepository projectInnovationInfoRepository;
-    private final ProjectInnovationJpaRepository projectInnovationRepository;
     
     public InnovationCommentController(InnovationCommentUseCase commentUseCase, 
                                      InnovationCommentMapper commentMapper,
-                                     ProjectInnovationInfoJpaRepository projectInnovationInfoRepository,
-                                     ProjectInnovationJpaRepository projectInnovationRepository) {
+                                     ProjectInnovationInfoJpaRepository projectInnovationInfoRepository) {
         this.commentUseCase = commentUseCase;
         this.commentMapper = commentMapper;
         this.projectInnovationInfoRepository = projectInnovationInfoRepository;
-        this.projectInnovationRepository = projectInnovationRepository;
     }
     
     @Operation(

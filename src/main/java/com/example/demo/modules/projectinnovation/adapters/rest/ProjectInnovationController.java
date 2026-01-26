@@ -194,28 +194,18 @@ public class ProjectInnovationController {
             @RequestParam(required = false, defaultValue = "0") Integer offset,
             @Parameter(description = "Maximum number of records to return (pagination)", example = "20")
             @RequestParam(required = false, defaultValue = "20") Integer limit) {
-        
-        // Validate pagination parameters
-        if (offset < 0) offset = 0;
-        int normalizedLimit = normalizeLimit(limit);
-        
-        // Normalize optional filters
-        List<Long> normalizedCountryIds = normalizeCountryIds(countryIds);
-        boolean hasCountryFilter = normalizedCountryIds != null;
-        
-        List<Long> normalizedActorIds = normalizeActorIds(actorIds);
-        boolean hasActorFilter = normalizedActorIds != null;
-        
+
+        SearchInput searchInput = normalizeSearchInput(offset, limit, countryIds, actorIds);
         SearchResult searchResult = resolveSearchResult(new SearchCriteria(
                 phase,
                 readinessScale,
                 innovationTypeId,
                 innovationId,
                 sdgId,
-                normalizedCountryIds,
-                normalizedActorIds,
-                hasCountryFilter,
-                hasActorFilter
+                searchInput.normalizedCountryIds(),
+                searchInput.normalizedActorIds(),
+                searchInput.hasCountryFilter(),
+                searchInput.hasActorFilter()
         ));
         List<ProjectInnovationInfo> allInnovations = searchResult.innovations();
         String searchType = searchResult.searchType();
@@ -224,10 +214,11 @@ public class ProjectInnovationController {
         int totalCount = allInnovations.size();
         
         // Apply pagination
-        List<ProjectInnovationInfo> paginatedInnovations = allInnovations.stream()
-                .skip(offset)
-                .limit(normalizedLimit)
-                .toList();
+        List<ProjectInnovationInfo> paginatedInnovations = paginateInnovations(
+                allInnovations,
+                searchInput.offset(),
+                searchInput.limit()
+        );
         
         List<ProjectInnovationInfoResponse> response = paginatedInnovations.stream()
                 .map(this::toInfoResponse)
@@ -236,12 +227,19 @@ public class ProjectInnovationController {
         // Create filters metadata
         ProjectInnovationSearchResponse.SearchFilters appliedFilters = 
             new ProjectInnovationSearchResponse.SearchFilters(
-                phase, readinessScale, innovationTypeId, innovationId, sdgId, normalizedCountryIds, normalizedActorIds, searchType
+                phase,
+                readinessScale,
+                innovationTypeId,
+                innovationId,
+                sdgId,
+                searchInput.normalizedCountryIds(),
+                searchInput.normalizedActorIds(),
+                searchType
             );
         
         // Create pagination metadata
         ProjectInnovationSearchResponse.PaginationInfo pagination = 
-            ProjectInnovationSearchResponse.PaginationInfo.of(offset, normalizedLimit, totalCount);
+            ProjectInnovationSearchResponse.PaginationInfo.of(searchInput.offset(), searchInput.limit(), totalCount);
         
         ProjectInnovationSearchResponse searchResponse = 
             ProjectInnovationSearchResponse.of(response, totalCount, appliedFilters, pagination);
@@ -271,28 +269,18 @@ public class ProjectInnovationController {
             @RequestParam(required = false, defaultValue = "0") Integer offset,
             @Parameter(description = "Maximum number of records to return (pagination)", example = "20")
             @RequestParam(required = false, defaultValue = "20") Integer limit) {
-        
-        // Validate pagination parameters
-        if (offset < 0) offset = 0;
-        int normalizedLimit = normalizeLimit(limit);
-        
-        // Normalize optional filters
-        List<Long> normalizedCountryIds = normalizeCountryIds(countryIds);
-        boolean hasCountryFilter = normalizedCountryIds != null;
-        
-        List<Long> normalizedActorIds = normalizeActorIds(actorIds);
-        boolean hasActorFilter = normalizedActorIds != null;
-        
+
+        SearchInput searchInput = normalizeSearchInput(offset, limit, countryIds, actorIds);
         SearchResult searchResult = resolveSearchResult(new SearchCriteria(
                 phase,
                 readinessScale,
                 innovationTypeId,
                 innovationId,
                 sdgId,
-                normalizedCountryIds,
-                normalizedActorIds,
-                hasCountryFilter,
-                hasActorFilter
+                searchInput.normalizedCountryIds(),
+                searchInput.normalizedActorIds(),
+                searchInput.hasCountryFilter(),
+                searchInput.hasActorFilter()
         ));
         List<ProjectInnovationInfo> allInnovations = searchResult.innovations();
         String searchType = searchResult.searchType();
@@ -301,10 +289,11 @@ public class ProjectInnovationController {
         int totalCount = allInnovations.size();
         
         // Apply pagination
-        List<ProjectInnovationInfo> paginatedInnovations = allInnovations.stream()
-                .skip(offset)
-                .limit(normalizedLimit)
-                .toList();
+        List<ProjectInnovationInfo> paginatedInnovations = paginateInnovations(
+                allInnovations,
+                searchInput.offset(),
+                searchInput.limit()
+        );
         
         List<ProjectInnovationSimpleResponse> response = paginatedInnovations.stream()
                 .map(this::toSimpleResponse)
@@ -313,12 +302,19 @@ public class ProjectInnovationController {
         // Create filters metadata
         ProjectInnovationSimpleSearchResponse.SearchFilters appliedFilters = 
             new ProjectInnovationSimpleSearchResponse.SearchFilters(
-                phase, readinessScale, innovationTypeId, innovationId, sdgId, normalizedCountryIds, normalizedActorIds, searchType
+                phase,
+                readinessScale,
+                innovationTypeId,
+                innovationId,
+                sdgId,
+                searchInput.normalizedCountryIds(),
+                searchInput.normalizedActorIds(),
+                searchType
             );
         
         // Create pagination metadata
         ProjectInnovationSimpleSearchResponse.PaginationInfo pagination = 
-            ProjectInnovationSimpleSearchResponse.PaginationInfo.of(offset, normalizedLimit, totalCount);
+            ProjectInnovationSimpleSearchResponse.PaginationInfo.of(searchInput.offset(), searchInput.limit(), totalCount);
         
         ProjectInnovationSimpleSearchResponse searchResponse = 
             ProjectInnovationSimpleSearchResponse.of(response, totalCount, appliedFilters, pagination);
@@ -348,28 +344,18 @@ public class ProjectInnovationController {
             @RequestParam(required = false, defaultValue = "0") Integer offset,
             @Parameter(description = "Maximum number of records to return (pagination)", example = "20")
             @RequestParam(required = false, defaultValue = "20") Integer limit) {
-        
-        // Validate pagination parameters
-        if (offset < 0) offset = 0;
-        int normalizedLimit = normalizeLimit(limit);
-        
-        // Normalize optional filters
-        List<Long> normalizedCountryIds = normalizeCountryIds(countryIds);
-        boolean hasCountryFilter = normalizedCountryIds != null;
-        
-        List<Long> normalizedActorIds = normalizeActorIds(actorIds);
-        boolean hasActorFilter = normalizedActorIds != null;
-        
+
+        SearchInput searchInput = normalizeSearchInput(offset, limit, countryIds, actorIds);
         SearchResult searchResult = resolveSearchResult(new SearchCriteria(
                 phase,
                 readinessScale,
                 innovationTypeId,
                 innovationId,
                 sdgId,
-                normalizedCountryIds,
-                normalizedActorIds,
-                hasCountryFilter,
-                hasActorFilter
+                searchInput.normalizedCountryIds(),
+                searchInput.normalizedActorIds(),
+                searchInput.hasCountryFilter(),
+                searchInput.hasActorFilter()
         ));
         List<ProjectInnovationInfo> allInnovations = searchResult.innovations();
         String searchType = searchResult.searchType();
@@ -378,10 +364,11 @@ public class ProjectInnovationController {
         int totalCount = allInnovations.size();
         
         // Apply pagination
-        List<ProjectInnovationInfo> paginatedInnovations = allInnovations.stream()
-                .skip(offset)
-                .limit(normalizedLimit)
-                .toList();
+        List<ProjectInnovationInfo> paginatedInnovations = paginateInnovations(
+                allInnovations,
+                searchInput.offset(),
+                searchInput.limit()
+        );
         
         // Build complete innovation info for each result
         List<InnovationInfo> response = paginatedInnovations.stream()
@@ -399,12 +386,19 @@ public class ProjectInnovationController {
         // Create filters metadata
         ProjectInnovationCompleteSearchResponse.SearchFilters appliedFilters = 
             new ProjectInnovationCompleteSearchResponse.SearchFilters(
-                phase, readinessScale, innovationTypeId, innovationId, sdgId, normalizedCountryIds, normalizedActorIds, searchType
+                phase,
+                readinessScale,
+                innovationTypeId,
+                innovationId,
+                sdgId,
+                searchInput.normalizedCountryIds(),
+                searchInput.normalizedActorIds(),
+                searchType
             );
         
         // Create pagination metadata
         ProjectInnovationCompleteSearchResponse.PaginationInfo pagination = 
-            ProjectInnovationCompleteSearchResponse.PaginationInfo.of(offset, normalizedLimit, totalCount);
+            ProjectInnovationCompleteSearchResponse.PaginationInfo.of(searchInput.offset(), searchInput.limit(), totalCount);
         
         ProjectInnovationCompleteSearchResponse searchResponse = 
             ProjectInnovationCompleteSearchResponse.of(response, totalCount, appliedFilters, pagination);
@@ -548,6 +542,27 @@ public class ProjectInnovationController {
                 : requestedLimit;
     }
 
+    private SearchInput normalizeSearchInput(
+            Integer offset,
+            Integer limit,
+            List<String> countryIds,
+            List<String> actorIds) {
+        int normalizedOffset = (offset != null && offset > 0) ? offset : 0;
+        int normalizedLimit = normalizeLimit(limit);
+        List<Long> normalizedCountryIds = normalizeCountryIds(countryIds);
+        boolean hasCountryFilter = normalizedCountryIds != null;
+        List<Long> normalizedActorIds = normalizeActorIds(actorIds);
+        boolean hasActorFilter = normalizedActorIds != null;
+        return new SearchInput(
+                normalizedOffset,
+                normalizedLimit,
+                normalizedCountryIds,
+                normalizedActorIds,
+                hasCountryFilter,
+                hasActorFilter
+        );
+    }
+
     private List<Long> normalizeCountryIds(List<String> countryIds) {
         if (countryIds == null) {
             return null;
@@ -594,6 +609,16 @@ public class ProjectInnovationController {
                 .distinct()
                 .toList();
         return filtered.isEmpty() ? null : filtered;
+    }
+
+    private List<ProjectInnovationInfo> paginateInnovations(
+            List<ProjectInnovationInfo> innovations,
+            int offset,
+            int limit) {
+        return innovations.stream()
+                .skip(offset)
+                .limit(limit)
+                .toList();
     }
     
     private String buildSearchType(boolean hasCountryFilter, boolean hasActorFilter, String baseType) {
@@ -1521,6 +1546,14 @@ public class ProjectInnovationController {
             Long innovationTypeId,
             Long innovationId,
             Long sdgId,
+            List<Long> normalizedCountryIds,
+            List<Long> normalizedActorIds,
+            boolean hasCountryFilter,
+            boolean hasActorFilter) {}
+
+    private record SearchInput(
+            int offset,
+            int limit,
             List<Long> normalizedCountryIds,
             List<Long> normalizedActorIds,
             boolean hasCountryFilter,

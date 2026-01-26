@@ -7,6 +7,7 @@ import com.example.demo.modules.projectinnovation.domain.model.ProjectInnovation
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Service
@@ -36,7 +37,7 @@ public class ProjectInnovationService implements ProjectInnovationUseCase {
     @Override
     public ProjectInnovation updateProjectInnovation(Long id, ProjectInnovation projectInnovation) {
         if (!projectInnovationRepositoryPort.findById(id).isPresent()) {
-            throw new RuntimeException("ProjectInnovation not found with id: " + id);
+            throw new NoSuchElementException("ProjectInnovation not found with id: " + id);
         }
         projectInnovation.setId(id);
         return projectInnovationRepositoryPort.save(projectInnovation);
@@ -45,7 +46,7 @@ public class ProjectInnovationService implements ProjectInnovationUseCase {
     @Override
     public void deleteProjectInnovation(Long id) {
         if (!projectInnovationRepositoryPort.findById(id).isPresent()) {
-            throw new RuntimeException("ProjectInnovation not found with id: " + id);
+            throw new NoSuchElementException("ProjectInnovation not found with id: " + id);
         }
         // Soft delete: mark as inactive instead of physical deletion
         projectInnovationRepositoryPort.deleteById(id);
@@ -70,7 +71,7 @@ public class ProjectInnovationService implements ProjectInnovationUseCase {
     public ProjectInnovation activateProjectInnovation(Long id) {
         Optional<ProjectInnovation> optionalPI = projectInnovationRepositoryPort.findByIdIncludingInactive(id);
         if (!optionalPI.isPresent()) {
-            throw new RuntimeException("ProjectInnovation not found with id: " + id);
+            throw new NoSuchElementException("ProjectInnovation not found with id: " + id);
         }
         ProjectInnovation projectInnovation = optionalPI.get();
         projectInnovation.setIsActive(true);
@@ -81,7 +82,7 @@ public class ProjectInnovationService implements ProjectInnovationUseCase {
     public ProjectInnovation deactivateProjectInnovation(Long id) {
         Optional<ProjectInnovation> optionalPI = projectInnovationRepositoryPort.findByIdIncludingInactive(id);
         if (!optionalPI.isPresent()) {
-            throw new RuntimeException("ProjectInnovation not found with id: " + id);
+            throw new NoSuchElementException("ProjectInnovation not found with id: " + id);
         }
         ProjectInnovation projectInnovation = optionalPI.get();
         projectInnovation.setIsActive(false);
@@ -117,7 +118,7 @@ public class ProjectInnovationService implements ProjectInnovationUseCase {
     @Override
     public ProjectInnovationInfo updateProjectInnovationInfo(Long id, ProjectInnovationInfo projectInnovationInfo) {
         if (!projectInnovationRepositoryPort.findProjectInnovationInfoById(id).isPresent()) {
-            throw new RuntimeException("ProjectInnovationInfo not found with id: " + id);
+            throw new NoSuchElementException("ProjectInnovationInfo not found with id: " + id);
         }
         projectInnovationInfo.setId(id);
         return projectInnovationRepositoryPort.saveProjectInnovationInfo(projectInnovationInfo);
@@ -126,7 +127,7 @@ public class ProjectInnovationService implements ProjectInnovationUseCase {
     @Override
     public void deleteProjectInnovationInfo(Long id) {
         if (!projectInnovationRepositoryPort.findProjectInnovationInfoById(id).isPresent()) {
-            throw new RuntimeException("ProjectInnovationInfo not found with id: " + id);
+            throw new NoSuchElementException("ProjectInnovationInfo not found with id: " + id);
         }
         projectInnovationRepositoryPort.deleteProjectInnovationInfoById(id);
     }

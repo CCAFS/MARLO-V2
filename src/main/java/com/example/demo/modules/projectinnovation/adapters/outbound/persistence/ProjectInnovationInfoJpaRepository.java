@@ -69,19 +69,6 @@ public interface ProjectInnovationInfoJpaRepository extends JpaRepository<Projec
 
     Optional<ProjectInnovationInfo> findTop1ByProjectInnovationIdOrderByIdDesc(Long projectInnovationId);
     
-    // JOIN queries temporarily commented for testing
-    // @Query("SELECT pii FROM ProjectInnovationInfo pii " +
-    //        "LEFT JOIN FETCH pii.innovationStage " +
-    //        "LEFT JOIN FETCH pii.innovationType " +
-    //        "WHERE pii.projectInnovationId = :projectInnovationId")
-    // List<ProjectInnovationInfo> findByProjectInnovationIdWithReferences(@Param("projectInnovationId") Long projectInnovationId);
-    
-    // @Query("SELECT pii FROM ProjectInnovationInfo pii " +
-    //        "LEFT JOIN FETCH pii.innovationStage " +
-    //        "LEFT JOIN FETCH pii.innovationType " +
-    //        "WHERE pii.id = :id")
-    // ProjectInnovationInfo findByIdWithReferences(@Param("id") Long id);
-    
     // Advanced filtering methods that return complete ProjectInnovationInfo (only active records)
     @Query(value = "SELECT DISTINCT pii.* FROM project_innovation_info pii " +
            "JOIN project_innovations p ON pii.project_innovation_id = p.id " +

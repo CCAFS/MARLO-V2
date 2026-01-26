@@ -92,11 +92,6 @@ public class ProjectInnovationActors {
     @Column(name = "total")
     private Integer total;
     
-    // Relationship with ProjectInnovation (temporarily commented to avoid circular dependencies)
-    // @ManyToOne(fetch = FetchType.LAZY)
-    // @JoinColumn(name = "innovation_id", insertable = false, updatable = false)
-    // private ProjectInnovation projectInnovation;
-    
     @PrePersist
     protected void onCreate() {
         if (activeSince == null) {

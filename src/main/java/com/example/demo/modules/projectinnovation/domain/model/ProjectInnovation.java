@@ -40,9 +40,6 @@ public class ProjectInnovation {
     @Column(name = "modification_justification", columnDefinition = "TEXT")
     private String modificationJustification;
     
-    // Relationship with detailed information (temporarily commented for testing)
-    // @OneToOne(mappedBy = "projectInnovation", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    // private ProjectInnovationInfo innovationInfo;
     
     @PrePersist
     protected void onCreate() {

@@ -21,6 +21,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -34,6 +36,7 @@ import java.util.List;
 @Tag(name = "Innovation API", description = "API for managing innovations")
 public class ProjectInnovationController {
     
+    private static final Logger logger = LoggerFactory.getLogger(ProjectInnovationController.class);
     private static final int DEFAULT_PAGINATION_LIMIT = 20;
     private static final String SEARCH_TYPE_GENERAL = "GENERAL";
     private static final String INNOVATION_TYPE_PREFIX = "Innovation Type ";
@@ -376,7 +379,7 @@ public class ProjectInnovationController {
                     try {
                         return toCompleteInfoWithRelationsResponse(info, info.getProjectInnovationId(), info.getIdPhase());
                     } catch (Exception e) {
-                        System.err.println("Error processing innovation ID: " + info.getProjectInnovationId() + " - " + e.getMessage());
+                        logger.warn("Error processing innovation ID: {}", info.getProjectInnovationId(), e);
                         return null;
                     }
                 })
@@ -550,9 +553,9 @@ public class ProjectInnovationController {
         int normalizedOffset = (offset != null && offset > 0) ? offset : 0;
         int normalizedLimit = normalizeLimit(limit);
         List<Long> normalizedCountryIds = normalizeCountryIds(countryIds);
-        boolean hasCountryFilter = normalizedCountryIds != null;
+        boolean hasCountryFilter = !normalizedCountryIds.isEmpty();
         List<Long> normalizedActorIds = normalizeActorIds(actorIds);
-        boolean hasActorFilter = normalizedActorIds != null;
+        boolean hasActorFilter = !normalizedActorIds.isEmpty();
         return new SearchInput(
                 normalizedOffset,
                 normalizedLimit,
@@ -565,7 +568,7 @@ public class ProjectInnovationController {
 
     private List<Long> normalizeCountryIds(List<String> countryIds) {
         if (countryIds == null) {
-            return null;
+            return List.of();
         }
         List<Long> filtered = countryIds.stream()
                 .filter(Objects::nonNull)
@@ -584,12 +587,12 @@ public class ProjectInnovationController {
                 })
                 .distinct()
                 .toList();
-        return filtered.isEmpty() ? null : filtered;
+        return filtered;
     }
     
     private List<Long> normalizeActorIds(List<String> actorIds) {
         if (actorIds == null) {
-            return null;
+            return List.of();
         }
         List<Long> filtered = actorIds.stream()
                 .filter(Objects::nonNull)
@@ -608,7 +611,7 @@ public class ProjectInnovationController {
                 })
                 .distinct()
                 .toList();
-        return filtered.isEmpty() ? null : filtered;
+        return filtered;
     }
 
     private List<ProjectInnovationInfo> paginateInnovations(
@@ -1105,13 +1108,13 @@ public class ProjectInnovationController {
                 nameBuilder.append(user.getFirstName().trim());
             }
             if (user.getLastName() != null && !user.getLastName().trim().isEmpty()) {
-                if (nameBuilder.length() > 0) {
+                if (!nameBuilder.isEmpty()) {
                     nameBuilder.append(" ");
                 }
                 nameBuilder.append(user.getLastName().trim());
             }
             
-            userName = nameBuilder.length() > 0 ? nameBuilder.toString() : 
+            userName = !nameBuilder.isEmpty() ? nameBuilder.toString() : 
                       (user.getUsername() != null ? user.getUsername() : "User " + person.getUserId());
             userEmail = user.getEmail() != null ? user.getEmail() : "user" + person.getUserId() + "@example.com";
         }

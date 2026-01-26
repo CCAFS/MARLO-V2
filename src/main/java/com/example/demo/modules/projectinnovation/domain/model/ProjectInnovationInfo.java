@@ -162,20 +162,6 @@ public class ProjectInnovationInfo {
     @Column(name = "poverty_jobs_score_id")
     private Long povertyJobsScoreId;
     
-    // Inverse relationship (temporarily commented for testing)
-    // @OneToOne
-    // @JoinColumn(name = "project_innovation_id", referencedColumnName = "id")
-    // private ProjectInnovation projectInnovation;
-    
-    // Catalog references (lazy loading) (temporarily commented for testing)
-    // @ManyToOne(fetch = FetchType.LAZY)
-    // @JoinColumn(name = "stage_innovation_id", insertable = false, updatable = false)
-    // private InnovationStage innovationStage;
-    
-    // @ManyToOne(fetch = FetchType.LAZY)
-    // @JoinColumn(name = "innovation_type_id", insertable = false, updatable = false)
-    // private InnovationType innovationType;
-    
     // Manual getters for critical fields (Lombok backup)
     public Long getId() { return id; }
     public Long getProjectInnovationId() { return projectInnovationId; }

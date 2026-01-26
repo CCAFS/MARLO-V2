@@ -98,12 +98,13 @@ class ProjectInnovationActorsMapperTest {
     }
 
     @Test
-    void toResponseList_WhenListNull_ShouldReturnNull() {
+    void toResponseList_WhenListNull_ShouldReturnEmptyList() {
         // Act
         List<ProjectInnovationActorsResponse> result = mapper.toResponseList(null);
 
         // Assert
-        assertNull(result);
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
     }
 
     @Test

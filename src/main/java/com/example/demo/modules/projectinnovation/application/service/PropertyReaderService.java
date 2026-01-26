@@ -1,5 +1,7 @@
 package com.example.demo.modules.projectinnovation.application.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -8,6 +10,8 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class PropertyReaderService {
+
+    private static final Logger logger = LoggerFactory.getLogger(PropertyReaderService.class);
     
     @Value("${marlo.innovation.pdf-generator.url}")
     private String pdfGeneratorUrl;
@@ -24,8 +28,8 @@ public class PropertyReaderService {
     }
     
     public void printConfiguration() {
-        System.out.println("📋 PDF Generator Configuration:");
-        System.out.println("URL: " + pdfGeneratorUrl);
-        System.out.println("URL with default: " + pdfGeneratorUrlWithDefault);
+        logger.info("📋 PDF Generator Configuration:");
+        logger.info("URL: {}", pdfGeneratorUrl);
+        logger.info("URL with default: {}", pdfGeneratorUrlWithDefault);
     }
 }

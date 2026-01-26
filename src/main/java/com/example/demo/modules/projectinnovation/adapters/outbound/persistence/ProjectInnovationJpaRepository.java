@@ -73,5 +73,4 @@ public interface ProjectInnovationJpaRepository extends JpaRepository<ProjectInn
            "WHERE p.isActive = true " +
            "ORDER BY p.id DESC")
     List<ProjectInnovation> findAllActiveInnovationsComplete();
-    // List<ProjectInnovation> findActiveByProjectIdWithInfo(@Param("projectId") Long projectId);
 }

@@ -5,8 +5,11 @@ import com.example.demo.modules.projectinnovation.domain.model.Phase;
 import com.example.demo.platform.config.InnovationPdfGeneratorProperties;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.RestClientException;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+
+import java.util.NoSuchElementException;
 
 /**
  * Service for generating PDF reports of innovations
@@ -63,8 +66,8 @@ public class InnovationPdfReportService {
                 byte[].class
             );
             return response.getBody();
-        } catch (Exception e) {
-            throw new RuntimeException("Error downloading PDF report for innovation " + innovationId, e);
+        } catch (RestClientException e) {
+            throw new IllegalStateException("Error downloading PDF report for innovation " + innovationId, e);
         }
     }
     
@@ -76,7 +79,7 @@ public class InnovationPdfReportService {
      */
     public String generateInnovationPdfUrlByPhase(Long innovationId, Long phaseId) {
         Phase phase = phaseRepository.findById(phaseId)
-            .orElseThrow(() -> new RuntimeException("Phase not found: " + phaseId));
+            .orElseThrow(() -> new NoSuchElementException("Phase not found: " + phaseId));
         
         String cycle = phase.getCycle();
         Integer year = phase.getYear();
@@ -91,7 +94,7 @@ public class InnovationPdfReportService {
      */
     public Phase getPhaseById(Long phaseId) {
         return phaseRepository.findById(phaseId)
-            .orElseThrow(() -> new RuntimeException("Phase not found: " + phaseId));
+            .orElseThrow(() -> new NoSuchElementException("Phase not found: " + phaseId));
     }
     
     /**

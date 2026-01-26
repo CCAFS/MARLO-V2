@@ -2,6 +2,7 @@ package com.example.demo.modules.projectinnovation.adapters.rest;
 
 import com.example.demo.modules.innovationtype.adapters.outbound.persistence.InnovationTypeRepositoryAdapter;
 import com.example.demo.modules.projectinnovation.adapters.rest.mapper.ProjectInnovationActorsMapper;
+import com.example.demo.modules.projectinnovation.adapters.rest.dto.ProjectInnovationSearchResponse;
 import com.example.demo.modules.projectinnovation.adapters.outbound.persistence.LocElementJpaRepository;
 import com.example.demo.modules.projectinnovation.adapters.outbound.persistence.ProjectInnovationRepositoryAdapter;
 import com.example.demo.modules.projectinnovation.application.port.inbound.ProjectInnovationUseCase;
@@ -614,13 +615,13 @@ class ProjectInnovationControllerTest {
     }
 
     @Test
-    void searchInnovations_WithEmptyCountryIds_ShouldReturnNull() {
+    void searchInnovations_WithEmptyCountryIds_ShouldReturnEmptyListInFilters() {
         // Arrange
         List<ProjectInnovationInfo> innovations = Arrays.asList(testInnovationInfo);
         when(projectInnovationUseCase.findAllActiveInnovationsInfo())
             .thenReturn(innovations);
 
-        // Act - empty list should normalize to null
+        // Act - empty list should normalize to empty list
         ResponseEntity<?> result = invokeSearchInnovations(
             null, null, null, null, null, Arrays.asList(""), null, null, 0, 20
         );
@@ -628,6 +629,11 @@ class ProjectInnovationControllerTest {
         // Assert
         assertNotNull(result);
         assertEquals(HttpStatus.OK, result.getStatusCode());
+        assertNotNull(result.getBody());
+        ProjectInnovationSearchResponse response = (ProjectInnovationSearchResponse) result.getBody();
+        assertNotNull(response.appliedFilters());
+        assertNotNull(response.appliedFilters().countryIds());
+        assertTrue(response.appliedFilters().countryIds().isEmpty());
     }
 
     @Test

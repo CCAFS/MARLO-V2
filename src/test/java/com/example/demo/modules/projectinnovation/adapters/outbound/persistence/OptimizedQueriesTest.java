@@ -124,13 +124,11 @@ public class OptimizedQueriesTest {
     public void testEdgeCases() {
         // Test with invalid phase ID
         Long countInvalidPhase = countryRepository.countDistinctCountriesByInnovationAndPhase(null, -1L);
-        assertThat(countInvalidPhase).isNotNull();
-        assertThat(countInvalidPhase).isEqualTo(0L);
+        assertThat(countInvalidPhase).isZero();
         
         // Test with invalid innovation ID
         Long countInvalidInnovation = countryRepository.countDistinctCountriesByInnovationAndPhase(-1L, null);
-        assertThat(countInvalidInnovation).isNotNull();
-        assertThat(countInvalidInnovation).isEqualTo(0L);
+        assertThat(countInvalidInnovation).isZero();
         
         System.out.println("✅ Edge cases test passed");
         System.out.println("   - Count with invalid phase: " + countInvalidPhase);

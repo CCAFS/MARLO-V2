@@ -2,11 +2,9 @@ package com.example.demo.modules.projectinnovation.adapters.rest;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-// import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.ResponseEntity;
-// import org.springframework.test.context.ActiveProfiles;
 
 import static org.junit.jupiter.api.Assertions.*;
 

@@ -5,7 +5,6 @@ import com.example.demo.modules.projectinnovation.domain.model.ProjectInnovation
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Component
 public class ProjectInnovationActorsMapper {
@@ -56,11 +55,11 @@ public class ProjectInnovationActorsMapper {
     
     public List<ProjectInnovationActorsResponse> toResponseList(List<ProjectInnovationActors> actorsList) {
         if (actorsList == null) {
-            return null;
+            return List.of();
         }
         
         return actorsList.stream()
                 .map(this::toResponse)
-                .collect(Collectors.toList());
+                .toList();
     }
 }

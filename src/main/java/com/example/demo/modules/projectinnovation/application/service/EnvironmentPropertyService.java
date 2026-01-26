@@ -1,5 +1,7 @@
 package com.example.demo.modules.projectinnovation.application.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
@@ -10,6 +12,7 @@ import org.springframework.stereotype.Service;
 public class EnvironmentPropertyService {
     
     private static final String PDF_GENERATOR_URL_PROPERTY = "marlo.innovation.pdf-generator.url";
+    private static final Logger logger = LoggerFactory.getLogger(EnvironmentPropertyService.class);
     private final Environment environment;
     
     public EnvironmentPropertyService(Environment environment) {
@@ -29,12 +32,12 @@ public class EnvironmentPropertyService {
     }
     
     public void printAllMarloProperties() {
-        System.out.println("🔍 All MARLO properties:");
+        logger.info("🔍 All MARLO properties:");
         
         // This is a simple way to check if property exists
         String pdfUrl = environment.getProperty(PDF_GENERATOR_URL_PROPERTY);
         if (pdfUrl != null) {
-            System.out.println(PDF_GENERATOR_URL_PROPERTY + " = " + pdfUrl);
+            logger.info("{} = {}", PDF_GENERATOR_URL_PROPERTY, pdfUrl);
         }
         
         // You can add more properties as needed
@@ -47,7 +50,7 @@ public class EnvironmentPropertyService {
         for (String property : propertiesToCheck) {
             String value = environment.getProperty(property);
             if (value != null) {
-                System.out.println(property + " = " + value);
+                logger.info("{} = {}", property, value);
             }
         }
     }

@@ -37,6 +37,9 @@ public class ProjectInnovationController {
     private static final int DEFAULT_PAGINATION_LIMIT = 20;
     private static final String SEARCH_TYPE_GENERAL = "GENERAL";
     private static final String INNOVATION_TYPE_PREFIX = "Innovation Type ";
+    private static final String SEARCH_TYPE_ALL_ACTIVE = "ALL_ACTIVE";
+    private static final String REGION_PREFIX = "Region ";
+    private static final String SEARCH_TYPE_SDG = "SDG";
     
     private final ProjectInnovationUseCase projectInnovationUseCase;
     private final ProjectInnovationActorsService actorsService;
@@ -203,25 +206,19 @@ public class ProjectInnovationController {
         List<Long> normalizedActorIds = normalizeActorIds(actorIds);
         boolean hasActorFilter = normalizedActorIds != null;
         
-        // Get innovation info with filters instead of just innovation entities
-        List<ProjectInnovationInfo> allInnovations;
-        String searchType;
-        
-        // If any SDG-related filter is provided, use SDG search
-        if (sdgId != null || (innovationId != null && phase != null)) {
-            allInnovations = projectInnovationUseCase.findActiveInnovationsInfoBySdgFilters(innovationId, phase, sdgId, normalizedCountryIds, normalizedActorIds, null);
-            searchType = buildSearchType(hasCountryFilter, hasActorFilter, "SDG");
-        }
-        // If any general filter is provided, use general search
-        else if (phase != null || readinessScale != null || innovationTypeId != null || hasCountryFilter || hasActorFilter) {
-            allInnovations = projectInnovationUseCase.findActiveInnovationsInfoWithFilters(phase, readinessScale, innovationTypeId, normalizedCountryIds, normalizedActorIds, null);
-            searchType = buildSearchType(hasCountryFilter, hasActorFilter, SEARCH_TYPE_GENERAL);
-        }
-        // If no filters provided, return all active innovations with info
-        else {
-            allInnovations = projectInnovationUseCase.findAllActiveInnovationsInfo();
-            searchType = "ALL_ACTIVE";
-        }
+        SearchResult searchResult = resolveSearchResult(
+                phase,
+                readinessScale,
+                innovationTypeId,
+                innovationId,
+                sdgId,
+                normalizedCountryIds,
+                normalizedActorIds,
+                hasCountryFilter,
+                hasActorFilter
+        );
+        List<ProjectInnovationInfo> allInnovations = searchResult.innovations();
+        String searchType = searchResult.searchType();
         
         // Get total count before pagination
         int totalCount = allInnovations.size();
@@ -286,25 +283,19 @@ public class ProjectInnovationController {
         List<Long> normalizedActorIds = normalizeActorIds(actorIds);
         boolean hasActorFilter = normalizedActorIds != null;
         
-        // Get innovation info with filters (reusing existing logic)
-        List<ProjectInnovationInfo> allInnovations;
-        String searchType;
-        
-        // If any SDG-related filter is provided, use SDG search
-        if (sdgId != null || (innovationId != null && phase != null)) {
-            allInnovations = projectInnovationUseCase.findActiveInnovationsInfoBySdgFilters(innovationId, phase, sdgId, normalizedCountryIds, normalizedActorIds, null);
-            searchType = buildSearchType(hasCountryFilter, hasActorFilter, "SDG");
-        }
-        // If any general filter is provided, use general search
-        else if (phase != null || readinessScale != null || innovationTypeId != null || hasCountryFilter || hasActorFilter) {
-            allInnovations = projectInnovationUseCase.findActiveInnovationsInfoWithFilters(phase, readinessScale, innovationTypeId, normalizedCountryIds, normalizedActorIds, null);
-            searchType = buildSearchType(hasCountryFilter, hasActorFilter, SEARCH_TYPE_GENERAL);
-        }
-        // If no filters provided, return all active innovations with info
-        else {
-            allInnovations = projectInnovationUseCase.findAllActiveInnovationsInfo();
-            searchType = "ALL_ACTIVE";
-        }
+        SearchResult searchResult = resolveSearchResult(
+                phase,
+                readinessScale,
+                innovationTypeId,
+                innovationId,
+                sdgId,
+                normalizedCountryIds,
+                normalizedActorIds,
+                hasCountryFilter,
+                hasActorFilter
+        );
+        List<ProjectInnovationInfo> allInnovations = searchResult.innovations();
+        String searchType = searchResult.searchType();
         
         // Get total count before pagination
         int totalCount = allInnovations.size();
@@ -369,25 +360,19 @@ public class ProjectInnovationController {
         List<Long> normalizedActorIds = normalizeActorIds(actorIds);
         boolean hasActorFilter = normalizedActorIds != null;
         
-        // Get innovation info with filters instead of just innovation entities
-        List<ProjectInnovationInfo> allInnovations;
-        String searchType;
-        
-        // If any SDG-related filter is provided, use SDG search
-        if (sdgId != null || (innovationId != null && phase != null)) {
-            allInnovations = projectInnovationUseCase.findActiveInnovationsInfoBySdgFilters(innovationId, phase, sdgId, normalizedCountryIds, normalizedActorIds, null);
-            searchType = buildSearchType(hasCountryFilter, hasActorFilter, "SDG");
-        }
-        // If any general filter is provided, use general search
-        else if (phase != null || readinessScale != null || innovationTypeId != null || hasCountryFilter || hasActorFilter) {
-            allInnovations = projectInnovationUseCase.findActiveInnovationsInfoWithFilters(phase, readinessScale, innovationTypeId, normalizedCountryIds, normalizedActorIds, null);
-            searchType = buildSearchType(hasCountryFilter, hasActorFilter, SEARCH_TYPE_GENERAL);
-        }
-        // If no filters provided, return all active innovations with info
-        else {
-            allInnovations = projectInnovationUseCase.findAllActiveInnovationsInfo();
-            searchType = "ALL_ACTIVE";
-        }
+        SearchResult searchResult = resolveSearchResult(
+                phase,
+                readinessScale,
+                innovationTypeId,
+                innovationId,
+                sdgId,
+                normalizedCountryIds,
+                normalizedActorIds,
+                hasCountryFilter,
+                hasActorFilter
+        );
+        List<ProjectInnovationInfo> allInnovations = searchResult.innovations();
+        String searchType = searchResult.searchType();
         
         // Get total count before pagination
         int totalCount = allInnovations.size();
@@ -405,7 +390,6 @@ public class ProjectInnovationController {
                         return toCompleteInfoWithRelationsResponse(info, info.getProjectInnovationId(), info.getIdPhase());
                     } catch (Exception e) {
                         System.err.println("Error processing innovation ID: " + info.getProjectInnovationId() + " - " + e.getMessage());
-                        e.printStackTrace();
                         return null;
                     }
                 })
@@ -846,7 +830,7 @@ public class ProjectInnovationController {
             case 1 -> "Northern Africa";
             case 2 -> "Sub-Saharan Africa";
             case 3 -> "Latin America and the Caribbean";
-            default -> "Region " + regionId;
+            default -> REGION_PREFIX + regionId;
         };
         return new RegionDto(regionId, regionName);
     }
@@ -1156,10 +1140,10 @@ public class ProjectInnovationController {
         try {
             return locElementRepository.findActiveById(regionId)
                     .map(LocElement::getName)
-                    .orElse("Region " + regionId);
+                    .orElse(REGION_PREFIX + regionId);
         } catch (Exception e) {
             // Fallback in case of database error
-            return "Region " + regionId;
+            return REGION_PREFIX + regionId;
         }
     }
     
@@ -1496,4 +1480,29 @@ public class ProjectInnovationController {
                 .body(Collections.emptyList());
         }
     }
+
+    private SearchResult resolveSearchResult(
+            Long phase,
+            Integer readinessScale,
+            Long innovationTypeId,
+            Long innovationId,
+            Long sdgId,
+            List<Long> normalizedCountryIds,
+            List<Long> normalizedActorIds,
+            boolean hasCountryFilter,
+            boolean hasActorFilter) {
+        if (sdgId != null || (innovationId != null && phase != null)) {
+            List<ProjectInnovationInfo> innovations = projectInnovationUseCase
+                    .findActiveInnovationsInfoBySdgFilters(innovationId, phase, sdgId, normalizedCountryIds, normalizedActorIds, null);
+            return new SearchResult(innovations, buildSearchType(hasCountryFilter, hasActorFilter, SEARCH_TYPE_SDG));
+        }
+        if (phase != null || readinessScale != null || innovationTypeId != null || hasCountryFilter || hasActorFilter) {
+            List<ProjectInnovationInfo> innovations = projectInnovationUseCase
+                    .findActiveInnovationsInfoWithFilters(phase, readinessScale, innovationTypeId, normalizedCountryIds, normalizedActorIds, null);
+            return new SearchResult(innovations, buildSearchType(hasCountryFilter, hasActorFilter, SEARCH_TYPE_GENERAL));
+        }
+        return new SearchResult(projectInnovationUseCase.findAllActiveInnovationsInfo(), SEARCH_TYPE_ALL_ACTIVE);
+    }
+
+    private record SearchResult(List<ProjectInnovationInfo> innovations, String searchType) {}
 }

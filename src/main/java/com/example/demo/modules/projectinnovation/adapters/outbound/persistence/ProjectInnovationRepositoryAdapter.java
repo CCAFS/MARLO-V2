@@ -329,27 +329,31 @@ public class ProjectInnovationRepositoryAdapter implements ProjectInnovationRepo
             
         } catch (Exception e) {
             // Fallback to original implementation if optimized query fails
-            try {
-                List<ProjectInnovationInfo> innovations = projectInnovationInfoJpaRepository.findByIdPhase(phaseId);
-                
-                List<Integer> readinessScales = innovations.stream()
-                        .map(ProjectInnovationInfo::getReadinessScale)
-                        .filter(java.util.Objects::nonNull)
-                        .collect(java.util.stream.Collectors.toList());
-                
-                if (readinessScales.isEmpty()) {
-                    return 0.0;
-                }
-                
-                double sum = readinessScales.stream()
-                        .mapToInt(Integer::intValue)
-                        .sum();
-                
-                return sum / readinessScales.size();
-                
-            } catch (Exception fallbackException) {
+            return calculateAverageScalingReadinessFallback(phaseId);
+        }
+    }
+
+    private Double calculateAverageScalingReadinessFallback(Long phaseId) {
+        try {
+            List<ProjectInnovationInfo> innovations = projectInnovationInfoJpaRepository.findByIdPhase(phaseId);
+
+            List<Integer> readinessScales = innovations.stream()
+                    .map(ProjectInnovationInfo::getReadinessScale)
+                    .filter(java.util.Objects::nonNull)
+                    .toList();
+
+            if (readinessScales.isEmpty()) {
                 return 0.0;
             }
+
+            double sum = readinessScales.stream()
+                    .mapToInt(Integer::intValue)
+                    .sum();
+
+            return sum / readinessScales.size();
+
+        } catch (Exception fallbackException) {
+            return 0.0;
         }
     }
     

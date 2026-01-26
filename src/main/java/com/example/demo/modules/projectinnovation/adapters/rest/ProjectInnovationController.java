@@ -35,6 +35,7 @@ import java.util.List;
 public class ProjectInnovationController {
     
     private static final int DEFAULT_PAGINATION_LIMIT = 20;
+    private static final String SEARCH_TYPE_GENERAL = "GENERAL";
     
     private final ProjectInnovationUseCase projectInnovationUseCase;
     private final ProjectInnovationActorsService actorsService;
@@ -213,7 +214,7 @@ public class ProjectInnovationController {
         // If any general filter is provided, use general search
         else if (phase != null || readinessScale != null || innovationTypeId != null || hasCountryFilter || hasActorFilter) {
             allInnovations = projectInnovationUseCase.findActiveInnovationsInfoWithFilters(phase, readinessScale, innovationTypeId, normalizedCountryIds, normalizedActorIds, null);
-            searchType = buildSearchType(hasCountryFilter, hasActorFilter, "GENERAL");
+            searchType = buildSearchType(hasCountryFilter, hasActorFilter, SEARCH_TYPE_GENERAL);
         }
         // If no filters provided, return all active innovations with info
         else {
@@ -296,7 +297,7 @@ public class ProjectInnovationController {
         // If any general filter is provided, use general search
         else if (phase != null || readinessScale != null || innovationTypeId != null || hasCountryFilter || hasActorFilter) {
             allInnovations = projectInnovationUseCase.findActiveInnovationsInfoWithFilters(phase, readinessScale, innovationTypeId, normalizedCountryIds, normalizedActorIds, null);
-            searchType = buildSearchType(hasCountryFilter, hasActorFilter, "GENERAL");
+            searchType = buildSearchType(hasCountryFilter, hasActorFilter, SEARCH_TYPE_GENERAL);
         }
         // If no filters provided, return all active innovations with info
         else {
@@ -379,7 +380,7 @@ public class ProjectInnovationController {
         // If any general filter is provided, use general search
         else if (phase != null || readinessScale != null || innovationTypeId != null || hasCountryFilter || hasActorFilter) {
             allInnovations = projectInnovationUseCase.findActiveInnovationsInfoWithFilters(phase, readinessScale, innovationTypeId, normalizedCountryIds, normalizedActorIds, null);
-            searchType = buildSearchType(hasCountryFilter, hasActorFilter, "GENERAL");
+            searchType = buildSearchType(hasCountryFilter, hasActorFilter, SEARCH_TYPE_GENERAL);
         }
         // If no filters provided, return all active innovations with info
         else {

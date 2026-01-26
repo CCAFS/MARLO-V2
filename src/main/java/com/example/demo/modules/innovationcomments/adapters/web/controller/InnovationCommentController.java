@@ -125,7 +125,7 @@ public class InnovationCommentController {
         @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @PostMapping
-    public ResponseEntity<?> createComment(
+    public ResponseEntity<Object> createComment(
             @Parameter(description = "Comment creation request", required = true)
             @Valid @RequestBody CreateInnovationCommentRequestDto requestDto) {
         
@@ -255,10 +255,6 @@ public class InnovationCommentController {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
     
-    private Optional<String> resolveInnovationName(Long innovationId) {
-        return resolveInnovationName(innovationId, null);
-    }
-
     private Optional<String> resolveInnovationName(Long innovationId, Long phaseId) {
         try {
             if (phaseId != null) {

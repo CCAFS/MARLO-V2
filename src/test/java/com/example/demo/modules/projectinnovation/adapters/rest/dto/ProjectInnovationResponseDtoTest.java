@@ -132,8 +132,8 @@ class ProjectInnovationRequestDtoTest {
         );
         
         // When & Then
-        assertNotNull(request.hashCode());
-        assertNotNull(updateRequest.hashCode());
+        assertDoesNotThrow(request::hashCode);
+        assertDoesNotThrow(updateRequest::hashCode);
         
         // Same object should have same hash
         assertEquals(request.hashCode(), request.hashCode());

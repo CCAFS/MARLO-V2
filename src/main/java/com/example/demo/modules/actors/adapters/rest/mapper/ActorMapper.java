@@ -5,7 +5,6 @@ import com.example.demo.modules.projectinnovation.domain.model.Actor;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Mapper for Actor entity to ActorResponse DTO
@@ -32,6 +31,6 @@ public class ActorMapper {
         
         return actors.stream()
                 .map(this::toResponse)
-                .collect(Collectors.toList());
+                .toList();
     }
 }

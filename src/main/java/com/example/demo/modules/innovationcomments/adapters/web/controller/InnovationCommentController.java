@@ -35,6 +35,7 @@ import java.util.Optional;
 public class InnovationCommentController {
     
     private static final Logger logger = LoggerFactory.getLogger(InnovationCommentController.class);
+    private static final String TABLE_NOT_FOUND_MARKER = "table not found";
     private final InnovationCommentUseCase commentUseCase;
     private final InnovationCommentMapper commentMapper;
     private final ProjectInnovationInfoJpaRepository projectInnovationInfoRepository;
@@ -82,16 +83,6 @@ public class InnovationCommentController {
         } catch (IllegalArgumentException e) {
             logger.warn("Invalid limit parameter provided: {}", e.getMessage());
             return ResponseEntity.badRequest().build();
-        } catch (RuntimeException e) {
-            if (e.getMessage() != null && e.getMessage().contains("table not found")) {
-                logger.error("Database table not found: {}", e.getMessage());
-                return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build();
-            }
-            logger.error("Error fetching comments: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        } catch (Exception e) {
-            logger.error("Unexpected error fetching comments: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
     
@@ -119,16 +110,6 @@ public class InnovationCommentController {
         } catch (IllegalArgumentException e) {
             logger.warn("Invalid request parameter for innovation ID {}: {}", innovationId, e.getMessage());
             return ResponseEntity.badRequest().build();
-        } catch (RuntimeException e) {
-            if (e.getMessage() != null && e.getMessage().contains("table not found")) {
-                logger.error("Database table not found: {}", e.getMessage());
-                return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build();
-            }
-            logger.error("Error fetching comments for innovation {}: {}", innovationId, e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        } catch (Exception e) {
-            logger.error("Unexpected error fetching comments for innovation {}: {}", innovationId, e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
     
@@ -181,16 +162,6 @@ public class InnovationCommentController {
         } catch (IllegalArgumentException e) {
             logger.warn("Invalid request data for comment creation: {}", e.getMessage());
             return ResponseEntity.badRequest().build();
-        } catch (RuntimeException e) {
-            if (e.getMessage() != null && e.getMessage().contains("table not found")) {
-                logger.error("Database table not found during comment creation: {}", e.getMessage());
-                return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build();
-            }
-            logger.error("Error creating comment: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        } catch (Exception e) {
-            logger.error("Unexpected error creating comment: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
     
@@ -213,8 +184,6 @@ public class InnovationCommentController {
             return ResponseEntity.ok(count);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
     
@@ -238,8 +207,6 @@ public class InnovationCommentController {
             return ResponseEntity.ok(responseDtos);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
     
@@ -269,9 +236,23 @@ public class InnovationCommentController {
             }
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
+    }
+
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<Void> handleRuntimeException(RuntimeException e) {
+        if (isTableNotFound(e)) {
+            logger.error("Database table not found: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build();
+        }
+        logger.error("Error processing comment request: {}", e.getMessage());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<Void> handleUnexpectedException(Exception e) {
+        logger.error("Unexpected error processing comment request: {}", e.getMessage());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
     
     private Optional<String> resolveInnovationName(Long innovationId) {
@@ -304,6 +285,11 @@ public class InnovationCommentController {
 
     private boolean hasText(String value) {
         return value != null && !value.trim().isEmpty();
+    }
+
+    private boolean isTableNotFound(RuntimeException e) {
+        String message = e.getMessage();
+        return message != null && message.contains(TABLE_NOT_FOUND_MARKER);
     }
 
 }

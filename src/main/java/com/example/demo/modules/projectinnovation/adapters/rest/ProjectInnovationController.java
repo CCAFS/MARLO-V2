@@ -1220,10 +1220,6 @@ public class ProjectInnovationController {
         }
     }
 
-    private InnovationInfo toCompleteInfoWithRelationsResponse(ProjectInnovationInfo info) {
-        return toCompleteInfoWithRelationsResponse(info, info.getProjectInnovationId(), info.getIdPhase());
-    }
-    
     private InnovationInfo toCompleteInfoWithRelationsResponse(ProjectInnovationInfo info, Long innovationId, Long phaseId) {
         // Get actors data
         List<ProjectInnovationActors> actors = actorsService.findActiveActorsByInnovationIdAndPhase(innovationId, phaseId.intValue());

@@ -171,7 +171,7 @@ class SustainableDevelopmentGoalTest {
         sdg.setId(1L);
 
         // Assert
-        assertNotEquals(sdg, "string");
+        assertFalse(sdg.equals("string"));
     }
 
     @Test

@@ -82,7 +82,7 @@ class ActorResponseTest {
         ActorResponse response = new ActorResponse(1L, "Farmer", "PRMS");
 
         // Assert
-        assertNotEquals(null, response);
+        assertNotNull(response);
     }
 
     @Test
@@ -100,7 +100,7 @@ class ActorResponseTest {
         ActorResponse response = new ActorResponse(1L, "Farmer", "PRMS");
 
         // Assert
-        assertNotEquals(response, "string");
+        assertFalse(response.equals("string"));
     }
 
     @Test

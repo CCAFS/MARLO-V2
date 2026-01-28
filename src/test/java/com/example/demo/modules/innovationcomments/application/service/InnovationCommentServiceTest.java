@@ -9,6 +9,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.example.demo.modules.innovationcomments.application.exception.CommentDataAccessException;
+import org.springframework.dao.DataAccessException;
+
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
@@ -595,5 +598,334 @@ class InnovationCommentServiceTest {
         // Assert
         assertNotNull(result);
         verify(commentRepository, times(1)).findAllCommentsOrderByActiveSinceDesc(0, 10);
+    }
+
+    // DataAccessException tests for comprehensive coverage
+
+    @Test
+    void getActiveCommentsByInnovationId_TableNotExistsError_ThrowsCommentDataAccessException() {
+        // Arrange
+        DataAccessException dae = new DataAccessException("Table innovation_catalog_comments doesn't exist") {};
+        when(commentRepository.findActiveCommentsByInnovationId(testInnovationId)).thenThrow(dae);
+        
+        // Act & Assert
+        CommentDataAccessException exception = assertThrows(CommentDataAccessException.class,
+            () -> commentService.getActiveCommentsByInnovationId(testInnovationId));
+        
+        assertTrue(exception.getMessage().contains("table not found"));
+    }
+
+    @Test
+    void getActiveCommentsByInnovationId_GenericDatabaseError_ThrowsCommentDataAccessException() {
+        // Arrange
+        DataAccessException dae = new DataAccessException("Connection timeout") {};
+        when(commentRepository.findActiveCommentsByInnovationId(testInnovationId)).thenThrow(dae);
+        
+        // Act & Assert
+        CommentDataAccessException exception = assertThrows(CommentDataAccessException.class,
+            () -> commentService.getActiveCommentsByInnovationId(testInnovationId));
+        
+        assertTrue(exception.getMessage().contains("Database error"));
+    }
+
+    @Test
+    void getActiveCommentsByInnovationIdOrderByCreatedAsc_TableNotExistsError_ThrowsException() {
+        // Arrange
+        DataAccessException dae = new DataAccessException("unknown table 'innovation_catalog_comments'") {};
+        when(commentRepository.findActiveCommentsByInnovationIdOrderByCreatedAsc(testInnovationId)).thenThrow(dae);
+        
+        // Act & Assert
+        CommentDataAccessException exception = assertThrows(CommentDataAccessException.class,
+            () -> commentService.getActiveCommentsByInnovationIdOrderByCreatedAsc(testInnovationId));
+        
+        assertTrue(exception.getMessage().contains("table not found"));
+    }
+
+    @Test
+    void getActiveCommentsByInnovationIdOrderByCreatedAsc_GenericDatabaseError_ThrowsException() {
+        // Arrange
+        DataAccessException dae = new DataAccessException("Connection refused") {};
+        when(commentRepository.findActiveCommentsByInnovationIdOrderByCreatedAsc(testInnovationId)).thenThrow(dae);
+        
+        // Act & Assert
+        CommentDataAccessException exception = assertThrows(CommentDataAccessException.class,
+            () -> commentService.getActiveCommentsByInnovationIdOrderByCreatedAsc(testInnovationId));
+        
+        assertTrue(exception.getMessage().contains("Database error"));
+    }
+
+    @Test
+    void getActiveCommentsByInnovationIdOrderByCreatedAsc_NullInnovationId_ThrowsIllegalArgumentException() {
+        // Act & Assert
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+            () -> commentService.getActiveCommentsByInnovationIdOrderByCreatedAsc(null));
+        
+        assertEquals("Innovation ID cannot be null", exception.getMessage());
+    }
+
+    @Test
+    void createComment_TableNotExistsError_ThrowsException() {
+        // Arrange
+        DataAccessException dae = new DataAccessException("Table 'innovation_catalog_comments' not found") {};
+        when(commentRepository.save(any())).thenThrow(dae);
+        
+        // Act & Assert
+        CommentDataAccessException exception = assertThrows(CommentDataAccessException.class,
+            () -> commentService.createComment(testInnovationId, testUserName, testUserLastname, testUserEmail, testCommentText));
+        
+        assertTrue(exception.getMessage().contains("table not found"));
+    }
+
+    @Test
+    void createComment_GenericDatabaseError_ThrowsException() {
+        // Arrange
+        DataAccessException dae = new DataAccessException("Constraint violation") {};
+        when(commentRepository.save(any())).thenThrow(dae);
+        
+        // Act & Assert
+        CommentDataAccessException exception = assertThrows(CommentDataAccessException.class,
+            () -> commentService.createComment(testInnovationId, testUserName, testUserLastname, testUserEmail, testCommentText));
+        
+        assertTrue(exception.getMessage().contains("Database error"));
+    }
+
+    @Test
+    void createCommentWithAudit_TableNotExistsError_ThrowsException() {
+        // Arrange
+        DataAccessException dae = new DataAccessException("Table innovation_catalog_comments doesn't exist") {};
+        when(commentRepository.save(any())).thenThrow(dae);
+        
+        // Act & Assert
+        CommentDataAccessException exception = assertThrows(CommentDataAccessException.class,
+            () -> commentService.createCommentWithAudit(testInnovationId, testUserName, testUserLastname, testUserEmail, testCommentText, "admin"));
+        
+        assertTrue(exception.getMessage().contains("table not found"));
+    }
+
+    @Test
+    void createCommentWithAudit_GenericDatabaseError_ThrowsException() {
+        // Arrange
+        DataAccessException dae = new DataAccessException("Connection lost") {};
+        when(commentRepository.save(any())).thenThrow(dae);
+        
+        // Act & Assert
+        CommentDataAccessException exception = assertThrows(CommentDataAccessException.class,
+            () -> commentService.createCommentWithAudit(testInnovationId, testUserName, testUserLastname, testUserEmail, testCommentText, "admin"));
+        
+        assertTrue(exception.getMessage().contains("Database error"));
+    }
+
+    @Test
+    void getActiveCommentsCount_TableNotExistsError_ThrowsException() {
+        // Arrange
+        DataAccessException dae = new DataAccessException("Table innovation_catalog_comments doesn't exist") {};
+        when(commentRepository.countActiveCommentsByInnovationId(testInnovationId)).thenThrow(dae);
+        
+        // Act & Assert
+        CommentDataAccessException exception = assertThrows(CommentDataAccessException.class,
+            () -> commentService.getActiveCommentsCount(testInnovationId));
+        
+        assertTrue(exception.getMessage().contains("table not found"));
+    }
+
+    @Test
+    void getActiveCommentsCount_GenericDatabaseError_ThrowsException() {
+        // Arrange
+        DataAccessException dae = new DataAccessException("Query timeout") {};
+        when(commentRepository.countActiveCommentsByInnovationId(testInnovationId)).thenThrow(dae);
+        
+        // Act & Assert
+        CommentDataAccessException exception = assertThrows(CommentDataAccessException.class,
+            () -> commentService.getActiveCommentsCount(testInnovationId));
+        
+        assertTrue(exception.getMessage().contains("Database error"));
+    }
+
+    @Test
+    void getActiveCommentsCount_NullInnovationId_ThrowsIllegalArgumentException() {
+        // Act & Assert
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+            () -> commentService.getActiveCommentsCount(null));
+        
+        assertEquals("Innovation ID cannot be null", exception.getMessage());
+    }
+
+    @Test
+    void getActiveCommentsByUserEmail_TableNotExistsError_ThrowsException() {
+        // Arrange
+        DataAccessException dae = new DataAccessException("Table innovation_catalog_comments doesn't exist") {};
+        when(commentRepository.findActiveCommentsByUserEmail(testUserEmail)).thenThrow(dae);
+        
+        // Act & Assert
+        CommentDataAccessException exception = assertThrows(CommentDataAccessException.class,
+            () -> commentService.getActiveCommentsByUserEmail(testUserEmail));
+        
+        assertTrue(exception.getMessage().contains("table not found"));
+    }
+
+    @Test
+    void getActiveCommentsByUserEmail_GenericDatabaseError_ThrowsException() {
+        // Arrange
+        DataAccessException dae = new DataAccessException("Connection pool exhausted") {};
+        when(commentRepository.findActiveCommentsByUserEmail(testUserEmail)).thenThrow(dae);
+        
+        // Act & Assert
+        CommentDataAccessException exception = assertThrows(CommentDataAccessException.class,
+            () -> commentService.getActiveCommentsByUserEmail(testUserEmail));
+        
+        assertTrue(exception.getMessage().contains("Database error"));
+    }
+
+    @Test
+    void getAllComments_TableNotExistsError_ThrowsException() {
+        // Arrange
+        DataAccessException dae = new DataAccessException("Table innovation_catalog_comments doesn't exist") {};
+        when(commentRepository.findAllCommentsOrderByActiveSinceDesc(0, null)).thenThrow(dae);
+        
+        // Act & Assert
+        CommentDataAccessException exception = assertThrows(CommentDataAccessException.class,
+            () -> commentService.getAllComments(null, null));
+        
+        assertTrue(exception.getMessage().contains("table not found"));
+    }
+
+    @Test
+    void getAllComments_GenericDatabaseError_ThrowsException() {
+        // Arrange
+        DataAccessException dae = new DataAccessException("Deadlock detected") {};
+        when(commentRepository.findAllCommentsOrderByActiveSinceDesc(0, null)).thenThrow(dae);
+        
+        // Act & Assert
+        CommentDataAccessException exception = assertThrows(CommentDataAccessException.class,
+            () -> commentService.getAllComments(null, null));
+        
+        assertTrue(exception.getMessage().contains("Database error"));
+    }
+
+    @Test
+    void getRecentActiveCommentsByInnovationId_TableNotExistsError_ThrowsException() {
+        // Arrange
+        DataAccessException dae = new DataAccessException("Table innovation_catalog_comments doesn't exist") {};
+        when(commentRepository.findRecentActiveCommentsByInnovationId(testInnovationId)).thenThrow(dae);
+        
+        // Act & Assert
+        CommentDataAccessException exception = assertThrows(CommentDataAccessException.class,
+            () -> commentService.getRecentActiveCommentsByInnovationId(testInnovationId));
+        
+        assertTrue(exception.getMessage().contains("table not found"));
+    }
+
+    @Test
+    void getRecentActiveCommentsByInnovationId_GenericDatabaseError_ThrowsException() {
+        // Arrange
+        DataAccessException dae = new DataAccessException("Socket error") {};
+        when(commentRepository.findRecentActiveCommentsByInnovationId(testInnovationId)).thenThrow(dae);
+        
+        // Act & Assert
+        CommentDataAccessException exception = assertThrows(CommentDataAccessException.class,
+            () -> commentService.getRecentActiveCommentsByInnovationId(testInnovationId));
+        
+        assertTrue(exception.getMessage().contains("Database error"));
+    }
+
+    @Test
+    void getRecentActiveCommentsByInnovationId_NullInnovationId_ThrowsIllegalArgumentException() {
+        // Act & Assert
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+            () -> commentService.getRecentActiveCommentsByInnovationId(null));
+        
+        assertEquals("Innovation ID cannot be null", exception.getMessage());
+    }
+
+    @Test
+    void deactivateComment_TableNotExistsError_ThrowsException() {
+        // Arrange
+        DataAccessException dae = new DataAccessException("Table innovation_catalog_comments doesn't exist") {};
+        when(commentRepository.existsActiveComment(1L)).thenThrow(dae);
+        
+        // Act & Assert
+        CommentDataAccessException exception = assertThrows(CommentDataAccessException.class,
+            () -> commentService.deactivateComment(1L));
+        
+        assertTrue(exception.getMessage().contains("table not found"));
+    }
+
+    @Test
+    void deactivateComment_GenericDatabaseError_ThrowsException() {
+        // Arrange
+        DataAccessException dae = new DataAccessException("Transaction rollback") {};
+        when(commentRepository.existsActiveComment(1L)).thenThrow(dae);
+        
+        // Act & Assert
+        CommentDataAccessException exception = assertThrows(CommentDataAccessException.class,
+            () -> commentService.deactivateComment(1L));
+        
+        assertTrue(exception.getMessage().contains("Database error"));
+    }
+
+    @Test
+    void deactivateComment_SoftDeleteTableNotExists_ThrowsException() {
+        // Arrange
+        DataAccessException dae = new DataAccessException("Table innovation_catalog_comments doesn't exist") {};
+        when(commentRepository.existsActiveComment(1L)).thenReturn(true);
+        when(commentRepository.softDeleteComment(1L)).thenThrow(dae);
+        
+        // Act & Assert
+        CommentDataAccessException exception = assertThrows(CommentDataAccessException.class,
+            () -> commentService.deactivateComment(1L));
+        
+        assertTrue(exception.getMessage().contains("table not found"));
+    }
+
+    @Test
+    void isCommentActive_TableNotExistsError_ThrowsException() {
+        // Arrange
+        DataAccessException dae = new DataAccessException("Table innovation_catalog_comments doesn't exist") {};
+        when(commentRepository.existsActiveComment(1L)).thenThrow(dae);
+        
+        // Act & Assert
+        CommentDataAccessException exception = assertThrows(CommentDataAccessException.class,
+            () -> commentService.isCommentActive(1L));
+        
+        assertTrue(exception.getMessage().contains("table not found"));
+    }
+
+    @Test
+    void isCommentActive_GenericDatabaseError_ThrowsException() {
+        // Arrange
+        DataAccessException dae = new DataAccessException("Database unavailable") {};
+        when(commentRepository.existsActiveComment(1L)).thenThrow(dae);
+        
+        // Act & Assert
+        CommentDataAccessException exception = assertThrows(CommentDataAccessException.class,
+            () -> commentService.isCommentActive(1L));
+        
+        assertTrue(exception.getMessage().contains("Database error"));
+    }
+
+    @Test
+    void isTableNotExistsError_WithNullMessage_ReturnsFalse() {
+        // This tests the private method indirectly through a DataAccessException with null message
+        DataAccessException dae = new DataAccessException(null) {};
+        when(commentRepository.findActiveCommentsByInnovationId(testInnovationId)).thenThrow(dae);
+        
+        // Act & Assert - should throw generic database error
+        CommentDataAccessException exception = assertThrows(CommentDataAccessException.class,
+            () -> commentService.getActiveCommentsByInnovationId(testInnovationId));
+        
+        assertTrue(exception.getMessage().contains("Database error"));
+    }
+
+    @Test
+    void isTableNotExistsError_WithTableKeyword_ReturnsTrue() {
+        // Test different variations of table not exists messages
+        DataAccessException dae = new DataAccessException("Error: table not found in schema") {};
+        when(commentRepository.findActiveCommentsByInnovationId(testInnovationId)).thenThrow(dae);
+        
+        // Act & Assert
+        CommentDataAccessException exception = assertThrows(CommentDataAccessException.class,
+            () -> commentService.getActiveCommentsByInnovationId(testInnovationId));
+        
+        assertTrue(exception.getMessage().contains("table not found"));
     }
 }

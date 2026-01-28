@@ -6,6 +6,8 @@ import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.Set;
 
@@ -77,22 +79,11 @@ class CreateSubscriptionRequestTest {
         assertTrue(violations.stream().anyMatch(v -> v.getMessage().contains("required") || v.getMessage().contains("blank")));
     }
 
-    @Test
-    void validation_WithBlankEmail_ShouldFail() {
+    @ParameterizedTest
+    @ValueSource(strings = {"", "   ", "user@", "userexample.com"})
+    void validation_WithInvalidEmailInputs_ShouldFail(String email) {
         // Arrange
-        CreateSubscriptionRequest request = new CreateSubscriptionRequest("");
-
-        // Act
-        Set<ConstraintViolation<CreateSubscriptionRequest>> violations = validator.validate(request);
-
-        // Assert
-        assertFalse(violations.isEmpty());
-    }
-
-    @Test
-    void validation_WithWhitespaceEmail_ShouldFail() {
-        // Arrange
-        CreateSubscriptionRequest request = new CreateSubscriptionRequest("   ");
+        CreateSubscriptionRequest request = new CreateSubscriptionRequest(email);
 
         // Act
         Set<ConstraintViolation<CreateSubscriptionRequest>> violations = validator.validate(request);
@@ -112,30 +103,6 @@ class CreateSubscriptionRequestTest {
         // Assert
         assertFalse(violations.isEmpty());
         assertTrue(violations.stream().anyMatch(v -> v.getMessage().contains("valid")));
-    }
-
-    @Test
-    void validation_WithEmailMissingDomain_ShouldFail() {
-        // Arrange
-        CreateSubscriptionRequest request = new CreateSubscriptionRequest("user@");
-
-        // Act
-        Set<ConstraintViolation<CreateSubscriptionRequest>> violations = validator.validate(request);
-
-        // Assert
-        assertFalse(violations.isEmpty());
-    }
-
-    @Test
-    void validation_WithEmailMissingAt_ShouldFail() {
-        // Arrange
-        CreateSubscriptionRequest request = new CreateSubscriptionRequest("userexample.com");
-
-        // Act
-        Set<ConstraintViolation<CreateSubscriptionRequest>> violations = validator.validate(request);
-
-        // Assert
-        assertFalse(violations.isEmpty());
     }
 
     @Test

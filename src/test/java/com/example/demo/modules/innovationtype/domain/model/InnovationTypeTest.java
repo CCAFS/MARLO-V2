@@ -101,7 +101,7 @@ class InnovationTypeTest {
         InnovationType type = new InnovationType(1L, "Type", "Def", false, 100L, "PRMS");
 
         // Assert
-        assertNotEquals(null, type);
+        assertNotNull(type);
     }
 
     @Test
@@ -119,7 +119,7 @@ class InnovationTypeTest {
         InnovationType type = new InnovationType(1L, "Type", "Def", false, 100L, "PRMS");
 
         // Assert
-        assertNotEquals(type, "string");
+        assertFalse(type.equals("string"));
     }
 
     @Test

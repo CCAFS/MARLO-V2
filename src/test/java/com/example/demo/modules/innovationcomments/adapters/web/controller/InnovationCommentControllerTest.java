@@ -149,7 +149,7 @@ class InnovationCommentControllerTest {
         request.setUserEmail("test@example.com");
         request.setComment("Spam comment");
         
-        when(commentUseCase.createComment(100L, anyString(), anyString(), "test@example.com", "Spam comment"))
+        when(commentUseCase.createComment(100L, "John", "Doe", "test@example.com", "Spam comment"))
             .thenThrow(new CommentRejectedException("Comment rejected", "SPAM", "Internal spam detection"));
 
         // Act

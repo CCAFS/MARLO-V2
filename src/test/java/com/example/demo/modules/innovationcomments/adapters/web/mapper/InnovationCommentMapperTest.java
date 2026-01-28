@@ -55,6 +55,7 @@ class InnovationCommentMapperTest {
         assertEquals(testComment.getId(), result.getId());
         assertEquals(testComment.getInnovationId(), result.getInnovationId());
         assertEquals(testComment.getUserName(), result.getUserName());
+        assertEquals(testComment.getUserLastname(), result.getUserLastname());
         assertEquals(testComment.getComment(), result.getComment());
     }
 
@@ -82,12 +83,13 @@ class InnovationCommentMapperTest {
     }
 
     @Test
-    void toResponseDtoList_WhenListNull_ShouldReturnNull() {
+    void toResponseDtoList_WhenListNull_ShouldReturnEmptyList() {
         // Act
         List<InnovationCommentResponseDto> result = mapper.toResponseDtoList(null);
 
         // Assert
-        assertNull(result);
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
     }
 
     @Test
@@ -112,6 +114,7 @@ class InnovationCommentMapperTest {
         assertNotNull(result);
         assertEquals(testRequestDto.getInnovationId(), result.getInnovationId());
         assertEquals(testRequestDto.getUserName(), result.getUserName());
+        assertEquals(testRequestDto.getUserLastname(), result.getUserLastname());
         assertEquals(testRequestDto.getComment(), result.getComment());
     }
 

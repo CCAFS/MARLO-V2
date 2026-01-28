@@ -75,7 +75,8 @@ public class ProjectInnovationController {
             @Parameter(description = "Innovation ID", example = "1")
             @RequestParam Long id) {
         return projectInnovationUseCase.findProjectInnovationById(id)
-                .map(projectInnovation -> ResponseEntity.ok(toResponse(projectInnovation)))
+                .map(this::toResponse)
+                .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
     
@@ -158,7 +159,8 @@ public class ProjectInnovationController {
             @Parameter(description = "Phase ID to filter relationships by", example = "428", required = true)
             @RequestParam Long phaseId) {
         return projectInnovationUseCase.findProjectInnovationInfoByInnovationIdAndPhaseId(innovationId, phaseId)
-                .map(info -> ResponseEntity.ok(toCompleteInfoWithRelationsResponse(info, innovationId, phaseId)))
+                .map(info -> toCompleteInfoWithRelationsResponse(info, innovationId, phaseId))
+                .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
     
@@ -383,7 +385,7 @@ public class ProjectInnovationController {
                         return null;
                     }
                 })
-                .filter(info -> info != null)
+                .filter(Objects::nonNull)
                 .toList();
         
         // Create filters metadata
@@ -532,7 +534,7 @@ public class ProjectInnovationController {
             phaseInfo,
             innovationTypeInfo,
             projectInnovation != null ? projectInnovation.getProjectId() : null,
-            projectInnovation != null ? projectInnovation.getIsActive() : true,
+            projectInnovation != null ? projectInnovation.getIsActive() : Boolean.TRUE,
             sdgs,
             regions,
             countries
@@ -1112,8 +1114,13 @@ public class ProjectInnovationController {
                 nameBuilder.append(user.getLastName().trim());
             }
             
-            userName = !nameBuilder.isEmpty() ? nameBuilder.toString() : 
-                      (user.getUsername() != null ? user.getUsername() : "User " + person.getUserId());
+            if (!nameBuilder.isEmpty()) {
+                userName = nameBuilder.toString();
+            } else if (user.getUsername() != null) {
+                userName = user.getUsername();
+            } else {
+                userName = "User " + person.getUserId();
+            }
             userEmail = user.getEmail() != null ? user.getEmail() : "user" + person.getUserId() + "@example.com";
         }
         
@@ -1211,6 +1218,10 @@ public class ProjectInnovationController {
             // Fallback in case of database error
             return "Country " + countryId;
         }
+    }
+
+    private InnovationInfo toCompleteInfoWithRelationsResponse(ProjectInnovationInfo info) {
+        return toCompleteInfoWithRelationsResponse(info, info.getProjectInnovationId(), info.getIdPhase());
     }
     
     private InnovationInfo toCompleteInfoWithRelationsResponse(ProjectInnovationInfo info, Long innovationId, Long phaseId) {
@@ -1495,7 +1506,7 @@ public class ProjectInnovationController {
                 .map(type -> new InnovationTypeResponse.Simple(
                     type.getId(),
                     type.getName(),
-                    type.getIsOldType() != null ? type.getIsOldType() : false
+                    Boolean.TRUE.equals(type.getIsOldType())
                 ))
                 .toList();
             

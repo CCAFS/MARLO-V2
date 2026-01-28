@@ -21,7 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ActiveProfiles("test")
 @Transactional
 @Disabled("Requires database connection for integration testing")
-public class OptimizedQueriesTest {
+class OptimizedQueriesTest {
 
     @Autowired
     private ProjectInnovationCountryJpaRepository countryRepository;
@@ -31,21 +31,24 @@ public class OptimizedQueriesTest {
 
     @Test
     @DisplayName("Optimized COUNT DISTINCT countries query should work correctly")
-    public void testOptimizedCountDistinctCountries() {
+    void testOptimizedCountDistinctCountries() {
         // Test with null parameters (should handle NULL checks)
         Long countWithNulls = countryRepository.countDistinctCountriesByInnovationAndPhase(null, null);
-        assertThat(countWithNulls).isNotNull();
-        assertThat(countWithNulls).isGreaterThanOrEqualTo(0);
+        assertThat(countWithNulls)
+                .isNotNull()
+                .isGreaterThanOrEqualTo(0);
         
         // Test with phase ID (common use case)
         Long countWithPhase = countryRepository.countDistinctCountriesByInnovationAndPhase(null, 428L);
-        assertThat(countWithPhase).isNotNull();
-        assertThat(countWithPhase).isGreaterThanOrEqualTo(0);
+        assertThat(countWithPhase)
+                .isNotNull()
+                .isGreaterThanOrEqualTo(0);
         
         // Test with both parameters
         Long countWithBoth = countryRepository.countDistinctCountriesByInnovationAndPhase(1L, 428L);
-        assertThat(countWithBoth).isNotNull();
-        assertThat(countWithBoth).isGreaterThanOrEqualTo(0);
+        assertThat(countWithBoth)
+                .isNotNull()
+                .isGreaterThanOrEqualTo(0);
         
         System.out.println("✅ Optimized COUNT DISTINCT countries test passed");
         System.out.println("   - Count with nulls: " + countWithNulls);
@@ -55,16 +58,18 @@ public class OptimizedQueriesTest {
 
     @Test
     @DisplayName("Optimized COUNT DISTINCT innovations query should work correctly")  
-    public void testOptimizedCountDistinctInnovations() {
+    void testOptimizedCountDistinctInnovations() {
         // Test with null parameters
         Long countWithNulls = countryRepository.countDistinctInnovationsByInnovationAndPhase(null, null);
-        assertThat(countWithNulls).isNotNull();
-        assertThat(countWithNulls).isGreaterThanOrEqualTo(0);
+        assertThat(countWithNulls)
+                .isNotNull()
+                .isGreaterThanOrEqualTo(0);
         
         // Test with phase ID
         Long countWithPhase = countryRepository.countDistinctInnovationsByInnovationAndPhase(null, 428L);
-        assertThat(countWithPhase).isNotNull();
-        assertThat(countWithPhase).isGreaterThanOrEqualTo(0);
+        assertThat(countWithPhase)
+                .isNotNull()
+                .isGreaterThanOrEqualTo(0);
         
         System.out.println("✅ Optimized COUNT DISTINCT innovations test passed");
         System.out.println("   - Count with nulls: " + countWithNulls);
@@ -73,17 +78,19 @@ public class OptimizedQueriesTest {
 
     @Test
     @DisplayName("Native queries should work correctly")
-    public void testNativeQueries() {
+    void testNativeQueries() {
         try {
             // Test native count countries query
             Long nativeCountryCount = countryRepository.countDistinctCountriesByInnovationAndPhaseNative(null, 428L);
-            assertThat(nativeCountryCount).isNotNull();
-            assertThat(nativeCountryCount).isGreaterThanOrEqualTo(0);
+            assertThat(nativeCountryCount)
+                    .isNotNull()
+                    .isGreaterThanOrEqualTo(0);
             
             // Test native count innovations query
             Long nativeInnovationCount = countryRepository.countDistinctInnovationsByInnovationAndPhaseNative(null, 428L);
-            assertThat(nativeInnovationCount).isNotNull();
-            assertThat(nativeInnovationCount).isGreaterThanOrEqualTo(0);
+            assertThat(nativeInnovationCount)
+                    .isNotNull()
+                    .isGreaterThanOrEqualTo(0);
             
             System.out.println("✅ Native queries test passed");
             System.out.println("   - Native country count: " + nativeCountryCount);
@@ -98,7 +105,7 @@ public class OptimizedQueriesTest {
 
     @Test
     @DisplayName("Optimized average scaling readiness query should work correctly")
-    public void testOptimizedAverageScalingReadiness() {
+    void testOptimizedAverageScalingReadiness() {
         try {
             // Test optimized average query
             Double average = infoRepository.findAverageScalingReadinessByPhaseOptimized(428L);
@@ -109,8 +116,9 @@ public class OptimizedQueriesTest {
             
             // If average is not null, it should be a valid number
             if (average != null) {
-                assertThat(average).isGreaterThanOrEqualTo(0.0);
-                assertThat(average).isLessThanOrEqualTo(10.0); // Assuming scale 0-10
+                assertThat(average)
+                        .isGreaterThanOrEqualTo(0.0)
+                        .isLessThanOrEqualTo(10.0); // Assuming scale 0-10
             }
             
         } catch (Exception e) {
@@ -121,7 +129,7 @@ public class OptimizedQueriesTest {
 
     @Test
     @DisplayName("Optimized queries should handle edge cases correctly")
-    public void testEdgeCases() {
+    void testEdgeCases() {
         // Test with invalid phase ID
         Long countInvalidPhase = countryRepository.countDistinctCountriesByInnovationAndPhase(null, -1L);
         assertThat(countInvalidPhase).isZero();
@@ -137,7 +145,7 @@ public class OptimizedQueriesTest {
 
     @Test
     @DisplayName("Performance test - queries should complete quickly")
-    public void testQueryPerformance() {
+    void testQueryPerformance() {
         long startTime = System.currentTimeMillis();
         
         // Execute all optimized queries

@@ -7,8 +7,6 @@ import com.example.demo.modules.innovationcomments.domain.port.out.InnovationCom
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
@@ -20,7 +18,6 @@ import java.util.List;
 @Transactional
 public class InnovationCommentService implements InnovationCommentUseCase {
     
-    private static final Logger logger = LoggerFactory.getLogger(InnovationCommentService.class);
     private static final String COMMENTS_TABLE_MISSING_MESSAGE =
             "Comments table not found. Please ensure the database schema is properly initialized.";
     private final InnovationCommentRepository commentRepository;
@@ -42,9 +39,7 @@ public class InnovationCommentService implements InnovationCommentUseCase {
         try {
             return commentRepository.findActiveCommentsByInnovationId(innovationId);
         } catch (DataAccessException e) {
-            logger.error("Database error while fetching comments for innovation {}: {}", innovationId, e.getMessage());
             if (isTableNotExistsError(e)) {
-                logger.warn("Table 'innovation_catalog_comments' does not exist in database");
                 throw new CommentDataAccessException(COMMENTS_TABLE_MISSING_MESSAGE, e);
             }
             throw new CommentDataAccessException("Database error occurred while fetching comments", e);
@@ -61,9 +56,7 @@ public class InnovationCommentService implements InnovationCommentUseCase {
         try {
             return commentRepository.findActiveCommentsByInnovationIdOrderByCreatedAsc(innovationId);
         } catch (DataAccessException e) {
-            logger.error("Database error while fetching comments for innovation {}: {}", innovationId, e.getMessage());
             if (isTableNotExistsError(e)) {
-                logger.warn("Table 'innovation_catalog_comments' does not exist in database");
                 throw new CommentDataAccessException(COMMENTS_TABLE_MISSING_MESSAGE, e);
             }
             throw new CommentDataAccessException("Database error occurred while fetching comments", e);
@@ -71,10 +64,10 @@ public class InnovationCommentService implements InnovationCommentUseCase {
     }
     
     @Override
-    public InnovationCatalogComment createComment(Long innovationId, String userName, String userLastname, 
+    public InnovationCatalogComment createComment(Long innovationId, String userName, String userLastname,
                                                 String userEmail, String commentText) {
         // Validate input parameters
-        validateCommentParameters(innovationId, userName, userLastname, userEmail);
+        validateCommentParameters(innovationId, userName, userEmail);
         commentModerationService.validateComment(innovationId, userEmail, commentText);
 
         try {
@@ -85,9 +78,7 @@ public class InnovationCommentService implements InnovationCommentUseCase {
             
             return commentRepository.save(comment);
         } catch (DataAccessException e) {
-            logger.error("Database error while creating comment for innovation {}: {}", innovationId, e.getMessage());
             if (isTableNotExistsError(e)) {
-                logger.warn("Table 'innovation_catalog_comments' does not exist in database");
                 throw new CommentDataAccessException(COMMENTS_TABLE_MISSING_MESSAGE, e);
             }
             throw new CommentDataAccessException("Database error occurred while creating comment", e);
@@ -95,10 +86,10 @@ public class InnovationCommentService implements InnovationCommentUseCase {
     }
     
     @Override
-    public InnovationCatalogComment createCommentWithAudit(Long innovationId, String userName, String userLastname, 
+    public InnovationCatalogComment createCommentWithAudit(Long innovationId, String userName, String userLastname,
                                                          String userEmail, String commentText, String createdBy) {
         // Validate input parameters
-        validateCommentParameters(innovationId, userName, userLastname, userEmail);
+        validateCommentParameters(innovationId, userName, userEmail);
         commentModerationService.validateComment(innovationId, userEmail, commentText);
         
         try {
@@ -110,9 +101,7 @@ public class InnovationCommentService implements InnovationCommentUseCase {
             
             return commentRepository.save(comment);
         } catch (DataAccessException e) {
-            logger.error("Database error while creating comment with audit for innovation {}: {}", innovationId, e.getMessage());
             if (isTableNotExistsError(e)) {
-                logger.warn("Table 'innovation_catalog_comments' does not exist in database");
                 throw new CommentDataAccessException(COMMENTS_TABLE_MISSING_MESSAGE, e);
             }
             throw new CommentDataAccessException("Database error occurred while creating comment", e);
@@ -129,9 +118,7 @@ public class InnovationCommentService implements InnovationCommentUseCase {
         try {
             return commentRepository.countActiveCommentsByInnovationId(innovationId);
         } catch (DataAccessException e) {
-            logger.error("Database error while counting comments for innovation {}: {}", innovationId, e.getMessage());
             if (isTableNotExistsError(e)) {
-                logger.warn("Table 'innovation_catalog_comments' does not exist in database");
                 throw new CommentDataAccessException(COMMENTS_TABLE_MISSING_MESSAGE, e);
             }
             throw new CommentDataAccessException("Database error occurred while counting comments", e);
@@ -148,9 +135,7 @@ public class InnovationCommentService implements InnovationCommentUseCase {
         try {
             return commentRepository.findActiveCommentsByUserEmail(userEmail);
         } catch (DataAccessException e) {
-            logger.error("Database error while fetching comments for user {}: {}", userEmail, e.getMessage());
             if (isTableNotExistsError(e)) {
-                logger.warn("Table 'innovation_catalog_comments' does not exist in database");
                 throw new CommentDataAccessException(COMMENTS_TABLE_MISSING_MESSAGE, e);
             }
             throw new CommentDataAccessException("Database error occurred while fetching user comments", e);
@@ -173,9 +158,7 @@ public class InnovationCommentService implements InnovationCommentUseCase {
         try {
             return commentRepository.findAllCommentsOrderByActiveSinceDesc(sanitizedOffset, sanitizedLimit);
         } catch (DataAccessException e) {
-            logger.error("Database error while fetching comments: {}", e.getMessage());
             if (isTableNotExistsError(e)) {
-                logger.warn("Table 'innovation_catalog_comments' does not exist in database");
                 throw new CommentDataAccessException(COMMENTS_TABLE_MISSING_MESSAGE, e);
             }
             throw new CommentDataAccessException("Database error occurred while fetching comments", e);
@@ -192,9 +175,7 @@ public class InnovationCommentService implements InnovationCommentUseCase {
         try {
             return commentRepository.findRecentActiveCommentsByInnovationId(innovationId);
         } catch (DataAccessException e) {
-            logger.error("Database error while fetching recent comments for innovation {}: {}", innovationId, e.getMessage());
             if (isTableNotExistsError(e)) {
-                logger.warn("Table 'innovation_catalog_comments' does not exist in database");
                 throw new CommentDataAccessException(COMMENTS_TABLE_MISSING_MESSAGE, e);
             }
             throw new CommentDataAccessException("Database error occurred while fetching recent comments", e);
@@ -216,9 +197,7 @@ public class InnovationCommentService implements InnovationCommentUseCase {
             int updatedRows = commentRepository.softDeleteComment(commentId);
             return updatedRows > 0;
         } catch (DataAccessException e) {
-            logger.error("Database error while deactivating comment {}: {}", commentId, e.getMessage());
             if (isTableNotExistsError(e)) {
-                logger.warn("Table 'innovation_catalog_comments' does not exist in database");
                 throw new CommentDataAccessException(COMMENTS_TABLE_MISSING_MESSAGE, e);
             }
             throw new CommentDataAccessException("Database error occurred while deactivating comment", e);
@@ -235,9 +214,7 @@ public class InnovationCommentService implements InnovationCommentUseCase {
         try {
             return commentRepository.existsActiveComment(commentId);
         } catch (DataAccessException e) {
-            logger.error("Database error while checking comment {} status: {}", commentId, e.getMessage());
             if (isTableNotExistsError(e)) {
-                logger.warn("Table 'innovation_catalog_comments' does not exist in database");
                 throw new CommentDataAccessException(COMMENTS_TABLE_MISSING_MESSAGE, e);
             }
             throw new CommentDataAccessException("Database error occurred while checking comment status", e);
@@ -248,10 +225,9 @@ public class InnovationCommentService implements InnovationCommentUseCase {
      * Validates common comment parameters
      * @param innovationId The innovation ID
      * @param userName The user name
-     * @param userLastname The user lastname
      * @param userEmail The user email
      */
-    private void validateCommentParameters(Long innovationId, String userName, String userLastname, String userEmail) {
+    private void validateCommentParameters(Long innovationId, String userName, String userEmail) {
         if (innovationId == null) {
             throw new IllegalArgumentException("Innovation ID cannot be null");
         }

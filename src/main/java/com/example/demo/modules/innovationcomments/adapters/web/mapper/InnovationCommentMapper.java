@@ -6,7 +6,6 @@ import com.example.demo.modules.innovationcomments.domain.model.InnovationCatalo
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Mapper for converting between DTOs and domain entities
@@ -45,12 +44,12 @@ public class InnovationCommentMapper {
      */
     public List<InnovationCommentResponseDto> toResponseDtoList(List<InnovationCatalogComment> comments) {
         if (comments == null) {
-            return null;
+            return List.of();
         }
         
         return comments.stream()
                 .map(this::toResponseDto)
-                .collect(Collectors.toList());
+                .toList();
     }
     
     /**

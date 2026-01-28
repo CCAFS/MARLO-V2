@@ -148,7 +148,13 @@ public class CommentModerationService {
                 continue;
             }
             String normalized = word.trim().toLowerCase(Locale.ROOT);
-            Pattern pattern = Pattern.compile("\\b" + Pattern.quote(normalized) + "\\b", Pattern.CASE_INSENSITIVE);
+            Pattern pattern;
+            if (normalized.contains(" ")) {
+                String phrasePattern = normalized.replaceAll("\\s+", "\\\\s+");
+                pattern = Pattern.compile(phrasePattern, Pattern.CASE_INSENSITIVE);
+            } else {
+                pattern = Pattern.compile("\\b" + Pattern.quote(normalized) + "\\b", Pattern.CASE_INSENSITIVE);
+            }
             patterns.add(new CustomWordPattern(normalized, pattern));
         }
         return List.copyOf(patterns);
@@ -231,6 +237,7 @@ public class CommentModerationService {
             String normalized = reasonCode
                     .replace("AI", "")
                     .replace("BLOCK", "")
+                    .replace("CUSTOM", "")
                     .replace("_", "")
                     .trim();
             if (!normalized.isEmpty()) {

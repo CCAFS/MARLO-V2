@@ -33,7 +33,7 @@ public interface InnovationCommentUseCase {
      * @param commentText The comment text
      * @return The created comment
      */
-    InnovationCatalogComment createComment(Long innovationId, String userName, String userLastname, 
+    InnovationCatalogComment createComment(Long innovationId, String userName, String userLastname,
                                          String userEmail, String commentText);
     
     /**
@@ -46,7 +46,7 @@ public interface InnovationCommentUseCase {
      * @param createdBy Who created the comment (for audit)
      * @return The created comment
      */
-    InnovationCatalogComment createCommentWithAudit(Long innovationId, String userName, String userLastname, 
+    InnovationCatalogComment createCommentWithAudit(Long innovationId, String userName, String userLastname,
                                                    String userEmail, String commentText, String createdBy);
     
     /**

@@ -16,7 +16,6 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.*;
 
 /**
@@ -143,17 +142,17 @@ class InnovationCommentServiceTest {
         assertEquals("User name cannot be null or empty", exception.getMessage());
         verify(commentRepository, never()).save(any());
     }
-    
+
     @Test
     void createComment_NullUserLastname_AllowsCreation() {
         // Arrange
         testCommentEntity.setUserLastname(null);
         when(commentRepository.save(any(InnovationCatalogComment.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        
+
         // Act
         InnovationCatalogComment result = commentService.createComment(
                 testInnovationId, testUserName, null, testUserEmail, testCommentText);
-        
+
         // Assert
         assertNotNull(result);
         assertNull(result.getUserLastname());
@@ -246,7 +245,7 @@ class InnovationCommentServiceTest {
     void getAllComments_NoLimit_ReturnsAll() {
         // Arrange
         List<InnovationCatalogComment> expectedComments = Arrays.asList(testCommentEntity);
-        when(commentRepository.findAllCommentsOrderByActiveSinceDesc(eq(0), isNull())).thenReturn(expectedComments);
+        when(commentRepository.findAllCommentsOrderByActiveSinceDesc(0, null)).thenReturn(expectedComments);
         
         // Act
         List<InnovationCatalogComment> result = commentService.getAllComments(null, null);
@@ -254,21 +253,21 @@ class InnovationCommentServiceTest {
         // Assert
         assertNotNull(result);
         assertEquals(1, result.size());
-        verify(commentRepository, times(1)).findAllCommentsOrderByActiveSinceDesc(eq(0), isNull());
+        verify(commentRepository, times(1)).findAllCommentsOrderByActiveSinceDesc(0, null);
     }
     
     @Test
     void getAllComments_WithLimit_ReturnsLimited() {
         // Arrange
         List<InnovationCatalogComment> expectedComments = Arrays.asList(testCommentEntity);
-        when(commentRepository.findAllCommentsOrderByActiveSinceDesc(eq(0), eq(5))).thenReturn(expectedComments);
+        when(commentRepository.findAllCommentsOrderByActiveSinceDesc(0, 5)).thenReturn(expectedComments);
         
         // Act
         List<InnovationCatalogComment> result = commentService.getAllComments(null, 5);
         
         // Assert
         assertNotNull(result);
-        verify(commentRepository, times(1)).findAllCommentsOrderByActiveSinceDesc(eq(0), eq(5));
+        verify(commentRepository, times(1)).findAllCommentsOrderByActiveSinceDesc(0, 5);
     }
     
     @Test
@@ -365,42 +364,42 @@ class InnovationCommentServiceTest {
     void getAllComments_WithNegativeOffset_ShouldUseZero() {
         // Arrange
         List<InnovationCatalogComment> expectedComments = Arrays.asList(testCommentEntity);
-        when(commentRepository.findAllCommentsOrderByActiveSinceDesc(eq(0), isNull())).thenReturn(expectedComments);
+        when(commentRepository.findAllCommentsOrderByActiveSinceDesc(0, null)).thenReturn(expectedComments);
         
         // Act
         List<InnovationCatalogComment> result = commentService.getAllComments(-5, null);
         
         // Assert
         assertNotNull(result);
-        verify(commentRepository, times(1)).findAllCommentsOrderByActiveSinceDesc(eq(0), isNull());
+        verify(commentRepository, times(1)).findAllCommentsOrderByActiveSinceDesc(0, null);
     }
 
     @Test
     void getAllComments_WithPositiveOffset_ShouldUseOffset() {
         // Arrange
         List<InnovationCatalogComment> expectedComments = Arrays.asList(testCommentEntity);
-        when(commentRepository.findAllCommentsOrderByActiveSinceDesc(eq(10), isNull())).thenReturn(expectedComments);
+        when(commentRepository.findAllCommentsOrderByActiveSinceDesc(10, null)).thenReturn(expectedComments);
         
         // Act
         List<InnovationCatalogComment> result = commentService.getAllComments(10, null);
         
         // Assert
         assertNotNull(result);
-        verify(commentRepository, times(1)).findAllCommentsOrderByActiveSinceDesc(eq(10), isNull());
+        verify(commentRepository, times(1)).findAllCommentsOrderByActiveSinceDesc(10, null);
     }
 
     @Test
     void getAllComments_WithZeroOffset_ShouldUseZero() {
         // Arrange
         List<InnovationCatalogComment> expectedComments = Arrays.asList(testCommentEntity);
-        when(commentRepository.findAllCommentsOrderByActiveSinceDesc(eq(0), eq(5))).thenReturn(expectedComments);
+        when(commentRepository.findAllCommentsOrderByActiveSinceDesc(0, 5)).thenReturn(expectedComments);
         
         // Act
         List<InnovationCatalogComment> result = commentService.getAllComments(0, 5);
         
         // Assert
         assertNotNull(result);
-        verify(commentRepository, times(1)).findAllCommentsOrderByActiveSinceDesc(eq(0), eq(5));
+        verify(commentRepository, times(1)).findAllCommentsOrderByActiveSinceDesc(0, 5);
     }
 
     @Test
@@ -560,41 +559,41 @@ class InnovationCommentServiceTest {
     void getAllComments_WithOffsetZero_ShouldUseZero() {
         // Arrange
         List<InnovationCatalogComment> expectedComments = Arrays.asList(testCommentEntity);
-        when(commentRepository.findAllCommentsOrderByActiveSinceDesc(eq(0), eq(10))).thenReturn(expectedComments);
+        when(commentRepository.findAllCommentsOrderByActiveSinceDesc(0, 10)).thenReturn(expectedComments);
         
         // Act
         List<InnovationCatalogComment> result = commentService.getAllComments(0, 10);
         
         // Assert
         assertNotNull(result);
-        verify(commentRepository, times(1)).findAllCommentsOrderByActiveSinceDesc(eq(0), eq(10));
+        verify(commentRepository, times(1)).findAllCommentsOrderByActiveSinceDesc(0, 10);
     }
 
     @Test
     void getAllComments_WithOffsetPositive_ShouldUseOffset() {
         // Arrange
         List<InnovationCatalogComment> expectedComments = Arrays.asList(testCommentEntity);
-        when(commentRepository.findAllCommentsOrderByActiveSinceDesc(eq(20), eq(10))).thenReturn(expectedComments);
+        when(commentRepository.findAllCommentsOrderByActiveSinceDesc(20, 10)).thenReturn(expectedComments);
         
         // Act
         List<InnovationCatalogComment> result = commentService.getAllComments(20, 10);
         
         // Assert
         assertNotNull(result);
-        verify(commentRepository, times(1)).findAllCommentsOrderByActiveSinceDesc(eq(20), eq(10));
+        verify(commentRepository, times(1)).findAllCommentsOrderByActiveSinceDesc(20, 10);
     }
 
     @Test
     void getAllComments_WithOffsetNull_ShouldUseZero() {
         // Arrange
         List<InnovationCatalogComment> expectedComments = Arrays.asList(testCommentEntity);
-        when(commentRepository.findAllCommentsOrderByActiveSinceDesc(eq(0), eq(10))).thenReturn(expectedComments);
+        when(commentRepository.findAllCommentsOrderByActiveSinceDesc(0, 10)).thenReturn(expectedComments);
         
         // Act
         List<InnovationCatalogComment> result = commentService.getAllComments(null, 10);
         
         // Assert
         assertNotNull(result);
-        verify(commentRepository, times(1)).findAllCommentsOrderByActiveSinceDesc(eq(0), eq(10));
+        verify(commentRepository, times(1)).findAllCommentsOrderByActiveSinceDesc(0, 10);
     }
 }

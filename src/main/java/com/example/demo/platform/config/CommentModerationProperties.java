@@ -17,6 +17,7 @@ public class CommentModerationProperties {
     private boolean logRejections = true;
     private OpenAiProperties openAi = new OpenAiProperties();
     private List<String> extraBannedWords = new ArrayList<>();
+    private List<String> spamPhrases = new ArrayList<>();
 
     public boolean isEnabled() {
         return enabled;
@@ -80,6 +81,14 @@ public class CommentModerationProperties {
 
     public void setExtraBannedWords(List<String> extraBannedWords) {
         this.extraBannedWords = extraBannedWords;
+    }
+
+    public List<String> getSpamPhrases() {
+        return spamPhrases;
+    }
+
+    public void setSpamPhrases(List<String> spamPhrases) {
+        this.spamPhrases = spamPhrases;
     }
 
     public static class OpenAiProperties {

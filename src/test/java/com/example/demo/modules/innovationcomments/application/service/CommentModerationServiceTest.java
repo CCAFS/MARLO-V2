@@ -30,6 +30,7 @@ class CommentModerationServiceTest {
         when(properties.getMaxRepeatedWords()).thenReturn(3);
         when(properties.getMaxUppercaseRatio()).thenReturn(0.8);
         when(properties.getExtraBannedWords()).thenReturn(Collections.emptyList());
+        when(properties.getSpamPhrases()).thenReturn(Collections.emptyList());
         when(properties.isLogRejections()).thenReturn(true);
         when(aiClientProvider.getIfAvailable()).thenReturn(null);
         
@@ -97,6 +98,20 @@ class CommentModerationServiceTest {
             newService.validateComment(1L, "test@example.com", "This contains spam word")
         );
         assertEquals("CUSTOM_BANNED_WORD", exception.getReasonCode());
+    }
+
+    @Test
+    void validateComment_WithSpamPhrase_ShouldReject() {
+        // Arrange
+        when(properties.getSpamPhrases()).thenReturn(List.of("buy now", "free money"));
+
+        CommentModerationService newService = new CommentModerationService(properties, aiClientProvider);
+
+        // Act & Assert
+        CommentRejectedException exception = assertThrows(CommentRejectedException.class, () ->
+            newService.validateComment(1L, "test@example.com", "Please BUY   NOW for a special offer")
+        );
+        assertEquals("SPAM_PHRASE", exception.getReasonCode());
     }
 
     @Test

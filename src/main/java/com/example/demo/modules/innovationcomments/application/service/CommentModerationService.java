@@ -32,6 +32,7 @@ public class CommentModerationService {
     private final SensitiveWordBs sensitiveWordBs;
     private final CommentAiModerationClient aiModerationClient;
     private final List<CustomWordPattern> customBannedWordPatterns;
+    private final List<CustomWordPattern> spamPhrasePatterns;
 
     public CommentModerationService(CommentModerationProperties properties,
                                     ObjectProvider<CommentAiModerationClient> aiModerationClientProvider) {
@@ -50,6 +51,7 @@ public class CommentModerationService {
                 .init();
         this.aiModerationClient = aiModerationClientProvider.getIfAvailable();
         this.customBannedWordPatterns = buildCustomPatterns(properties.getExtraBannedWords());
+        this.spamPhrasePatterns = buildCustomPatterns(properties.getSpamPhrases());
     }
 
     public void validateComment(Long innovationId, String userEmail, String commentText) {
@@ -98,6 +100,14 @@ public class CommentModerationService {
                     innovationId, userEmail, sanitized);
         }
 
+        Optional<String> spamPhrase = findSpamPhrase(sanitized);
+        if (spamPhrase.isPresent()) {
+            reject("The comment looks like spam and was blocked.",
+                    "SPAM_PHRASE",
+                    "Spam phrase detected: " + spamPhrase.get(),
+                    innovationId, userEmail, sanitized);
+        }
+
         List<String> bannedWords = sensitiveWordBs.findAll(sanitized);
         if (!bannedWords.isEmpty()) {
             reject("The comment contains restricted language. Please edit it and try again.",
@@ -131,6 +141,18 @@ public class CommentModerationService {
             return Optional.empty();
         }
         for (CustomWordPattern entry : customBannedWordPatterns) {
+            if (entry.pattern().matcher(text).find()) {
+                return Optional.of(entry.value());
+            }
+        }
+        return Optional.empty();
+    }
+
+    private Optional<String> findSpamPhrase(String text) {
+        if (spamPhrasePatterns.isEmpty()) {
+            return Optional.empty();
+        }
+        for (CustomWordPattern entry : spamPhrasePatterns) {
             if (entry.pattern().matcher(text).find()) {
                 return Optional.of(entry.value());
             }

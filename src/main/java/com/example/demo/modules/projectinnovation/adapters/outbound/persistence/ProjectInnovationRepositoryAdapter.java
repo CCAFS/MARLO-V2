@@ -39,6 +39,15 @@ public class ProjectInnovationRepositoryAdapter implements ProjectInnovationRepo
     private final NamedParameterJdbcTemplate jdbcTemplate;
     
     public static record HeadquarterLocation(String city, Long locElementId, String locationName) {}
+    public static record PrmsInnovationProjection(Long id, Long prmsResultId, String title, String pdfLink) {}
+        public static record PrmsInnovationRelationProjection(
+            Long projectInnovationId,
+            Long phaseId,
+            Long id,
+            Long prmsResultId,
+            String title,
+            String pdfLink
+        ) {}
     
     public ProjectInnovationRepositoryAdapter(
             ProjectInnovationJpaRepository projectInnovationJpaRepository,
@@ -434,6 +443,85 @@ public class ProjectInnovationRepositoryAdapter implements ProjectInnovationRepo
             return List.of();
         }
         return projectInnovationInfoJpaRepository.findActiveByProjectInnovationIdsAndPhase(innovationIds, phaseId);
+    }
+
+    /**
+     * Find active PRMS innovations linked to a project innovation in a phase.
+     */
+    public List<PrmsInnovationProjection> findActivePrmsInnovationsByInnovationIdAndPhase(Long innovationId, Long phaseId) {
+        if (innovationId == null || phaseId == null) {
+            return List.of();
+        }
+
+        String sql = """
+                SELECT pi.id AS id,
+                       pi.prms_result_id AS prmsResultId,
+                       pi.title AS title,
+                       pi.pdf_link AS pdfLink
+                FROM project_innovation_prms pip
+                JOIN prms_innovations pi ON pi.id = pip.prms_innovation_id
+                WHERE pip.project_innovation_id = :innovationId
+                  AND pip.id_phase = :phaseId
+                  AND pip.is_active = 1
+                ORDER BY pip.id DESC
+                """;
+
+        MapSqlParameterSource parameters = new MapSqlParameterSource()
+                .addValue("innovationId", innovationId)
+                .addValue("phaseId", phaseId);
+
+        try {
+            return jdbcTemplate.query(sql, parameters, (rs, rowNum) -> new PrmsInnovationProjection(
+                    rs.getLong("id"),
+                    rs.getObject("prmsResultId") != null ? rs.getLong("prmsResultId") : null,
+                    rs.getString("title"),
+                    rs.getString("pdfLink")
+            ));
+        } catch (DataAccessException ex) {
+            log.warn("Unable to load PRMS innovations for innovation {} phase {}: {}",
+                    innovationId, phaseId, ex.getMessage());
+            return List.of();
+        }
+    }
+
+    /**
+     * Find active PRMS innovations linked to innovation-phase pairs in batch.
+     */
+    public List<PrmsInnovationRelationProjection> findActivePrmsInnovationsByInnovationPhaseKeys(List<String> innovationPhaseKeys) {
+        if (innovationPhaseKeys == null || innovationPhaseKeys.isEmpty()) {
+            return List.of();
+        }
+
+        String sql = """
+                SELECT pip.project_innovation_id AS projectInnovationId,
+                       pip.id_phase AS phaseId,
+                       pi.id AS id,
+                       pi.prms_result_id AS prmsResultId,
+                       pi.title AS title,
+                       pi.pdf_link AS pdfLink
+                FROM project_innovation_prms pip
+                JOIN prms_innovations pi ON pi.id = pip.prms_innovation_id
+                WHERE pip.is_active = 1
+                  AND CONCAT(pip.project_innovation_id, ':', pip.id_phase) IN (:innovationPhaseKeys)
+                ORDER BY pip.project_innovation_id, pip.id_phase, pip.id DESC
+                """;
+
+        MapSqlParameterSource parameters = new MapSqlParameterSource()
+                .addValue("innovationPhaseKeys", innovationPhaseKeys);
+
+        try {
+            return jdbcTemplate.query(sql, parameters, (rs, rowNum) -> new PrmsInnovationRelationProjection(
+                    rs.getLong("projectInnovationId"),
+                    rs.getLong("phaseId"),
+                    rs.getLong("id"),
+                    rs.getObject("prmsResultId") != null ? rs.getLong("prmsResultId") : null,
+                    rs.getString("title"),
+                    rs.getString("pdfLink")
+            ));
+        } catch (DataAccessException ex) {
+            log.warn("Unable to load PRMS innovations in batch for keys {}: {}", innovationPhaseKeys, ex.getMessage());
+            return List.of();
+        }
     }
     
     /**

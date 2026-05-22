@@ -89,6 +89,7 @@ public record InnovationInfo(
         List<ProjectInnovationPartnershipResponse> contactPersons,       // External Partners with Contact Names
         List<ProjectInnovationContributingOrganizationResponse> contributingOrganizations, // Contributing Organizations
         List<ProjectInnovationComplementarySolutionResponse> complementarySolutions, // Complementary solutions
+        List<ProjectInnovationPrmsResponse> prmsInnovations,             // PRMS relations
         List<ProjectInnovationBundleResponse> bundles                    // Bundled innovations
 ) {
 }

@@ -374,12 +374,20 @@ public class ProjectInnovationController {
                 searchInput.offset(),
                 searchInput.limit()
         );
+
+        Map<String, List<ProjectInnovationPrmsResponse>> prmsByInnovationPhase =
+            preloadPrmsInnovationsForSearch(paginatedInnovations);
         
         // Build complete innovation info for each result
         List<InnovationInfo> response = paginatedInnovations.stream()
                 .map(info -> {
                     try {
-                        return toCompleteInfoWithRelationsResponse(info, info.getProjectInnovationId(), info.getIdPhase());
+                return toCompleteInfoWithRelationsResponse(
+                    info,
+                    info.getProjectInnovationId(),
+                    info.getIdPhase(),
+                    prmsByInnovationPhase
+                );
                     } catch (Exception e) {
                         logger.warn("Error processing innovation ID: {}", info.getProjectInnovationId(), e);
                         return null;
@@ -1220,7 +1228,48 @@ public class ProjectInnovationController {
         }
     }
 
+    private Map<String, List<ProjectInnovationPrmsResponse>> preloadPrmsInnovationsForSearch(List<ProjectInnovationInfo> innovations) {
+        if (innovations == null || innovations.isEmpty()) {
+            return Map.of();
+        }
+
+        List<String> innovationPhaseKeys = innovations.stream()
+                .filter(Objects::nonNull)
+                .filter(info -> info.getProjectInnovationId() != null && info.getIdPhase() != null)
+                .map(info -> bundleInfoKey(info.getProjectInnovationId(), info.getIdPhase()))
+                .distinct()
+                .toList();
+
+        if (innovationPhaseKeys.isEmpty()) {
+            return Map.of();
+        }
+
+        Map<String, List<ProjectInnovationPrmsResponse>> prmsByInnovationPhase = new HashMap<>();
+        repositoryAdapter.findActivePrmsInnovationsByInnovationPhaseKeys(innovationPhaseKeys)
+                .forEach(prms -> {
+                    String key = bundleInfoKey(prms.projectInnovationId(), prms.phaseId());
+                    prmsByInnovationPhase
+                            .computeIfAbsent(key, ignored -> new java.util.ArrayList<>())
+                            .add(new ProjectInnovationPrmsResponse(
+                                    prms.id(),
+                                    prms.prmsResultId(),
+                                    prms.title(),
+                                    prms.pdfLink()
+                            ));
+                });
+
+        return prmsByInnovationPhase;
+    }
+
     private InnovationInfo toCompleteInfoWithRelationsResponse(ProjectInnovationInfo info, Long innovationId, Long phaseId) {
+        return toCompleteInfoWithRelationsResponse(info, innovationId, phaseId, null);
+    }
+
+    private InnovationInfo toCompleteInfoWithRelationsResponse(
+            ProjectInnovationInfo info,
+            Long innovationId,
+            Long phaseId,
+            Map<String, List<ProjectInnovationPrmsResponse>> preloadedPrmsByInnovationPhase) {
         // Get actors data
         List<ProjectInnovationActors> actors = actorsService.findActiveActorsByInnovationIdAndPhase(innovationId, phaseId.intValue());
         List<ProjectInnovationActorsResponse> actorsResponse = actors.stream()
@@ -1356,6 +1405,23 @@ public class ProjectInnovationController {
                 })
                 .toList();
 
+        String prmsKey = bundleInfoKey(innovationId, phaseId);
+        List<ProjectInnovationPrmsResponse> prmsInnovations;
+        if (preloadedPrmsByInnovationPhase != null) {
+            prmsInnovations = preloadedPrmsByInnovationPhase.getOrDefault(prmsKey, List.of());
+        } else {
+            prmsInnovations = repositoryAdapter
+                    .findActivePrmsInnovationsByInnovationIdAndPhase(innovationId, phaseId)
+                    .stream()
+                    .map(prms -> new ProjectInnovationPrmsResponse(
+                            prms.id(),
+                            prms.prmsResultId(),
+                            prms.title(),
+                            prms.pdfLink()
+                    ))
+                    .toList();
+        }
+
         return new InnovationInfo(
                 info.getId(),
                 info.getProjectInnovationId(),
@@ -1433,6 +1499,7 @@ public class ProjectInnovationController {
                 contactPersonsResponse,
                 contributingOrganizationsResponse,
                 complementarySolutionsResponse,
+                prmsInnovations,
                 bundlesResponse
         );
     }

@@ -100,6 +100,64 @@ public interface ProjectInnovationInfoJpaRepository extends JpaRepository<Projec
             @Param("actorIds") List<Long> actorIds,
             @Param("actorIdsCount") int actorIdsCount,
             @Param("hasActorFilter") boolean hasActorFilter);
+
+    @Query(value = "SELECT DISTINCT pii.* FROM project_innovation_info pii " +
+           "JOIN project_innovations p ON pii.project_innovation_id = p.id " +
+           "WHERE p.is_active = true " +
+           "AND (:phase IS NULL OR pii.id_phase = :phase) " +
+           "AND (:readinessScale IS NULL OR pii.readiness_scale = :readinessScale) " +
+           "AND (:innovationTypeId IS NULL OR pii.innovation_type_id = :innovationTypeId) " +
+           "AND (:hasCountryFilter = false OR ( " +
+               "SELECT COUNT(DISTINCT pic.id_country) " +
+               "FROM project_innovation_countries pic " +
+               "WHERE pic.project_innovation_id = pii.project_innovation_id " +
+               "AND pic.id_phase = pii.id_phase " +
+               "AND pic.id_country IN (:countryIds)) = :countryIdsCount) " +
+           "AND (:hasActorFilter = false OR ( " +
+               "SELECT COUNT(DISTINCT pia.actor_id) " +
+               "FROM project_innovation_actors pia " +
+               "WHERE pia.innovation_id = pii.project_innovation_id " +
+               "AND pia.id_phase = pii.id_phase " +
+               "AND pia.is_active = true " +
+               "AND pia.actor_id IN (:actorIds)) = :actorIdsCount) " +
+           "AND (:hasSearch = false OR ( " +
+               "LOWER(COALESCE(pii.title, '')) LIKE :searchTerm " +
+               "OR LOWER(COALESCE(pii.short_title, '')) LIKE :searchTerm " +
+               "OR LOWER(COALESCE(pii.narrative, '')) LIKE :searchTerm " +
+               "OR CAST(pii.project_innovation_id AS CHAR) LIKE :searchTerm " +
+               "OR CAST(pii.year AS CHAR) LIKE :searchTerm " +
+               "OR EXISTS (SELECT 1 FROM rep_ind_innovation_types rit " +
+                   "WHERE rit.id = pii.innovation_type_id " +
+                   "AND LOWER(COALESCE(rit.name, '')) LIKE :searchTerm) " +
+               "OR EXISTS (SELECT 1 FROM project_innovation_countries pic_search " +
+                   "JOIN loc_elements le_country ON le_country.id = pic_search.id_country " +
+                   "WHERE pic_search.project_innovation_id = pii.project_innovation_id " +
+                   "AND pic_search.id_phase = pii.id_phase " +
+                   "AND LOWER(COALESCE(le_country.name, '')) LIKE :searchTerm) " +
+               "OR EXISTS (SELECT 1 FROM project_innovation_regions pir_search " +
+                   "JOIN loc_elements le_region ON le_region.id = pir_search.id_region " +
+                   "WHERE pir_search.project_innovation_id = pii.project_innovation_id " +
+                   "AND pir_search.id_phase = pii.id_phase " +
+                   "AND LOWER(COALESCE(le_region.name, '')) LIKE :searchTerm) " +
+               "OR EXISTS (SELECT 1 FROM project_innovation_actors pia_search " +
+                   "JOIN actors a_search ON a_search.id = pia_search.actor_id " +
+                   "WHERE pia_search.innovation_id = pii.project_innovation_id " +
+                   "AND pia_search.id_phase = pii.id_phase " +
+                   "AND pia_search.is_active = true " +
+                   "AND LOWER(COALESCE(a_search.name, '')) LIKE :searchTerm))) " +
+           "ORDER BY pii.project_innovation_id DESC", nativeQuery = true)
+    List<ProjectInnovationInfo> findActiveInnovationsInfoWithSearchFilters(
+            @Param("phase") Long phase,
+            @Param("readinessScale") Integer readinessScale,
+            @Param("innovationTypeId") Long innovationTypeId,
+            @Param("countryIds") List<Long> countryIds,
+            @Param("countryIdsCount") int countryIdsCount,
+            @Param("hasCountryFilter") boolean hasCountryFilter,
+            @Param("actorIds") List<Long> actorIds,
+            @Param("actorIdsCount") int actorIdsCount,
+            @Param("hasActorFilter") boolean hasActorFilter,
+            @Param("searchTerm") String searchTerm,
+            @Param("hasSearch") boolean hasSearch);
     
     // Find innovation info by SDG relationship
     @Query(value = "SELECT DISTINCT pii.* FROM project_innovation_info pii " +
@@ -134,6 +192,66 @@ public interface ProjectInnovationInfoJpaRepository extends JpaRepository<Projec
             @Param("actorIds") List<Long> actorIds,
             @Param("actorIdsCount") int actorIdsCount,
             @Param("hasActorFilter") boolean hasActorFilter);
+
+    @Query(value = "SELECT DISTINCT pii.* FROM project_innovation_info pii " +
+           "JOIN project_innovations p ON pii.project_innovation_id = p.id " +
+           "JOIN project_innovation_sdgs pis ON p.id = pis.innovation_id AND pii.id_phase = pis.id_phase " +
+           "WHERE p.is_active = true " +
+           "AND pis.is_active = true " +
+           "AND (:innovationId IS NULL OR pis.innovation_id = :innovationId) " +
+           "AND (:phase IS NULL OR pis.id_phase = :phase) " +
+           "AND (:sdgId IS NULL OR pis.sdg_id = :sdgId) " +
+           "AND (:hasCountryFilter = false OR ( " +
+               "SELECT COUNT(DISTINCT pic.id_country) " +
+               "FROM project_innovation_countries pic " +
+               "WHERE pic.project_innovation_id = pii.project_innovation_id " +
+               "AND pic.id_phase = pii.id_phase " +
+               "AND pic.id_country IN (:countryIds)) = :countryIdsCount) " +
+           "AND (:hasActorFilter = false OR ( " +
+               "SELECT COUNT(DISTINCT pia.actor_id) " +
+               "FROM project_innovation_actors pia " +
+               "WHERE pia.innovation_id = pii.project_innovation_id " +
+               "AND pia.id_phase = pii.id_phase " +
+               "AND pia.is_active = true " +
+               "AND pia.actor_id IN (:actorIds)) = :actorIdsCount) " +
+           "AND (:hasSearch = false OR ( " +
+               "LOWER(COALESCE(pii.title, '')) LIKE :searchTerm " +
+               "OR LOWER(COALESCE(pii.short_title, '')) LIKE :searchTerm " +
+               "OR LOWER(COALESCE(pii.narrative, '')) LIKE :searchTerm " +
+               "OR CAST(pii.project_innovation_id AS CHAR) LIKE :searchTerm " +
+               "OR CAST(pii.year AS CHAR) LIKE :searchTerm " +
+               "OR EXISTS (SELECT 1 FROM rep_ind_innovation_types rit " +
+                   "WHERE rit.id = pii.innovation_type_id " +
+                   "AND LOWER(COALESCE(rit.name, '')) LIKE :searchTerm) " +
+               "OR EXISTS (SELECT 1 FROM project_innovation_countries pic_search " +
+                   "JOIN loc_elements le_country ON le_country.id = pic_search.id_country " +
+                   "WHERE pic_search.project_innovation_id = pii.project_innovation_id " +
+                   "AND pic_search.id_phase = pii.id_phase " +
+                   "AND LOWER(COALESCE(le_country.name, '')) LIKE :searchTerm) " +
+               "OR EXISTS (SELECT 1 FROM project_innovation_regions pir_search " +
+                   "JOIN loc_elements le_region ON le_region.id = pir_search.id_region " +
+                   "WHERE pir_search.project_innovation_id = pii.project_innovation_id " +
+                   "AND pir_search.id_phase = pii.id_phase " +
+                   "AND LOWER(COALESCE(le_region.name, '')) LIKE :searchTerm) " +
+               "OR EXISTS (SELECT 1 FROM project_innovation_actors pia_search " +
+                   "JOIN actors a_search ON a_search.id = pia_search.actor_id " +
+                   "WHERE pia_search.innovation_id = pii.project_innovation_id " +
+                   "AND pia_search.id_phase = pii.id_phase " +
+                   "AND pia_search.is_active = true " +
+                   "AND LOWER(COALESCE(a_search.name, '')) LIKE :searchTerm))) " +
+           "ORDER BY pii.project_innovation_id DESC", nativeQuery = true)
+    List<ProjectInnovationInfo> findActiveInnovationsInfoBySdgSearchFilters(
+            @Param("innovationId") Long innovationId,
+            @Param("phase") Long phase,
+            @Param("sdgId") Long sdgId,
+            @Param("countryIds") List<Long> countryIds,
+            @Param("countryIdsCount") int countryIdsCount,
+            @Param("hasCountryFilter") boolean hasCountryFilter,
+            @Param("actorIds") List<Long> actorIds,
+            @Param("actorIdsCount") int actorIdsCount,
+            @Param("hasActorFilter") boolean hasActorFilter,
+            @Param("searchTerm") String searchTerm,
+            @Param("hasSearch") boolean hasSearch);
     
     // Find all active innovations info
     @Query(value = "SELECT DISTINCT pii.* FROM project_innovation_info pii " +

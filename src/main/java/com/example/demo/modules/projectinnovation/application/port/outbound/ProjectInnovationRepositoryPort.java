@@ -39,6 +39,8 @@ public interface ProjectInnovationRepositoryPort {
     List<ProjectInnovationInfo> findActiveInnovationsInfoWithFilters(Long phase, Integer readinessScale, Long innovationTypeId, List<Long> countryIds, List<Long> actorIds);
     List<ProjectInnovationInfo> findActiveInnovationsInfoBySdgFilters(Long innovationId, Long phase, Long sdgId, List<Long> countryIds, List<Long> actorIds);
     List<ProjectInnovationInfo> findAllActiveInnovationsInfo();
+    List<ProjectInnovationInfo> findActiveInnovationsInfoWithSearchFilters(Long phase, Integer readinessScale, Long innovationTypeId, List<Long> countryIds, List<Long> actorIds, String searchTerm, boolean hasSearch);
+    List<ProjectInnovationInfo> findActiveInnovationsInfoBySdgSearchFilters(Long innovationId, Long phase, Long sdgId, List<Long> countryIds, List<Long> actorIds, String searchTerm, boolean hasSearch);
     
     // Statistics methods
     Double findAverageScalingReadinessByPhase(Long phaseId);

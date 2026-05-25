@@ -29,4 +29,12 @@ public interface ProjectInnovationSdgJpaRepository extends JpaRepository<Project
            "WHERE pis.innovationId IN :innovationIds " +
            "AND pis.isActive = true")
     List<ProjectInnovationSdg> findActiveSdgsByInnovationIds(@Param("innovationIds") List<Long> innovationIds);
+
+    @Query("SELECT pis FROM ProjectInnovationSdg pis " +
+           "WHERE pis.innovationId IN :innovationIds " +
+           "AND pis.idPhase IN :phaseIds " +
+           "AND pis.isActive = true")
+    List<ProjectInnovationSdg> findActiveSdgsByInnovationIdsAndPhases(
+            @Param("innovationIds") List<Long> innovationIds,
+            @Param("phaseIds") List<Long> phaseIds);
 }

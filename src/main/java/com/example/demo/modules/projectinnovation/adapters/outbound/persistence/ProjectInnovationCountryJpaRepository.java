@@ -19,6 +19,13 @@ public interface ProjectInnovationCountryJpaRepository extends JpaRepository<Pro
     @Query("SELECT pic FROM ProjectInnovationCountry pic " +
            "WHERE pic.projectInnovationId IN :innovationIds")
     List<ProjectInnovationCountry> findByInnovationIds(@Param("innovationIds") List<Long> innovationIds);
+
+    @Query("SELECT pic FROM ProjectInnovationCountry pic " +
+           "WHERE pic.projectInnovationId IN :innovationIds " +
+           "AND pic.idPhase IN :phaseIds")
+    List<ProjectInnovationCountry> findByInnovationIdsAndPhases(
+            @Param("innovationIds") List<Long> innovationIds,
+            @Param("phaseIds") List<Long> phaseIds);
     
     // OPTIMIZED: Using EXISTS instead of JOIN for better performance
     @Query("SELECT COUNT(DISTINCT pic.idCountry) FROM ProjectInnovationCountry pic " +

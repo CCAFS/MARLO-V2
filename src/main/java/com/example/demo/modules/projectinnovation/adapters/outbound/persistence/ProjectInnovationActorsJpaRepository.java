@@ -38,6 +38,15 @@ public interface ProjectInnovationActorsJpaRepository extends JpaRepository<Proj
     List<ProjectInnovationActors> findByIdPhaseAndIsActiveTrue(Integer idPhase);
     
     List<ProjectInnovationActors> findByInnovationIdAndIdPhaseAndIsActiveTrue(Long innovationId, Integer idPhase);
+
+    @Query("SELECT pia FROM ProjectInnovationActors pia " +
+           "LEFT JOIN FETCH pia.actor " +
+           "WHERE pia.innovationId IN :innovationIds " +
+           "AND pia.idPhase IN :phaseIds " +
+           "AND pia.isActive = true")
+    List<ProjectInnovationActors> findActiveByInnovationIdsAndPhases(
+            @Param("innovationIds") List<Long> innovationIds,
+            @Param("phaseIds") List<Long> phaseIds);
     
     /**
      * Find actors by phase

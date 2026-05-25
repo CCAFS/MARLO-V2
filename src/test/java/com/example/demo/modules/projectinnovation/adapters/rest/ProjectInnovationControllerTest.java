@@ -1,6 +1,7 @@
 package com.example.demo.modules.projectinnovation.adapters.rest;
 
 import com.example.demo.modules.innovationtype.adapters.outbound.persistence.InnovationTypeRepositoryAdapter;
+import com.example.demo.modules.projectinnovation.adapters.rest.dto.InnovationFacetsResponse;
 import com.example.demo.modules.projectinnovation.adapters.rest.mapper.ProjectInnovationActorsMapper;
 import com.example.demo.modules.projectinnovation.adapters.rest.dto.ProjectInnovationSearchResponse;
 import com.example.demo.modules.projectinnovation.adapters.outbound.persistence.LocElementJpaRepository;
@@ -8,7 +9,10 @@ import com.example.demo.modules.projectinnovation.adapters.outbound.persistence.
 import com.example.demo.modules.projectinnovation.application.port.inbound.ProjectInnovationUseCase;
 import com.example.demo.modules.projectinnovation.application.service.ProjectInnovationActorsService;
 import com.example.demo.modules.projectinnovation.domain.model.ProjectInnovation;
+import com.example.demo.modules.projectinnovation.domain.model.ProjectInnovationActors;
+import com.example.demo.modules.projectinnovation.domain.model.ProjectInnovationCountry;
 import com.example.demo.modules.projectinnovation.domain.model.ProjectInnovationInfo;
+import com.example.demo.modules.projectinnovation.domain.model.ProjectInnovationSdg;
 import com.example.demo.modules.sustainabledevelopmentgoals.adapters.outbound.persistence.SustainableDevelopmentGoalJpaRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,6 +31,7 @@ import java.lang.reflect.Method;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
@@ -36,6 +41,8 @@ import static org.mockito.Mockito.mockingDetails;
 
 @ExtendWith(MockitoExtension.class)
 class ProjectInnovationControllerTest {
+
+    private static final String SEARCH_TERM = "climate";
 
     private ProjectInnovationUseCase projectInnovationUseCase;
 
@@ -384,6 +391,39 @@ class ProjectInnovationControllerTest {
     }
 
     @Test
+    void searchInnovationsSimple_WithSearch_ShouldUseServerSideTextSearch() {
+        // Arrange
+        List<ProjectInnovationInfo> innovations = Arrays.asList(testInnovationInfo);
+        when(projectInnovationUseCase.findActiveInnovationsInfoWithSearchFilters(
+            eq(428L),
+            isNull(),
+            isNull(),
+            eq(List.of()),
+            eq(List.of()),
+            eq(SEARCH_TERM),
+            eq(true)
+        )).thenReturn(innovations);
+
+        // Act
+        ResponseEntity<?> result = controller.searchInnovationsSimple(
+            428L, null, null, null, null, null, null, SEARCH_TERM, null, 0, 20
+        );
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+        verify(projectInnovationUseCase).findActiveInnovationsInfoWithSearchFilters(
+            eq(428L),
+            isNull(),
+            isNull(),
+            eq(List.of()),
+            eq(List.of()),
+            eq(SEARCH_TERM),
+            eq(true)
+        );
+    }
+
+    @Test
     void searchInnovationsComplete_ShouldReturnCompleteResponse() {
         // Arrange
         List<ProjectInnovationInfo> innovations = Arrays.asList(testInnovationInfo);
@@ -435,6 +475,54 @@ class ProjectInnovationControllerTest {
         assertNotNull(result);
         assertEquals(HttpStatus.OK, result.getStatusCode());
         assertNotNull(result.getBody());
+    }
+
+    @Test
+    void getInnovationFacets_ShouldReturnCountsForFilteredInnovations() {
+        // Arrange
+        testInnovationInfo.setProjectInnovationId(1L);
+        testInnovationInfo.setIdPhase(428L);
+        testInnovationInfo.setInnovationTypeId(4L);
+        testInnovationInfo.setReadinessScale(7);
+
+        when(projectInnovationUseCase.findActiveInnovationsInfoWithFilters(
+            eq(428L),
+            isNull(),
+            isNull(),
+            eq(List.of()),
+            eq(List.of()),
+            isNull()
+        )).thenReturn(List.of(testInnovationInfo));
+
+        ProjectInnovationCountry country = new ProjectInnovationCountry(1, 1L, 113L, 428L);
+        ProjectInnovationSdg sdg = new ProjectInnovationSdg();
+        sdg.setInnovationId(1L);
+        sdg.setSdgId(2L);
+        sdg.setIdPhase(428L);
+        ProjectInnovationActors actor = new ProjectInnovationActors();
+        actor.setInnovationId(1L);
+        actor.setActorId(5L);
+        actor.setIdPhase(428L);
+
+        when(repositoryAdapter.findCountriesByInnovationIdsAndPhases(anyList(), anyList())).thenReturn(List.of(country));
+        when(repositoryAdapter.findSdgsByInnovationIdsAndPhases(anyList(), anyList())).thenReturn(List.of(sdg));
+        when(actorsService.findActiveActorsByInnovationIdsAndPhases(anyList(), anyList())).thenReturn(List.of(actor));
+
+        // Act
+        ResponseEntity<InnovationFacetsResponse> result = controller.getInnovationFacets(
+            428L, null, null, null, null, null, null, null, null
+        );
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+        assertNotNull(result.getBody());
+        assertEquals(1, result.getBody().totalCount());
+        assertEquals(113L, result.getBody().countries().get(0).id());
+        assertEquals(2L, result.getBody().sdgs().get(0).id());
+        assertEquals(4L, result.getBody().innovationTypes().get(0).id());
+        assertEquals(5L, result.getBody().actors().get(0).id());
+        assertEquals(7L, result.getBody().readinessScales().get(0).id());
     }
 
     @Test
@@ -928,10 +1016,10 @@ class ProjectInnovationControllerTest {
             Method method = ProjectInnovationController.class.getMethod(
                 "searchInnovations",
                 Long.class, Integer.class, Long.class, Long.class, Long.class,
-                List.class, List.class, Integer.class, Integer.class);
+                List.class, List.class, String.class, String.class, Integer.class, Integer.class);
             return (ResponseEntity<?>) method.invoke(
                 controller, phase, readinessScale, innovationTypeId, innovationId, sdgId,
-                countryIds, actorIds, offset, limit);
+                countryIds, actorIds, null, null, offset, limit);
         } catch (ReflectiveOperationException e) {
             throw new RuntimeException(e);
         }
@@ -953,10 +1041,10 @@ class ProjectInnovationControllerTest {
             Method method = ProjectInnovationController.class.getMethod(
                 "searchInnovationsSimple",
                 Long.class, Integer.class, Long.class, Long.class, Long.class,
-                List.class, List.class, Integer.class, Integer.class);
+                List.class, List.class, String.class, String.class, Integer.class, Integer.class);
             return (ResponseEntity<?>) method.invoke(
                 controller, phase, readinessScale, innovationTypeId, innovationId, sdgId,
-                countryIds, actorIds, offset, limit);
+                countryIds, actorIds, null, null, offset, limit);
         } catch (ReflectiveOperationException e) {
             throw new RuntimeException(e);
         }
@@ -978,10 +1066,10 @@ class ProjectInnovationControllerTest {
             Method method = ProjectInnovationController.class.getMethod(
                 "searchInnovationsComplete",
                 Long.class, Integer.class, Long.class, Long.class, Long.class,
-                List.class, List.class, Integer.class, Integer.class);
+                List.class, List.class, String.class, String.class, Integer.class, Integer.class);
             return (ResponseEntity<?>) method.invoke(
                 controller, phase, readinessScale, innovationTypeId, innovationId, sdgId,
-                countryIds, actorIds, offset, limit);
+                countryIds, actorIds, null, null, offset, limit);
         } catch (ReflectiveOperationException e) {
             throw new RuntimeException(e);
         }

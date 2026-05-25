@@ -26,4 +26,11 @@ public class ProjectInnovationActorsService {
     public List<ProjectInnovationActors> findActiveActorsByInnovationIdAndPhase(Long innovationId, Integer phaseId) {
         return actorsRepository.findByInnovationIdAndIdPhaseAndIsActiveTrue(innovationId, phaseId);
     }
+
+    public List<ProjectInnovationActors> findActiveActorsByInnovationIdsAndPhases(List<Long> innovationIds, List<Long> phaseIds) {
+        if (innovationIds == null || innovationIds.isEmpty() || phaseIds == null || phaseIds.isEmpty()) {
+            return List.of();
+        }
+        return actorsRepository.findActiveByInnovationIdsAndPhases(innovationIds, phaseIds);
+    }
 }

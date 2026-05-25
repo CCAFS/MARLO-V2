@@ -19,8 +19,10 @@ import jakarta.validation.Valid;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -195,12 +197,17 @@ public class ProjectInnovationController {
             @RequestParam(required = false) List<String> countryIds,
             @Parameter(description = "Actor IDs to filter by (comma-separated or repeat parameter)", example = "1,2")
             @RequestParam(required = false) List<String> actorIds,
+            @Parameter(description = "Text search term to match innovation title, narrative, ID, year, type, country, region, or actor", example = "climate")
+            @RequestParam(required = false) String search,
+            @Parameter(description = "Alias for search", example = "climate")
+            @RequestParam(required = false, name = "q") String q,
             @Parameter(description = "Number of records to skip (pagination)", example = "0")
             @RequestParam(required = false, defaultValue = "0") Integer offset,
             @Parameter(description = "Maximum number of records to return (pagination)", example = "20")
             @RequestParam(required = false, defaultValue = "20") Integer limit) {
 
         SearchInput searchInput = normalizeSearchInput(offset, limit, countryIds, actorIds);
+        String searchTerm = normalizeSearchTerm(search, q);
         SearchResult searchResult = resolveSearchResult(new SearchCriteria(
                 phase,
                 readinessScale,
@@ -210,7 +217,9 @@ public class ProjectInnovationController {
                 searchInput.normalizedCountryIds(),
                 searchInput.normalizedActorIds(),
                 searchInput.hasCountryFilter(),
-                searchInput.hasActorFilter()
+                searchInput.hasActorFilter(),
+                searchTerm,
+                hasSearchTerm(searchTerm)
         ));
         List<ProjectInnovationInfo> allInnovations = searchResult.innovations();
         String searchType = searchResult.searchType();
@@ -251,7 +260,7 @@ public class ProjectInnovationController {
             
         return ResponseEntity.ok(searchResponse);
     }
-    
+
     @Operation(summary = "Search innovations with simplified response", 
                description = "Returns active innovations with essential fields only including phase, innovation type, SDGs, regions and countries. Optimized for performance with minimal data transfer. Supports pagination with offset and limit parameters.")
     @GetMapping("/search-simple")
@@ -270,12 +279,17 @@ public class ProjectInnovationController {
             @RequestParam(required = false) List<String> countryIds,
             @Parameter(description = "Actor IDs to filter by (comma-separated or repeat parameter)", example = "1,2")
             @RequestParam(required = false) List<String> actorIds,
+            @Parameter(description = "Text search term to match innovation title, narrative, ID, year, type, country, region, or actor", example = "climate")
+            @RequestParam(required = false) String search,
+            @Parameter(description = "Alias for search", example = "climate")
+            @RequestParam(required = false, name = "q") String q,
             @Parameter(description = "Number of records to skip (pagination)", example = "0")
             @RequestParam(required = false, defaultValue = "0") Integer offset,
             @Parameter(description = "Maximum number of records to return (pagination)", example = "20")
             @RequestParam(required = false, defaultValue = "20") Integer limit) {
 
         SearchInput searchInput = normalizeSearchInput(offset, limit, countryIds, actorIds);
+        String searchTerm = normalizeSearchTerm(search, q);
         SearchResult searchResult = resolveSearchResult(new SearchCriteria(
                 phase,
                 readinessScale,
@@ -285,7 +299,9 @@ public class ProjectInnovationController {
                 searchInput.normalizedCountryIds(),
                 searchInput.normalizedActorIds(),
                 searchInput.hasCountryFilter(),
-                searchInput.hasActorFilter()
+                searchInput.hasActorFilter(),
+                searchTerm,
+                hasSearchTerm(searchTerm)
         ));
         List<ProjectInnovationInfo> allInnovations = searchResult.innovations();
         String searchType = searchResult.searchType();
@@ -326,7 +342,7 @@ public class ProjectInnovationController {
             
         return ResponseEntity.ok(searchResponse);
     }
-    
+
     @Operation(summary = "Search innovations with complete information", 
                description = "Returns active innovations with complete information including all relationships (SDGs, regions, countries, organizations, partners, references, actors) - same as info endpoint but for multiple innovations. Supports pagination with offset and limit parameters.")
     @GetMapping("/search-complete")
@@ -345,12 +361,17 @@ public class ProjectInnovationController {
             @RequestParam(required = false) List<String> countryIds,
             @Parameter(description = "Actor IDs to filter by (comma-separated or repeat parameter)", example = "1,2")
             @RequestParam(required = false) List<String> actorIds,
+            @Parameter(description = "Text search term to match innovation title, narrative, ID, year, type, country, region, or actor", example = "climate")
+            @RequestParam(required = false) String search,
+            @Parameter(description = "Alias for search", example = "climate")
+            @RequestParam(required = false, name = "q") String q,
             @Parameter(description = "Number of records to skip (pagination)", example = "0")
             @RequestParam(required = false, defaultValue = "0") Integer offset,
             @Parameter(description = "Maximum number of records to return (pagination)", example = "20")
             @RequestParam(required = false, defaultValue = "20") Integer limit) {
 
         SearchInput searchInput = normalizeSearchInput(offset, limit, countryIds, actorIds);
+        String searchTerm = normalizeSearchTerm(search, q);
         SearchResult searchResult = resolveSearchResult(new SearchCriteria(
                 phase,
                 readinessScale,
@@ -360,7 +381,9 @@ public class ProjectInnovationController {
                 searchInput.normalizedCountryIds(),
                 searchInput.normalizedActorIds(),
                 searchInput.hasCountryFilter(),
-                searchInput.hasActorFilter()
+                searchInput.hasActorFilter(),
+                searchTerm,
+                hasSearchTerm(searchTerm)
         ));
         List<ProjectInnovationInfo> allInnovations = searchResult.innovations();
         String searchType = searchResult.searchType();
@@ -417,6 +440,48 @@ public class ProjectInnovationController {
             ProjectInnovationCompleteSearchResponse.of(response, totalCount, appliedFilters, pagination);
             
         return ResponseEntity.ok(searchResponse);
+    }
+
+    @Operation(summary = "Get innovation facet counts",
+               description = "Returns lightweight aggregated counts for countries, SDGs, innovation types, actors, and readiness scales using the same filters as search.")
+    @GetMapping("/facets")
+    public ResponseEntity<InnovationFacetsResponse> getInnovationFacets(
+            @Parameter(description = "Phase ID to filter by", example = "428")
+            @RequestParam(required = false) Long phase,
+            @Parameter(description = "Readiness scale to filter by", example = "7")
+            @RequestParam(required = false) Integer readinessScale,
+            @Parameter(description = "Innovation type ID to filter by", example = "1")
+            @RequestParam(required = false) Long innovationTypeId,
+            @Parameter(description = "Innovation ID to filter by (for SDG search)", example = "1566")
+            @RequestParam(required = false) Long innovationId,
+            @Parameter(description = "SDG ID to filter by", example = "2")
+            @RequestParam(required = false) Long sdgId,
+            @Parameter(description = "Country IDs to filter by (comma-separated or repeat parameter)", example = "113,126")
+            @RequestParam(required = false) List<String> countryIds,
+            @Parameter(description = "Actor IDs to filter by (comma-separated or repeat parameter)", example = "1,2")
+            @RequestParam(required = false) List<String> actorIds,
+            @Parameter(description = "Text search term to match innovation title, narrative, ID, year, type, country, region, or actor", example = "climate")
+            @RequestParam(required = false) String search,
+            @Parameter(description = "Alias for search", example = "climate")
+            @RequestParam(required = false, name = "q") String q) {
+
+        SearchInput searchInput = normalizeSearchInput(0, DEFAULT_PAGINATION_LIMIT, countryIds, actorIds);
+        String searchTerm = normalizeSearchTerm(search, q);
+        SearchResult searchResult = resolveSearchResult(new SearchCriteria(
+                phase,
+                readinessScale,
+                innovationTypeId,
+                innovationId,
+                sdgId,
+                searchInput.normalizedCountryIds(),
+                searchInput.normalizedActorIds(),
+                searchInput.hasCountryFilter(),
+                searchInput.hasActorFilter(),
+                searchTerm,
+                hasSearchTerm(searchTerm)
+        ));
+
+        return ResponseEntity.ok(toFacetsResponse(searchResult.innovations()));
     }
     
     private ProjectInnovationResponse toResponse(ProjectInnovation projectInnovation) {
@@ -620,6 +685,19 @@ public class ProjectInnovationController {
                 })
                 .distinct()
                 .toList();
+    }
+
+    private String normalizeSearchTerm(String search, String q) {
+        String value = search != null && !search.trim().isEmpty() ? search : q;
+        if (value == null) {
+            return null;
+        }
+        String normalized = value.trim();
+        return normalized.isEmpty() ? null : normalized;
+    }
+
+    private boolean hasSearchTerm(String searchTerm) {
+        return searchTerm != null && !searchTerm.isBlank();
     }
 
     private List<ProjectInnovationInfo> paginateInnovations(
@@ -1581,10 +1659,147 @@ public class ProjectInnovationController {
         }
     }
 
+    private InnovationFacetsResponse toFacetsResponse(List<ProjectInnovationInfo> innovations) {
+        if (innovations == null || innovations.isEmpty()) {
+            return new InnovationFacetsResponse(0, List.of(), List.of(), List.of(), List.of(), List.of());
+        }
+
+        Map<Long, Integer> countryCounts = new HashMap<>();
+        Map<Long, String> countryNames = new HashMap<>();
+        Map<Long, Integer> sdgCounts = new HashMap<>();
+        Map<Long, String> sdgNames = new HashMap<>();
+        Map<Long, Integer> innovationTypeCounts = new HashMap<>();
+        Map<Long, String> innovationTypeNames = new HashMap<>();
+        Map<Long, Integer> actorCounts = new HashMap<>();
+        Map<Long, String> actorNames = new HashMap<>();
+        Map<Long, Integer> readinessScaleCounts = new HashMap<>();
+        Map<Long, String> readinessScaleNames = new HashMap<>();
+
+        Set<String> countryPairs = new HashSet<>();
+        Set<String> sdgPairs = new HashSet<>();
+        Set<String> innovationTypePairs = new HashSet<>();
+        Set<String> actorPairs = new HashSet<>();
+        Set<String> readinessScalePairs = new HashSet<>();
+
+        for (ProjectInnovationInfo innovation : innovations) {
+            Long innovationId = innovation.getProjectInnovationId();
+            incrementFacet(
+                    innovationTypeCounts,
+                    innovationTypeNames,
+                    innovationTypePairs,
+                    innovation.getInnovationTypeId(),
+                    null,
+                    innovationId);
+            Integer readinessScale = innovation.getReadinessScale();
+            incrementFacet(
+                    readinessScaleCounts,
+                    readinessScaleNames,
+                    readinessScalePairs,
+                    readinessScale == null ? null : readinessScale.longValue(),
+                    null,
+                    innovationId);
+        }
+
+        List<Long> innovationIds = innovations.stream()
+                .map(ProjectInnovationInfo::getProjectInnovationId)
+                .filter(Objects::nonNull)
+                .distinct()
+                .toList();
+        List<Long> phaseIds = innovations.stream()
+                .map(ProjectInnovationInfo::getIdPhase)
+                .filter(Objects::nonNull)
+                .distinct()
+                .toList();
+
+        for (ProjectInnovationCountry country : repositoryAdapter.findCountriesByInnovationIdsAndPhases(innovationIds, phaseIds)) {
+            incrementFacet(
+                    countryCounts,
+                    countryNames,
+                    countryPairs,
+                    country.getIdCountry(),
+                    null,
+                    country.getProjectInnovationId());
+        }
+
+        for (ProjectInnovationSdg sdg : repositoryAdapter.findSdgsByInnovationIdsAndPhases(innovationIds, phaseIds)) {
+            incrementFacet(
+                    sdgCounts,
+                    sdgNames,
+                    sdgPairs,
+                    sdg.getSdgId(),
+                    null,
+                    sdg.getInnovationId());
+        }
+
+        for (ProjectInnovationActors actor : actorsService.findActiveActorsByInnovationIdsAndPhases(innovationIds, phaseIds)) {
+            String actorName = actor.getActor() != null ? actor.getActor().getName() : null;
+            incrementFacet(
+                    actorCounts,
+                    actorNames,
+                    actorPairs,
+                    actor.getActorId(),
+                    actorName,
+                    actor.getInnovationId());
+        }
+
+        return new InnovationFacetsResponse(
+                innovations.size(),
+                toFacetCounts(countryCounts, countryNames),
+                toFacetCounts(sdgCounts, sdgNames),
+                toFacetCounts(innovationTypeCounts, innovationTypeNames),
+                toFacetCounts(actorCounts, actorNames),
+                toFacetCounts(readinessScaleCounts, readinessScaleNames));
+    }
+
+    private void incrementFacet(
+            Map<Long, Integer> counts,
+            Map<Long, String> names,
+            Set<String> seenPairs,
+            Long id,
+            String name,
+            Long innovationId) {
+        if (id == null) {
+            return;
+        }
+
+        String pairKey = id + ":" + (innovationId == null ? "unknown" : innovationId);
+        if (!seenPairs.add(pairKey)) {
+            return;
+        }
+
+        counts.merge(id, 1, Integer::sum);
+        if (name != null && !name.isBlank()) {
+            names.putIfAbsent(id, name);
+        }
+    }
+
+    private List<InnovationFacetsResponse.FacetCount> toFacetCounts(
+            Map<Long, Integer> counts,
+            Map<Long, String> names) {
+        return counts.entrySet().stream()
+                .map(entry -> new InnovationFacetsResponse.FacetCount(
+                        entry.getKey(),
+                        entry.getValue(),
+                        names.get(entry.getKey())))
+                .sorted((left, right) -> {
+                    int countComparison = right.count().compareTo(left.count());
+                    return countComparison != 0 ? countComparison : left.id().compareTo(right.id());
+                })
+                .toList();
+    }
+
     private SearchResult resolveSearchResult(SearchCriteria criteria) {
         if (criteria.sdgId() != null || (criteria.innovationId() != null && criteria.phase() != null)) {
-            List<ProjectInnovationInfo> innovations = projectInnovationUseCase
-                    .findActiveInnovationsInfoBySdgFilters(
+            List<ProjectInnovationInfo> innovations = criteria.hasSearch()
+                    ? projectInnovationUseCase.findActiveInnovationsInfoBySdgSearchFilters(
+                            criteria.innovationId(),
+                            criteria.phase(),
+                            criteria.sdgId(),
+                            criteria.normalizedCountryIds(),
+                            criteria.normalizedActorIds(),
+                            criteria.searchTerm(),
+                            criteria.hasSearch())
+                    : projectInnovationUseCase.findActiveInnovationsInfoBySdgFilters(
                             criteria.innovationId(),
                             criteria.phase(),
                             criteria.sdgId(),
@@ -1598,9 +1813,18 @@ public class ProjectInnovationController {
                 || criteria.readinessScale() != null
                 || criteria.innovationTypeId() != null
                 || criteria.hasCountryFilter()
-                || criteria.hasActorFilter()) {
-            List<ProjectInnovationInfo> innovations = projectInnovationUseCase
-                    .findActiveInnovationsInfoWithFilters(
+                || criteria.hasActorFilter()
+                || criteria.hasSearch()) {
+            List<ProjectInnovationInfo> innovations = criteria.hasSearch()
+                    ? projectInnovationUseCase.findActiveInnovationsInfoWithSearchFilters(
+                            criteria.phase(),
+                            criteria.readinessScale(),
+                            criteria.innovationTypeId(),
+                            criteria.normalizedCountryIds(),
+                            criteria.normalizedActorIds(),
+                            criteria.searchTerm(),
+                            criteria.hasSearch())
+                    : projectInnovationUseCase.findActiveInnovationsInfoWithFilters(
                             criteria.phase(),
                             criteria.readinessScale(),
                             criteria.innovationTypeId(),
@@ -1624,7 +1848,9 @@ public class ProjectInnovationController {
             List<Long> normalizedCountryIds,
             List<Long> normalizedActorIds,
             boolean hasCountryFilter,
-            boolean hasActorFilter) {}
+            boolean hasActorFilter,
+            String searchTerm,
+            boolean hasSearch) {}
 
     private record SearchInput(
             int offset,

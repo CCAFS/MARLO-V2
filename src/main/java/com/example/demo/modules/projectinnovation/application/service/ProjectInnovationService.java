@@ -173,4 +173,14 @@ public class ProjectInnovationService implements ProjectInnovationUseCase {
     public List<ProjectInnovationInfo> findAllActiveInnovationsInfo() {
         return projectInnovationRepositoryPort.findAllActiveInnovationsInfo();
     }
+
+    @Override
+    public List<ProjectInnovationInfo> findActiveInnovationsInfoWithSearchFilters(Long phase, Integer readinessScale, Long innovationTypeId, List<Long> countryIds, List<Long> actorIds, String searchTerm, boolean hasSearch) {
+        return projectInnovationRepositoryPort.findActiveInnovationsInfoWithSearchFilters(phase, readinessScale, innovationTypeId, countryIds, actorIds, searchTerm, hasSearch);
+    }
+
+    @Override
+    public List<ProjectInnovationInfo> findActiveInnovationsInfoBySdgSearchFilters(Long innovationId, Long phase, Long sdgId, List<Long> countryIds, List<Long> actorIds, String searchTerm, boolean hasSearch) {
+        return projectInnovationRepositoryPort.findActiveInnovationsInfoBySdgSearchFilters(innovationId, phase, sdgId, countryIds, actorIds, searchTerm, hasSearch);
+    }
 }

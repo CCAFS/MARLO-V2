@@ -197,12 +197,11 @@ public class ProjectInnovationRepositoryAdapter implements ProjectInnovationRepo
         
         List<Long> normalizedActorIds = (actorIds == null || actorIds.isEmpty()) ? null : actorIds;
         boolean hasActorFilter = normalizedActorIds != null;
-        int actorIdsCount = (normalizedActorIds != null) ? normalizedActorIds.size() : 0;
         List<Long> queryActorIds = hasActorFilter ? normalizedActorIds : Collections.singletonList(-1L);
         
         return projectInnovationInfoJpaRepository.findActiveInnovationsInfoWithFilters(
                 phase, readinessScale, innovationTypeId, queryCountryIds, countryIdsCount, hasCountryFilter,
-                queryActorIds, actorIdsCount, hasActorFilter);
+                queryActorIds, hasActorFilter);
     }
 
     @Override
@@ -214,12 +213,11 @@ public class ProjectInnovationRepositoryAdapter implements ProjectInnovationRepo
 
         List<Long> normalizedActorIds = (actorIds == null || actorIds.isEmpty()) ? null : actorIds;
         boolean hasActorFilter = normalizedActorIds != null;
-        int actorIdsCount = (normalizedActorIds != null) ? normalizedActorIds.size() : 0;
         List<Long> queryActorIds = hasActorFilter ? normalizedActorIds : Collections.singletonList(-1L);
 
         return projectInnovationInfoJpaRepository.findActiveInnovationsInfoWithSearchFilters(
                 phase, readinessScale, innovationTypeId, queryCountryIds, countryIdsCount, hasCountryFilter,
-                queryActorIds, actorIdsCount, hasActorFilter, normalizeSearchTerm(searchTerm), hasSearch);
+                queryActorIds, hasActorFilter, normalizeSearchTerm(searchTerm), hasSearch);
     }
     
     @Override
@@ -231,12 +229,11 @@ public class ProjectInnovationRepositoryAdapter implements ProjectInnovationRepo
         
         List<Long> normalizedActorIds = (actorIds == null || actorIds.isEmpty()) ? null : actorIds;
         boolean hasActorFilter = normalizedActorIds != null;
-        int actorIdsCount = (normalizedActorIds != null) ? normalizedActorIds.size() : 0;
         List<Long> queryActorIds = hasActorFilter ? normalizedActorIds : Collections.singletonList(-1L);
         
         return projectInnovationInfoJpaRepository.findActiveInnovationsInfoBySdgFilters(
                 innovationId, phase, sdgId, queryCountryIds, countryIdsCount, hasCountryFilter,
-                queryActorIds, actorIdsCount, hasActorFilter);
+                queryActorIds, hasActorFilter);
     }
 
     @Override
@@ -248,12 +245,11 @@ public class ProjectInnovationRepositoryAdapter implements ProjectInnovationRepo
 
         List<Long> normalizedActorIds = (actorIds == null || actorIds.isEmpty()) ? null : actorIds;
         boolean hasActorFilter = normalizedActorIds != null;
-        int actorIdsCount = (normalizedActorIds != null) ? normalizedActorIds.size() : 0;
         List<Long> queryActorIds = hasActorFilter ? normalizedActorIds : Collections.singletonList(-1L);
 
         return projectInnovationInfoJpaRepository.findActiveInnovationsInfoBySdgSearchFilters(
                 innovationId, phase, sdgId, queryCountryIds, countryIdsCount, hasCountryFilter,
-                queryActorIds, actorIdsCount, hasActorFilter, normalizeSearchTerm(searchTerm), hasSearch);
+                queryActorIds, hasActorFilter, normalizeSearchTerm(searchTerm), hasSearch);
     }
     
     @Override

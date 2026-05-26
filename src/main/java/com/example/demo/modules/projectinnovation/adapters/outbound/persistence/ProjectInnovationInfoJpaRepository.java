@@ -82,13 +82,13 @@ public interface ProjectInnovationInfoJpaRepository extends JpaRepository<Projec
                "WHERE pic.project_innovation_id = pii.project_innovation_id " +
                "AND pic.id_phase = pii.id_phase " +
                "AND pic.id_country IN (:countryIds)) = :countryIdsCount) " +
-           "AND (:hasActorFilter = false OR ( " +
-               "SELECT COUNT(DISTINCT pia.actor_id) " +
+           "AND (:hasActorFilter = false OR EXISTS ( " +
+               "SELECT 1 " +
                "FROM project_innovation_actors pia " +
                "WHERE pia.innovation_id = pii.project_innovation_id " +
                "AND pia.id_phase = pii.id_phase " +
                "AND pia.is_active = true " +
-               "AND pia.actor_id IN (:actorIds)) = :actorIdsCount) " +
+               "AND pia.actor_id IN (:actorIds))) " +
            "ORDER BY pii.project_innovation_id DESC", nativeQuery = true)
     List<ProjectInnovationInfo> findActiveInnovationsInfoWithFilters(
             @Param("phase") Long phase,
@@ -113,13 +113,13 @@ public interface ProjectInnovationInfoJpaRepository extends JpaRepository<Projec
                "WHERE pic.project_innovation_id = pii.project_innovation_id " +
                "AND pic.id_phase = pii.id_phase " +
                "AND pic.id_country IN (:countryIds)) = :countryIdsCount) " +
-           "AND (:hasActorFilter = false OR ( " +
-               "SELECT COUNT(DISTINCT pia.actor_id) " +
+           "AND (:hasActorFilter = false OR EXISTS ( " +
+               "SELECT 1 " +
                "FROM project_innovation_actors pia " +
                "WHERE pia.innovation_id = pii.project_innovation_id " +
                "AND pia.id_phase = pii.id_phase " +
                "AND pia.is_active = true " +
-               "AND pia.actor_id IN (:actorIds)) = :actorIdsCount) " +
+               "AND pia.actor_id IN (:actorIds))) " +
            "AND (:hasSearch = false OR ( " +
                "LOWER(COALESCE(pii.title, '')) LIKE :searchTerm " +
                "OR LOWER(COALESCE(pii.short_title, '')) LIKE :searchTerm " +
@@ -174,13 +174,13 @@ public interface ProjectInnovationInfoJpaRepository extends JpaRepository<Projec
                "WHERE pic.project_innovation_id = pii.project_innovation_id " +
                "AND pic.id_phase = pii.id_phase " +
                "AND pic.id_country IN (:countryIds)) = :countryIdsCount) " +
-           "AND (:hasActorFilter = false OR ( " +
-               "SELECT COUNT(DISTINCT pia.actor_id) " +
+           "AND (:hasActorFilter = false OR EXISTS ( " +
+               "SELECT 1 " +
                "FROM project_innovation_actors pia " +
                "WHERE pia.innovation_id = pii.project_innovation_id " +
                "AND pia.id_phase = pii.id_phase " +
                "AND pia.is_active = true " +
-               "AND pia.actor_id IN (:actorIds)) = :actorIdsCount) " +
+               "AND pia.actor_id IN (:actorIds))) " +
            "ORDER BY pii.project_innovation_id DESC", nativeQuery = true)
     List<ProjectInnovationInfo> findActiveInnovationsInfoBySdgFilters(
             @Param("innovationId") Long innovationId,
@@ -207,13 +207,13 @@ public interface ProjectInnovationInfoJpaRepository extends JpaRepository<Projec
                "WHERE pic.project_innovation_id = pii.project_innovation_id " +
                "AND pic.id_phase = pii.id_phase " +
                "AND pic.id_country IN (:countryIds)) = :countryIdsCount) " +
-           "AND (:hasActorFilter = false OR ( " +
-               "SELECT COUNT(DISTINCT pia.actor_id) " +
+           "AND (:hasActorFilter = false OR EXISTS ( " +
+               "SELECT 1 " +
                "FROM project_innovation_actors pia " +
                "WHERE pia.innovation_id = pii.project_innovation_id " +
                "AND pia.id_phase = pii.id_phase " +
                "AND pia.is_active = true " +
-               "AND pia.actor_id IN (:actorIds)) = :actorIdsCount) " +
+               "AND pia.actor_id IN (:actorIds))) " +
            "AND (:hasSearch = false OR ( " +
                "LOWER(COALESCE(pii.title, '')) LIKE :searchTerm " +
                "OR LOWER(COALESCE(pii.short_title, '')) LIKE :searchTerm " +

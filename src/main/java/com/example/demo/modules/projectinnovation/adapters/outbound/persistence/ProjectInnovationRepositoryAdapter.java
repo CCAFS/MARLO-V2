@@ -361,10 +361,16 @@ public class ProjectInnovationRepositoryAdapter implements ProjectInnovationRepo
     
     // Statistics methods for innovation and country counting
     public Long countDistinctCountries(Long innovationId, Long phaseId) {
+        if (innovationId == null && phaseId != null) {
+            return projectInnovationCountryJpaRepository.countDistinctCountriesByPhase(phaseId);
+        }
         return projectInnovationCountryJpaRepository.countDistinctCountriesByInnovationAndPhase(innovationId, phaseId);
     }
     
     public Long countDistinctInnovations(Long innovationId, Long phaseId) {
+        if (innovationId == null && phaseId != null) {
+            return projectInnovationCountryJpaRepository.countDistinctInnovationsByPhase(phaseId);
+        }
         return projectInnovationCountryJpaRepository.countDistinctInnovationsByInnovationAndPhase(innovationId, phaseId);
     }
     

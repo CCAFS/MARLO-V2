@@ -98,7 +98,6 @@ public interface ProjectInnovationInfoJpaRepository extends JpaRepository<Projec
             @Param("countryIdsCount") int countryIdsCount,
             @Param("hasCountryFilter") boolean hasCountryFilter,
             @Param("actorIds") List<Long> actorIds,
-            @Param("actorIdsCount") int actorIdsCount,
             @Param("hasActorFilter") boolean hasActorFilter);
 
     @Query(value = "SELECT DISTINCT pii.* FROM project_innovation_info pii " +
@@ -154,7 +153,6 @@ public interface ProjectInnovationInfoJpaRepository extends JpaRepository<Projec
             @Param("countryIdsCount") int countryIdsCount,
             @Param("hasCountryFilter") boolean hasCountryFilter,
             @Param("actorIds") List<Long> actorIds,
-            @Param("actorIdsCount") int actorIdsCount,
             @Param("hasActorFilter") boolean hasActorFilter,
             @Param("searchTerm") String searchTerm,
             @Param("hasSearch") boolean hasSearch);
@@ -190,7 +188,6 @@ public interface ProjectInnovationInfoJpaRepository extends JpaRepository<Projec
             @Param("countryIdsCount") int countryIdsCount,
             @Param("hasCountryFilter") boolean hasCountryFilter,
             @Param("actorIds") List<Long> actorIds,
-            @Param("actorIdsCount") int actorIdsCount,
             @Param("hasActorFilter") boolean hasActorFilter);
 
     @Query(value = "SELECT DISTINCT pii.* FROM project_innovation_info pii " +
@@ -248,7 +245,6 @@ public interface ProjectInnovationInfoJpaRepository extends JpaRepository<Projec
             @Param("countryIdsCount") int countryIdsCount,
             @Param("hasCountryFilter") boolean hasCountryFilter,
             @Param("actorIds") List<Long> actorIds,
-            @Param("actorIdsCount") int actorIdsCount,
             @Param("hasActorFilter") boolean hasActorFilter,
             @Param("searchTerm") String searchTerm,
             @Param("hasSearch") boolean hasSearch);

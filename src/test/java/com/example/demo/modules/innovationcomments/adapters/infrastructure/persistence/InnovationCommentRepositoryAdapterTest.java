@@ -3,6 +3,8 @@ package com.example.demo.modules.innovationcomments.adapters.infrastructure.pers
 import com.example.demo.modules.innovationcomments.domain.model.InnovationCatalogComment;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.springframework.data.domain.Pageable;
 
 import java.util.Arrays;
 import java.util.List;
@@ -161,9 +163,8 @@ class InnovationCommentRepositoryAdapterTest {
         // Arrange
         InnovationCatalogComment comment1 = new InnovationCatalogComment();
         InnovationCatalogComment comment2 = new InnovationCatalogComment();
-        InnovationCatalogComment comment3 = new InnovationCatalogComment();
-        when(jpaRepository.findAllByOrderByActiveSinceDesc())
-            .thenReturn(Arrays.asList(comment1, comment2, comment3));
+        when(jpaRepository.findAllByOrderByActiveSinceDesc(any(Pageable.class)))
+            .thenReturn(Arrays.asList(comment1, comment2));
 
         // Act
         List<InnovationCatalogComment> result = adapter.findAllCommentsOrderByActiveSinceDesc(1, 2);
@@ -171,7 +172,11 @@ class InnovationCommentRepositoryAdapterTest {
         // Assert
         assertNotNull(result);
         assertEquals(2, result.size());
-        verify(jpaRepository).findAllByOrderByActiveSinceDesc();
+        ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
+        verify(jpaRepository).findAllByOrderByActiveSinceDesc(pageableCaptor.capture());
+        verify(jpaRepository, never()).findAllByOrderByActiveSinceDesc();
+        assertEquals(1, pageableCaptor.getValue().getOffset());
+        assertEquals(2, pageableCaptor.getValue().getPageSize());
     }
 
     @Test

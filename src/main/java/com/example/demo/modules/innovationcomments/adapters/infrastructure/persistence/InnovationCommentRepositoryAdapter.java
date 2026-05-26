@@ -2,9 +2,12 @@ package com.example.demo.modules.innovationcomments.adapters.infrastructure.pers
 
 import com.example.demo.modules.innovationcomments.domain.model.InnovationCatalogComment;
 import com.example.demo.modules.innovationcomments.domain.port.out.InnovationCommentRepository;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Optional;
 
@@ -64,21 +67,13 @@ public class InnovationCommentRepositoryAdapter implements InnovationCommentRepo
     
     @Override
     public List<InnovationCatalogComment> findAllCommentsOrderByActiveSinceDesc(Integer offset, Integer limit) {
-        // Get all comments ordered by activeSince descending
-        List<InnovationCatalogComment> allComments = jpaRepository.findAllByOrderByActiveSinceDesc();
-        
         // If no limit specified, return all comments
         if (limit == null || limit <= 0) {
-            return allComments;
+            return jpaRepository.findAllByOrderByActiveSinceDesc();
         }
-        
-        // Apply offset and limit using Stream (same pattern as search-complete)
+
         int sanitizedOffset = (offset != null && offset > 0) ? offset : 0;
-        
-        return allComments.stream()
-                .skip(sanitizedOffset)  // Skip exactly 'offset' records
-                .limit(limit)           // Take maximum 'limit' records
-                .toList();
+        return jpaRepository.findAllByOrderByActiveSinceDesc(new OffsetLimitPageable(sanitizedOffset, limit));
     }
     
     @Override
@@ -91,5 +86,65 @@ public class InnovationCommentRepositoryAdapter implements InnovationCommentRepo
     public boolean existsActiveComment(Long commentId) {
         Optional<InnovationCatalogComment> comment = jpaRepository.findById(commentId);
         return comment.isPresent() && comment.get().getIsActive();
+    }
+
+    private record OffsetLimitPageable(int offset, int limit) implements Pageable, Serializable {
+
+        private OffsetLimitPageable {
+            if (offset < 0) {
+                throw new IllegalArgumentException("Offset must not be negative");
+            }
+            if (limit <= 0) {
+                throw new IllegalArgumentException("Limit must be greater than zero");
+            }
+        }
+
+        @Override
+        public int getPageNumber() {
+            return offset / limit;
+        }
+
+        @Override
+        public int getPageSize() {
+            return limit;
+        }
+
+        @Override
+        public long getOffset() {
+            return offset;
+        }
+
+        @Override
+        public Sort getSort() {
+            return Sort.unsorted();
+        }
+
+        @Override
+        public Pageable next() {
+            return new OffsetLimitPageable(offset + limit, limit);
+        }
+
+        @Override
+        public Pageable previousOrFirst() {
+            return hasPrevious() ? new OffsetLimitPageable(Math.max(offset - limit, 0), limit) : first();
+        }
+
+        @Override
+        public Pageable first() {
+            return new OffsetLimitPageable(0, limit);
+        }
+
+        @Override
+        public Pageable withPage(int pageNumber) {
+            if (pageNumber < 0) {
+                throw new IllegalArgumentException("Page index must not be negative");
+            }
+            return new OffsetLimitPageable(pageNumber * limit, limit);
+        }
+
+        @Override
+        public boolean hasPrevious() {
+            return offset > 0;
+        }
     }
 }

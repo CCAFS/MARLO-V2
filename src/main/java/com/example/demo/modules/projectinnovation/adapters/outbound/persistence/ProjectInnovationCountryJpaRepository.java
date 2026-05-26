@@ -34,6 +34,14 @@ public interface ProjectInnovationCountryJpaRepository extends JpaRepository<Pro
            "AND EXISTS (SELECT 1 FROM ProjectInnovation pi " +
                        "WHERE pi.id = pic.projectInnovationId AND pi.isActive = true)")
     Long countDistinctCountriesByInnovationAndPhase(@Param("innovationId") Long innovationId, @Param("phaseId") Long phaseId);
+
+    @Query(value = "SELECT COUNT(DISTINCT pic.id_country) " +
+                   "FROM project_innovation_countries pic " +
+                   "JOIN project_innovations pi ON pi.id = pic.project_innovation_id " +
+                   "WHERE pic.id_phase = :phaseId " +
+                   "AND pi.is_active = 1",
+           nativeQuery = true)
+    Long countDistinctCountriesByPhase(@Param("phaseId") Long phaseId);
     
     // OPTIMIZED: Using EXISTS instead of JOIN for better performance
     @Query("SELECT COUNT(DISTINCT pii.projectInnovationId) FROM ProjectInnovationInfo pii " +
@@ -42,10 +50,18 @@ public interface ProjectInnovationCountryJpaRepository extends JpaRepository<Pro
            "AND EXISTS (SELECT 1 FROM ProjectInnovation pi " +
                        "WHERE pi.id = pii.projectInnovationId AND pi.isActive = true)")
     Long countDistinctInnovationsByInnovationAndPhase(@Param("innovationId") Long innovationId, @Param("phaseId") Long phaseId);
+
+    @Query(value = "SELECT COUNT(DISTINCT pic.project_innovation_id) " +
+                   "FROM project_innovation_countries pic " +
+                   "JOIN project_innovations pi ON pi.id = pic.project_innovation_id " +
+                   "WHERE pic.id_phase = :phaseId " +
+                   "AND pi.is_active = 1",
+           nativeQuery = true)
+    Long countDistinctInnovationsByPhase(@Param("phaseId") Long phaseId);
     
     // NATIVE QUERY: Ultra-optimized for production with proper indexing
     @Query(value = "SELECT COUNT(DISTINCT pic.id_country) " +
-                   "FROM project_innovation_country pic " +
+                   "FROM project_innovation_countries pic " +
                    "WHERE (:phaseId IS NULL OR pic.id_phase = :phaseId) " +
                    "AND (:innovationId IS NULL OR pic.project_innovation_id = :innovationId) " +
                    "AND pic.project_innovation_id IN (" +
@@ -55,7 +71,7 @@ public interface ProjectInnovationCountryJpaRepository extends JpaRepository<Pro
     
     // NATIVE QUERY: Ultra-optimized for production with proper indexing
     @Query(value = "SELECT COUNT(DISTINCT pic.project_innovation_id) " +
-                   "FROM project_innovation_country pic " +
+                   "FROM project_innovation_countries pic " +
                    "WHERE (:phaseId IS NULL OR pic.id_phase = :phaseId) " +
                    "AND (:innovationId IS NULL OR pic.project_innovation_id = :innovationId) " +
                    "AND pic.project_innovation_id IN (" +

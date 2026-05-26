@@ -79,7 +79,7 @@ class ProjectInnovationRepositoryAdapterTest {
         Long mockCount = 7L;
         Long testPhaseId = 100L;
         
-        when(countryRepository.countDistinctCountriesByInnovationAndPhase(null, testPhaseId))
+        when(countryRepository.countDistinctCountriesByPhase(testPhaseId))
                 .thenReturn(mockCount);
 
         // Act
@@ -87,6 +87,8 @@ class ProjectInnovationRepositoryAdapterTest {
 
         // Assert
         assertEquals(mockCount, result);
+        verify(countryRepository).countDistinctCountriesByPhase(testPhaseId);
+        verify(countryRepository, never()).countDistinctCountriesByInnovationAndPhase(any(), any());
     }
 
     @Test
@@ -95,7 +97,7 @@ class ProjectInnovationRepositoryAdapterTest {
         Long mockCount = 42L;
         Long testPhaseId = 200L;
         
-        when(countryRepository.countDistinctInnovationsByInnovationAndPhase(null, testPhaseId))
+        when(countryRepository.countDistinctInnovationsByPhase(testPhaseId))
                 .thenReturn(mockCount);
 
         // Act
@@ -103,6 +105,8 @@ class ProjectInnovationRepositoryAdapterTest {
 
         // Assert
         assertEquals(mockCount, result);
+        verify(countryRepository).countDistinctInnovationsByPhase(testPhaseId);
+        verify(countryRepository, never()).countDistinctInnovationsByInnovationAndPhase(any(), any());
     }
 
     @Test
@@ -110,7 +114,7 @@ class ProjectInnovationRepositoryAdapterTest {
         // Arrange
         Long testPhaseId = 300L;
         
-        when(countryRepository.countDistinctCountriesByInnovationAndPhase(null, testPhaseId))
+        when(countryRepository.countDistinctCountriesByPhase(testPhaseId))
                 .thenReturn(null);
 
         // Act
@@ -126,7 +130,7 @@ class ProjectInnovationRepositoryAdapterTest {
         Long testPhaseId = 400L;
         Long zeroCount = 0L;
         
-        when(countryRepository.countDistinctInnovationsByInnovationAndPhase(null, testPhaseId))
+        when(countryRepository.countDistinctInnovationsByPhase(testPhaseId))
                 .thenReturn(zeroCount);
 
         // Act

@@ -583,6 +583,29 @@ class ProjectInnovationControllerTest {
     }
 
     @Test
+    void searchInnovationsSimpleWithMultipleActorIdsShouldNormalizeAsAnyMatchFilter() {
+        // Arrange
+        List<String> actorIds = Arrays.asList("1,6", "7", "8", "8");
+
+        // Act
+        ResponseEntity<?> result = controller.searchInnovationsSimple(
+            null, null, null, null, null, null, actorIds, null, null, 0, 20
+        );
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+        verify(projectInnovationUseCase).findActiveInnovationsInfoWithFilters(
+            isNull(),
+            isNull(),
+            isNull(),
+            eq(List.of()),
+            eq(List.of(1L, 6L, 7L, 8L)),
+            isNull()
+        );
+    }
+
+    @Test
     void searchInnovations_WithInvalidLimit_ShouldUseDefault() {
         // Arrange
         List<ProjectInnovationInfo> innovations = Arrays.asList(testInnovationInfo);

@@ -368,9 +368,6 @@ public class ProjectInnovationRepositoryAdapter implements ProjectInnovationRepo
     }
     
     public Long countDistinctInnovations(Long innovationId, Long phaseId) {
-        if (innovationId == null && phaseId != null) {
-            return projectInnovationCountryJpaRepository.countDistinctInnovationsByPhase(phaseId);
-        }
         return projectInnovationCountryJpaRepository.countDistinctInnovationsByInnovationAndPhase(innovationId, phaseId);
     }
     

@@ -96,8 +96,8 @@ class ProjectInnovationRepositoryAdapterTest {
         // Arrange
         Long mockCount = 42L;
         Long testPhaseId = 200L;
-        
-        when(countryRepository.countDistinctInnovationsByPhase(testPhaseId))
+
+        when(countryRepository.countDistinctInnovationsByInnovationAndPhase(null, testPhaseId))
                 .thenReturn(mockCount);
 
         // Act
@@ -105,8 +105,7 @@ class ProjectInnovationRepositoryAdapterTest {
 
         // Assert
         assertEquals(mockCount, result);
-        verify(countryRepository).countDistinctInnovationsByPhase(testPhaseId);
-        verify(countryRepository, never()).countDistinctInnovationsByInnovationAndPhase(any(), any());
+        verify(countryRepository).countDistinctInnovationsByInnovationAndPhase(null, testPhaseId);
     }
 
     @Test
@@ -129,8 +128,8 @@ class ProjectInnovationRepositoryAdapterTest {
         // Arrange
         Long testPhaseId = 400L;
         Long zeroCount = 0L;
-        
-        when(countryRepository.countDistinctInnovationsByPhase(testPhaseId))
+
+        when(countryRepository.countDistinctInnovationsByInnovationAndPhase(null, testPhaseId))
                 .thenReturn(zeroCount);
 
         // Act

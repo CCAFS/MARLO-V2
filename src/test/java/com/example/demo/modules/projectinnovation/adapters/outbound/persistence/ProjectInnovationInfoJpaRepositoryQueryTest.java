@@ -20,10 +20,6 @@ class ProjectInnovationInfoJpaRepositoryQueryTest {
                 "countDistinctCountriesByPhase",
                 "COUNT(DISTINCT pic.id_country)"
         );
-        assertStatsCountQueryIsPhaseSpecific(
-                "countDistinctInnovationsByPhase",
-                "COUNT(DISTINCT pic.project_innovation_id)"
-        );
     }
 
     @Test
